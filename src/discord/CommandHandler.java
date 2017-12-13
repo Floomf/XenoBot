@@ -27,7 +27,7 @@ public class CommandHandler {
     public List<IUser> getUsers(PoolType pool, IGuild guild, IMessage message) {
         List<IUser> users = guild.getUsers();    
         if (pool == PoolType.ONLINE) {
-            users.removeIf(IUser -> IUser.getPresence().getStatus().equals(StatusType.OFFLINE));
+            users.removeIf(user -> user.getPresence().getStatus().equals(StatusType.OFFLINE));
         } else if (pool == PoolType.OFFLINE) {
             //test this
             users.removeIf(user -> !user.getPresence().getStatus().equals(StatusType.OFFLINE));
@@ -38,7 +38,8 @@ public class CommandHandler {
         return users;
     }
 
-    public String listRolesByName() {
+    //TO RE-ADD
+    /*public String listRolesByName() {
         StringBuilder sb = new StringBuilder();
         for (IRole role : colorRoles) {
             sb.append(role.getName());
@@ -46,16 +47,19 @@ public class CommandHandler {
         }
         sb.delete(sb.length() - 2, sb.length());
         return sb.toString();
-    }
+    }*/
 
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
         IMessage message = event.getMessage();
         IUser user = message.getAuthor();
+        long id = user.getLongID();
         IGuild guild = message.getGuild();
         IChannel channel = message.getChannel();
 
-        String[] args = message.getContent().trim().replaceAll("\\s\\s+", " ").split("\\s");
+        //seperate the contents of the message into an array of strings
+        String[] args = message.getContent().toLowerCase()
+                .trim().replaceAll("\\s\\s+", " ").split("\\s");
         
         boolean hasArgs = (args.length > 1);
         boolean isOwner = user.equals(guild.getOwner());
@@ -71,17 +75,17 @@ public class CommandHandler {
 
         //Make sure the guild has a bots channel
         if (guild.getChannelsByName("bots").isEmpty()) {
-            BotUtils.sendMessage(channel, "**Info**```py"
-                    + "\nPlease create a new text channel named \"#bots\"!"
-                    + " I will only function properly there. Beep boop.```");
+            BotUtils.sendInfoMessage(channel,
+                    "Please create a new text channel named \"#bots\"!"
+                    + " I will only function properly there. Beep boop.");
             return;
         }
         
         //Make sure command is in the bots channel
         if (!channel.getName().equals("bots")) {
-            BotUtils.sendMessage(channel, "**Info**```py"
-                    + "\nI only respond to commands within the \"#bots\" channel."
-                    + " Please type your command again there.```");
+            BotUtils.sendInfoMessage(channel,
+                    "I only respond to commands within the \"#bots\" channel."
+                    + " Please type your command again there.");
             return;
         }
 
@@ -91,22 +95,24 @@ public class CommandHandler {
 
             case "help":
                 if (isOwner) {
-                    BotUtils.sendMessage(channel, "**Owner Commands:**```"
-                            + "!setnames   - Mass change users' nicknames."
+                    BotUtils.sendMessage(channel, "Owner Commands", 
+                            "!setnames   - Mass change users' nicknames."
                             + "\n!resetnames - Mass reset users' nicknames."
-                            + "\n!flood      - Flood your connected voice channel.```\n ");
+                            + "\n!flood      - Flood your connected voice channel."
+                            + "\n!givexp     - Give XP to a specifed user.");
                 }               
-                BotUtils.sendMessage(channel, "**User Commands:**```"
-                        + "!level   - View your level and progress."
-                        + "\n!balance - View your balance."
+                BotUtils.sendMessage(channel, "User Commands", 
+                        "!level   - View your or another user's level progress."
+                        + "\n!balance - View your or another user's balance."
                         + "\n!rng     - Generate a random number."
                         + "\n!flip    - Flip a coin."
                         + "\n!cat     - See a random cat."
                         + "\n!dadjoke - Read a random dad joke."
                         + "\n!raffle  - Choose a random user."
-                        + "\n!info    - View bot information.```");
+                        + "\n!info    - View bot information.");
                 return;
 
+            //TO RE-ADD WITH LEVEL SYSTEM
             /*case "color":
                 //Check if the command was sent in The Realm
                 if (!(guild.getLongID() == 98236427971592192L)) {
@@ -140,36 +146,36 @@ public class CommandHandler {
 
             case "rng":
                 if (!hasArgs) {
-                    BotUtils.sendMessage(channel, "**Usage**:```!rng [max]"
+                    BotUtils.sendUsageMessage(channel, "!rng [max]"
                             + "\n\nGenerates a integer from 1 to the max."
-                            + "\nMax must be greater than 1.```");
+                            + "\nMax must be greater than 1.");
                     return;
                 }
 
                 try {
                     int limit = Integer.parseInt(args[1]);
                     if (limit > 1) {
-                        BotUtils.sendMessage(channel, 
-                                "**Result**```" + (int) (Math.random() * limit + 1) + "```");
+                        BotUtils.sendMessage(channel, "Result", 
+                                String.valueOf((int) (Math.random() * limit + 1)));
                         return;
                     }
                 } catch (NumberFormatException e) {
                 }
-                BotUtils.sendMessage(channel, "**Error**```Parameter is not an integer greater than one.```");
+                BotUtils.sendErrorMessage(channel, "Parameter is not an integer greater than one.");
                 return;
 
             case "flip":
+                String result = "Heads";
                 if (Math.random() < 0.5) {
-                    BotUtils.sendMessage(channel, "**Result**```Heads!```");
-                    return;
+                    result = "Tails";
                 }
-                BotUtils.sendMessage(channel, "**Result**```Tails!```");
+                BotUtils.sendMessage(channel, "Result", result);
                 return;
 
             case "cat":
                 if (!hasArgs) {
-                    BotUtils.sendMessage(channel, "**Usage:**:```!cat [pic/gif]"
-                            + "\n\nView a random cat picture or gif.```");
+                    BotUtils.sendUsageMessage(channel, "!cat [pic/gif]"
+                            + "\n\nView a random cat picture or gif.");
                     return;
                 }
 
@@ -187,6 +193,7 @@ public class CommandHandler {
                     } catch (IOException ex) {
                     }
                 }
+                BotUtils.sendErrorMessage(channel, "Unknown media type. Type \"!cat\" for help.");
                 return;
 
             case "dadjoke":
@@ -205,14 +212,14 @@ public class CommandHandler {
 
             case "raffle":
                 if (!hasArgs) {
-                    BotUtils.sendMessage(channel, 
-                            "**Usage:**```!raffle [all/online/offline/voice]"
+                    BotUtils.sendUsageMessage(channel, 
+                            "!raffle [all/online/offline/voice]"
                             + "\n\nChooses a random user from the selected pool."
                             + "\nThis does not include yourself or any bots."
                             + "\n\nall     - All server users."
                             + "\nonline  - All online users on the server."
                             + "\noffline - All offline users on the server."
-                            + "\nvoice   - All users in your connected voice channel.```");
+                            + "\nvoice   - All users in your connected voice channel.");
                     return;
                 }
 
@@ -220,12 +227,12 @@ public class CommandHandler {
                 try {
                     raffleUsers = getUsers(PoolType.valueOf(args[1].toUpperCase()), guild, message);
                 } catch (IllegalArgumentException ex) {
-                    BotUtils.sendMessage(channel, 
-                            "**Error**```Unknown pool type. Type \".raffle\" for help.```");
+                    BotUtils.sendErrorMessage(channel, 
+                            "Unknown pool type. Type \"!raffle\" for help.");
                     return;
                 } catch (NullPointerException ex) {
-                    BotUtils.sendMessage(channel, 
-                            "**Error**```You are not currently connected to any voice channel on this server!```");
+                    BotUtils.sendErrorMessage(channel, 
+                            "You are not currently connected to any voice channel on this server!");
                     return;
                 }
 
@@ -233,35 +240,35 @@ public class CommandHandler {
 
                 //Check if the user is the only one in the list
                 if (raffleUsers.isEmpty()) {
-                    BotUtils.sendMessage(channel, 
-                            "**Error**```You are the only user in the selected pool!"
-                            + "\nYou can't win your own raffle silly.```");
+                    BotUtils.sendErrorMessage(channel, 
+                            "You are the only user in the selected pool!"
+                            + "\nYou can't win your own raffle silly.");
                     return;
                 }
 
                 //Finally send the message
-                BotUtils.sendMessage(channel, String.format("Winner!```%s```",
-                        raffleUsers.get((int) (Math.random() * raffleUsers.size())).getDisplayName(guild)));
+                BotUtils.sendMessage(channel, "Winner", 
+                        raffleUsers.get((int) (Math.random() * raffleUsers.size())).getDisplayName(guild));
                 return;
 
             case "setnames":
                 //Make sure the command can only be run by the server owner
                 if (!isOwner) {
-                    BotUtils.sendMessage(channel, "**Error**```You are not this server's owner.```");
+                    BotUtils.sendErrorMessage(channel, "You are not this server's owner.");
                     return;
                 }
 
                 //Check if the command has all arguments to it
                 if (args.length < 3) {
-                    BotUtils.sendMessage(channel, 
-                            "**Usage**```!setnames [all/online/offline/voice] [name(s)]"
+                    BotUtils.sendUsageMessage(channel, 
+                            "!setnames [all/online/offline/voice] [name(s)]"
                             + "\n\nSets the names of users in the selected pool "
                             + "using the entered name or names at random selection."
                             + "\nNames are seperated by a comma WITH NO SPACING (Ben,Ricky,Fartface)."
                             + "\n\nall     - All server users."
                             + "\nonline  - All online users on the server."
                             + "\noffline - All offline users on the server."
-                            + "\nvoice   - All users in your connected voice channel.```");
+                            + "\nvoice   - All users in your connected voice channel.");
                     return;
                 }
 
@@ -271,12 +278,12 @@ public class CommandHandler {
                 try {
                     usersPool = getUsers(PoolType.valueOf(args[1].toUpperCase()), guild, message);
                 } catch (IllegalArgumentException ex) {
-                    BotUtils.sendMessage(channel, 
-                            "**Error**```Unknown pool type. Type \".setnames\" for help.```");
+                    BotUtils.sendErrorMessage(channel, 
+                            "Unknown pool type. Type \".setnames\" for help.");
                     return;
                 } catch (NullPointerException ex) {
-                    BotUtils.sendMessage(channel, 
-                            "**Error**```You are not currently connected to any voice channel on this server!```");
+                    BotUtils.sendErrorMessage(channel, 
+                            "You are not currently connected to any voice channel on this server!");
                     return;
                 }
 
@@ -294,8 +301,8 @@ public class CommandHandler {
                             "```There are enough names to give everyone a unique name!```");
                 }
 
-                BotUtils.sendMessage(channel, String.format(
-                        "```Setting the names of %d users with a pool of %d unique name(s)...```",
+                BotUtils.sendInfoMessage(channel, String.format(
+                        "Setting the names of %d users with a pool of %d unique name(s)...",
                         usersPool.size(), names.size()));
 
                 for (IUser userToName : usersPool) {
@@ -313,25 +320,24 @@ public class CommandHandler {
                     } catch (InterruptedException ex) {
                     }
                 }
-                BotUtils.sendMessage(channel, 
-                        "**Success**```Randomly changed all users' names in the selected pool.```");
+                BotUtils.sendMessage(channel, "Success", 
+                        "Randomly changed all users' names in the specified pool.");
                 return;
 
             case "resetnames":
                 //Make sure the command can only be run by the server owner
                 if (!isOwner) {
-                    BotUtils.sendMessage(channel, "**Error**```You are not this server's owner.```");
+                    BotUtils.sendErrorMessage(channel, "You are not this server's owner.");
                     return;
                 }
 
                 if (!hasArgs) {
-                    BotUtils.sendMessage(channel, 
-                            "**Usage**```!resetnames [all/online/offline/voice]"
+                    BotUtils.sendUsageMessage(channel, "!resetnames [all/online/offline/voice]"
                             + "\n\nResets the names of users of the selected pool type."
                             + "\n\nall     - All server users."
                             + "\nonline  - All online users on the server."
                             + "\noffline - All offline users on the server."
-                            + "\nvoice   - All users in your connected voice channel.```");
+                            + "\nvoice   - All users in your connected voice channel.");
                     return;
                 }
 
@@ -339,41 +345,41 @@ public class CommandHandler {
                 try {
                     resetUsers = getUsers(PoolType.valueOf(args[1].toUpperCase()), guild, message);
                 } catch (IllegalArgumentException ex) {
-                    BotUtils.sendMessage(channel, 
-                            "**Error**```Unknown pool type. Type \".resetnames\" for help.```");
+                    BotUtils.sendErrorMessage(channel, 
+                            "Unknown pool type. Type \"!resetnames\" for help.");
                     return;
                 } catch (NullPointerException ex) {
-                    BotUtils.sendMessage(channel, 
-                            "**Error**```You are not currently connected to any voice channel on this server!```");
+                    BotUtils.sendErrorMessage(channel, 
+                            "You are not currently connected to any voice channel on this server!");
                     return;
                 }
 
-                BotUtils.sendMessage(channel, "```Resetting all users' names in the specified pool...```");
+                BotUtils.sendInfoMessage(channel, "Resetting all users' names in the specified pool...");
 
                 for (IUser userToReset : resetUsers) {
-                    BotUtils.setName(guild, userToReset, null);
+                    BotUtils.setNickname(guild, userToReset, null);
                 }
 
                 return;
-                
+            
+            //this a terrible fucking command and needs to go or be rewritten
             case "flood":
                 //Make sure the command can only be run by the server owner
                 if (!isOwner) {
-                    BotUtils.sendMessage(channel, "**Error**```You are not this server's owner.```");
+                    BotUtils.sendErrorMessage(channel, "You are not this server's owner.");
                     return;
                 }
                 
                 if (!hasArgs) {
-                    BotUtils.sendMessage(channel, 
-                            "**Usage**```!flood [amount]"
+                    BotUtils.sendUsageMessage(channel, "!flood [amount]"
                             + "\n\nRapidly reconnects to your connected voice channel, spamming the users connected."
-                            + "\n\namount - The amount of reconnections (300 max).```");
+                            + "\n\namount - The amount of reconnections (300 max).");
                     return;
                 }
                 
                 if (user.getVoiceStateForGuild(guild).getChannel() == null) {
-                    BotUtils.sendMessage(channel, 
-                            "**Error**```You are not currently connected to any voice channel on this server!```");
+                    BotUtils.sendErrorMessage(channel, 
+                            "You are not currently connected to any voice channel on this server!");
                     return;
                 }
                 
@@ -390,32 +396,35 @@ public class CommandHandler {
 
                             }
                         }
-                        BotUtils.sendMessage(channel, "**Success?**```Flooding finished.```");
+                        BotUtils.sendMessage(channel, "Success", "Flooding complete.");
                         return;
                     }
                 } catch (NumberFormatException e) {
                 }
-                BotUtils.sendMessage(channel, "**Error**```Amount is not an integer between 1 and 300.```");
+                BotUtils.sendErrorMessage(channel, "Amount is not an integer between 1 and 300.");
                 return;
                 
             case "balance":
-                BotUtils.sendMessage(channel, "**Balance**```$" 
-                        + UserManager.getUserBalance(user.getLongID()) + "```");
-                return;
-                
-                
-            case "info":
-                BotUtils.sendMessage(channel, "**Info**```"
-                        + "Zeno Bot v2.0.2 - Last Updated 12/11/17"
-                        + "\nCoded by Frozen"
-                        + "\nMessage me for bot support."
-                        + "\nFrozen#9260```");
+                if (hasArgs) {
+                    id = UserManager.getUserIDFromName(args[1]);
+                    if (id == -1L) {
+                        BotUtils.sendErrorMessage(channel, "Specified user was not found in the database.");
+                        return;
+                    }
+                }
+                BotUtils.sendMessage(channel, "Balance", "$" 
+                        + UserManager.getUserBalance(user.getLongID()));
                 return;
                 
             case "level":
-                long id = user.getLongID();
-                BotUtils.sendMessage(channel, String.format("**Info**```"
-                        + "Level %d\n%d/%d XP```",
+                if (hasArgs) {
+                    id = UserManager.getUserIDFromName(args[1]);
+                    if (id == -1L) {
+                        BotUtils.sendErrorMessage(channel, "Specified user was not found in the database.");
+                        return;
+                    }
+                }   
+                BotUtils.sendInfoMessage(channel, String.format("Level %d\n%d/%d XP",
                         UserManager.getUserLevel(id),
                         UserManager.getUserXP(id),
                         UserManager.getUserXPNeeded(id)));
@@ -424,25 +433,33 @@ public class CommandHandler {
             //todo better argument checking
             case "givexp":
                 if (!isOwner) {
-                    BotUtils.sendMessage(channel, "**Error**```You are not this server's owner.```");
+                    BotUtils.sendErrorMessage(channel, "You are not this server's owner.");
                     return;
                 }
                 
                 if (args.length < 3) {
-                    BotUtils.sendMessage(channel, 
-                            "**Usage**```!givexp [userID] [amount]"
+                    BotUtils.sendUsageMessage(channel, 
+                            "!givexp [userID] [amount]"
                             + "\n\nGive xp to the user."
-                            + "\n\nuserID - The user's long ID.```");
+                            + "\n\nuserID - The user's long ID.");
                     return;
                 }
                 
                 UserManager.addUserXP(guild, Long.parseLong(args[1]), Integer.parseInt(args[2]));
-                BotUtils.sendMessage(channel, "**Success**```Gave " 
-                        + args[2] + "xp to " + UserManager.getUserName(Long.parseLong(args[1])) + ".```");
-                return;             
+                BotUtils.sendMessage(channel, "Success", "Gave " + args[2] 
+                        + "xp to " + UserManager.getUserName(Long.parseLong(args[1])));
+                return;        
+                
+            case "info":
+                BotUtils.sendInfoMessage(channel,
+                        "Zeno Bot " + BotUtils.VERSION + " - Last Updated 12/13/17"
+                        + "\nCoded by Frozen"
+                        + "\nMessage me for bot support."
+                        + "\nFrozen#9260");
+                return;
                 
             default:
-                BotUtils.sendMessage(channel, "**Error**```Unknown command. Type \"!help\" for available commands.```");
+                BotUtils.sendErrorMessage(channel, "Unknown command. Type \"!help\" for available commands.");
         }
     }
 }

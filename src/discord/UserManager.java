@@ -1,5 +1,7 @@
 package discord;
 
+import discord.objects.Rank;
+import discord.objects.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -103,7 +105,7 @@ public class UserManager {
         }
         return false;
     }
-    
+           
     //Methods for viewing/modifying user data
     
     private static User getUser(long id) {
@@ -112,6 +114,15 @@ public class UserManager {
                 return user;
         }
         return null;
+    }    
+    
+    public static long getUserIDFromName(String name) {
+        for (User user : users) {
+            if (user.getName().toLowerCase().equals(name)) {
+                return user.getID();
+            }
+        }
+        return -1;
     }
     
     public static String getUserName(long id) {
@@ -141,9 +152,8 @@ public class UserManager {
     public static void addUserXP(IGuild guild, long id, int amount) {
         User user = getUser(id);
         user.addXP(amount); 
-        if (checkLevelupUser(user)) {
+        if (checkLevelupUser(user)) 
             levelUpUser(guild, user);
-        }
     }
     
     private static void levelUpUser(IGuild guild, User user) {
@@ -162,12 +172,11 @@ public class UserManager {
             user.setRank(rankNeeded);
             RankManager.setRankOfUser(guild, user);
             BotUtils.sendMessage(botsChannel,
-                    "```Congratulations! You are now a " + rankNeeded.getName() + ".```");
+                    "```Congratulations! You are now (a/an) " + rankNeeded.getName() + ".```");
         }
         
-        if (checkLevelupUser(user)) {
+        if (checkLevelupUser(user)) 
             levelUpUser(guild, user);
-        }
     }
     
     private static boolean checkLevelupUser(User user) {

@@ -9,22 +9,38 @@ import sx.blah.discord.util.RequestBuffer;
 
 public class BotUtils {  
     
+    public static final String VERSION = "2.1.0";
     public static final String CMD_PREFIX = "!";
     public static final long REALM_ID = 98236427971592192L; //my server long id
     public static final int XP_MULTIPLIER = 1;
     
     public static void sendMessage(IChannel channel, String message) {
-        RequestBuffer.request(() -> {
-            
+        RequestBuffer.request(() -> {           
             try{
                 channel.sendMessage(message);
             } catch (DiscordException e){
                 System.err.println("Message could not be sent with error: " + e);
             }
-        }).get();
+        }).get(); //.get() makes sure they send in order cause async??
     }
     
-    public static void setName(IGuild guild, IUser user, String name) {
+    public static void sendMessage(IChannel channel, String header, String body) {
+        sendMessage(channel, String.format("**%s**```%s```", header, body));
+    }
+    
+    public static void sendInfoMessage(IChannel channel, String message) {
+        sendMessage(channel, "Info", message);
+    }
+    
+    public static void sendErrorMessage(IChannel channel, String message) {
+        sendMessage(channel, "Error", message);
+    }
+    
+    public static void sendUsageMessage(IChannel channel, String message) {
+        sendMessage(channel, "Usage", message);
+    }
+    
+    public static void setNickname(IGuild guild, IUser user, String name) {
         RequestBuffer.request(() -> {
             try{
                 guild.setUserNickname(user, name);

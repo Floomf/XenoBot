@@ -1,5 +1,6 @@
 package discord;
 
+import discord.objects.User;
 import java.util.List;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
@@ -15,7 +16,7 @@ public class NameManager {
                 System.out.println("Can't set owner's nickname");
                 return;
             }     
-            BotUtils.setName(guild, dUser, name);
+            BotUtils.setNickname(guild, dUser, name);
         }
     }
     

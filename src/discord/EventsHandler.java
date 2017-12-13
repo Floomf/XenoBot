@@ -4,7 +4,6 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.guild.member.UserJoinEvent;
-import sx.blah.discord.handle.impl.events.guild.voice.user.UserSpeakingEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -19,18 +18,10 @@ public class EventsHandler {
                
         UserManager.createDatabase(guild);       
         XPHandler.startChecker(guild);
-        guild.getVoiceChannelByID(298179139221848064L).leave();
     }
     
     @EventSubscriber
-    public void onUserTalkEvent(UserSpeakingEvent event) {
-        IUser user = event.getUser();
-        if (event.isSpeaking()) {
-            System.out.println(user.getName() + " is speaking");
-        }
-    }
-    
-    @EventSubscriber
+    //Add user to database when they join The Realm
     public void onUserJoinEvent(UserJoinEvent event) {
        IGuild guild = event.getGuild();
        IUser user = event.getUser();

@@ -1,4 +1,6 @@
-package discord;
+package discord.objects;
+
+import discord.BotUtils;
 
 public class User {
     
@@ -75,7 +77,7 @@ public class User {
     }
     
     public void genXPForLevel() {
-        xpforLevel = BotUtils.XP_MULTIPLIER * level * 35 + 55;
+        xpforLevel = BotUtils.XP_MULTIPLIER * (level * 35 + 55);
     }
     
 }
