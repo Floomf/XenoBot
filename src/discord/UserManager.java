@@ -124,6 +124,7 @@ public class UserManager {
         }
         return -1;
     }
+    
     /*
     public static void test(IGuild guild) {
         for (User user : users) {

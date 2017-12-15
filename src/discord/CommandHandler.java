@@ -448,14 +448,24 @@ public class CommandHandler {
                 UserManager.addUserXP(guild, Long.parseLong(args[1]), Integer.parseInt(args[2]));
                 BotUtils.sendMessage(channel, "Success", "Gave " + args[2] 
                         + "xp to " + UserManager.getUserName(Long.parseLong(args[1])));
-                return;        
+                return;     
+                
+            case "savedata":
+                if (!isOwner) {
+                    BotUtils.sendErrorMessage(channel, "You are not this server's owner.");
+                    return;
+                }                
+                UserManager.saveDatabase();
+                BotUtils.sendInfoMessage(channel, "Database saved.");
+                return;
                 
             case "info":
                 BotUtils.sendInfoMessage(channel,
-                        "Zeno Bot " + BotUtils.VERSION + " - Last Updated 12/13/17"
-                        + "\nCoded by Frozen"
-                        + "\nMessage me for bot support."
-                        + "\nFrozen#9260");
+                        "Zeno Bot " + BotUtils.VERSION + " - Last Updated " 
+                                + BotUtils.CHANGEDATE
+                                + "\nCoded by Frozen"
+                                + "\nMessage me for bot support."
+                                + "\nFrozen#9260");
                 return;
                 
             default:

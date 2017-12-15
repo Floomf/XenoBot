@@ -17,7 +17,7 @@ public class EventsHandler {
         client.online("Type !help");
                
         UserManager.createDatabase(guild);       
-        XPHandler.startChecker(guild);
+        XPHandler.startChecker(guild);      
     }
     
     @EventSubscriber
