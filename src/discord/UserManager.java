@@ -124,6 +124,17 @@ public class UserManager {
         }
         return -1;
     }
+    /*
+    public static void test(IGuild guild) {
+        for (User user : users) {
+            int level = user.getLevel();
+            for (int i = 1; i < level; i++) {
+                user.addXP(-level * 5);
+                if (checkLeveldownUser(user))
+                    addLevelsUser(guild, user, -1);
+            }
+        }
+    }*/
     
     public static String getUserName(long id) {
         return getUser(id).getName();
@@ -152,19 +163,28 @@ public class UserManager {
     public static void addUserXP(IGuild guild, long id, int amount) {
         User user = getUser(id);
         user.addXP(amount); 
-        if (checkLevelupUser(user)) 
-            levelUpUser(guild, user);
+        if (checkLevelupUser(user))
+            addLevelsUser(guild, user, 1);
+        else if (checkLeveldownUser(user))
+            addLevelsUser(guild, user, -1);
     }
     
-    private static void levelUpUser(IGuild guild, User user) {
-        IUser dUser = guild.getUserByID(user.getID());
+    //this needs to be a lot cleaner, fix it sooner
+    private static void addLevelsUser(IGuild guild, User user, int amount) {
         IChannel botsChannel = guild.getChannelByID(250084663618568192L);
         
-        user.addXP(-user.getXPForLevel()); //carry over xp to next level
-        user.addLevels(1);      
+        if (amount > 0) {
+            user.addXP(-user.getXPForLevel()); //carry over xp to next level
+        }
+        
+        user.addLevels(amount); 
+        
+        if (amount < 0) {
+            user.addXP(user.getXPForLevel() + user.getXP()); //subtract from the max
+        }      
         NameManager.formatNameOfUser(guild, user);
      
-        BotUtils.sendMessage(botsChannel, dUser.mention() 
+        BotUtils.sendMessage(botsChannel, guild.getUserByID(user.getID()).mention() 
                 + "```Level up! You are now level " + user.getLevel() + ".```"); 
         
         Rank rankNeeded = RankManager.getRankForLevel(user.getLevel());
@@ -176,11 +196,17 @@ public class UserManager {
         }
         
         if (checkLevelupUser(user)) 
-            levelUpUser(guild, user);
+            addLevelsUser(guild, user, 1);
+        if (checkLeveldownUser(user))
+            addLevelsUser(guild, user, -1);
     }
     
     private static boolean checkLevelupUser(User user) {
         return (user.getXP() >= user.getXPForLevel());
     }
     
+    private static boolean checkLeveldownUser(User user) {
+        return (user.getXP() < 0);
+    }
+      
 }
