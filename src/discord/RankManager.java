@@ -4,6 +4,7 @@ import discord.objects.Rank;
 import discord.objects.User;
 import java.util.List;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
 public class RankManager {
@@ -29,20 +30,23 @@ public class RankManager {
             if (level - rank.getLevelRequired() <= 4)
                 return rank;
         }
-        return RANKS[RANKS.length - 1];
-    }
-    
-    public static boolean hasRankOnGuild(IGuild guild, User user) {
-        return (guild.getRolesForUser(
-                guild.getUserByID(user.getID())).contains(
-                        guild.getRoleByID(user.getRank().getID())));
-
+        return RANKS[RANKS.length - 1]; //last rank
     }
     
     public static void setRankOfUser(IGuild guild, User user) {        
         IUser dUser = guild.getUserByID(user.getID());
-        if (!hasRankOnGuild(guild, user)) {
-            BotUtils.setRole(guild, dUser, guild.getRoleByID(user.getRank().getID()));
+        List<IRole> guildRoles = dUser.getRolesForGuild(guild);
+        if (!guildRoles.contains(guild.getRoleByID(user.getRank().getID()))) {
+            //remove only existing "rank" roles on the user, this way other roles are kept
+            for (Rank rank : RANKS) {
+                IRole role = guild.getRoleByID(rank.getID());
+                if (guildRoles.contains(role)) {
+                    guildRoles.remove(role);
+                    break;
+                }        
+            }
+            guildRoles.add(guild.getRoleByID(user.getRank().getID()));            
+            BotUtils.setRoles(guild, dUser, guildRoles.toArray(new IRole[guildRoles.size()]));
             System.out.println("Set role of " + user.getName() + " to " + user.getRank().getName());
         }
     }

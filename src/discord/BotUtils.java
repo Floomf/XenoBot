@@ -1,5 +1,6 @@
 package discord;
 
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -9,10 +10,10 @@ import sx.blah.discord.util.RequestBuffer;
 
 public class BotUtils {  
     
-    public static final String VERSION = "2.1.3";
+    public static final String VERSION = "2.1.4";
     public static final String CHANGEDATE = "12/16/17";
     public static final String CMD_PREFIX = "!";
-    public static final long REALM_ID = 98236427971592192L; //my server long id
+    public static final long REALM_ID = 98236427971592192L; //The Realm long id
     public static final int XP_MULTIPLIER = 1;
     
     public static void sendMessage(IChannel channel, String message) {
@@ -27,6 +28,16 @@ public class BotUtils {
     
     public static void sendMessage(IChannel channel, String header, String body) {
         sendMessage(channel, String.format("**%s**```%s```", header, body));
+    }
+    
+    public static void sendEmbedMessage(IChannel channel, EmbedObject object) {
+        RequestBuffer.request(() -> {           
+            try{
+                channel.sendMessage(object);
+            } catch (DiscordException e){
+                System.err.println("Message could not be sent with error: " + e);
+            }
+        }).get();
     }
     
     public static void sendInfoMessage(IChannel channel, String message) {
@@ -51,10 +62,9 @@ public class BotUtils {
         });
     }
     
-    public static void setRole(IGuild guild, IUser user, IRole role) {
+    public static void setRoles(IGuild guild, IUser user, IRole[] roles) {
         RequestBuffer.request(() -> {
             try{
-                IRole roles[] = {role}; 
                 guild.editUserRoles(user, roles);
             } catch (DiscordException e) {
                 System.err.println("Role could not be set with error: " + e);
