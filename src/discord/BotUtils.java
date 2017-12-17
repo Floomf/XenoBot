@@ -9,8 +9,8 @@ import sx.blah.discord.util.RequestBuffer;
 
 public class BotUtils {  
     
-    public static final String VERSION = "2.1.2";
-    public static final String CHANGEDATE = "12/15/17";
+    public static final String VERSION = "2.1.3";
+    public static final String CHANGEDATE = "12/16/17";
     public static final String CMD_PREFIX = "!";
     public static final long REALM_ID = 98236427971592192L; //my server long id
     public static final int XP_MULTIPLIER = 1;

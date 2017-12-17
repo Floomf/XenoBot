@@ -32,7 +32,7 @@ public class XPHandler {
             users.removeIf(user -> user.isBot());
             users.removeIf(user -> user.getVoiceStateForGuild(guild).isSelfDeafened());
             if (users.size() >= 2) {
-                List<String> namesToGive = new ArrayList<String>();
+                List<String> namesToGive = new ArrayList<>();
                 int xp = 5 * users.size() + 10; // min 300/hr
                 for (IUser user : users) { 
                     IVoiceState state = user.getVoiceStateForGuild(guild);
@@ -40,7 +40,7 @@ public class XPHandler {
                     if (user.isBot() || state.isSelfMuted() || state.isMuted()) {
                         continue;
                     }
-                    UserManager.addUserXP(guild, user.getLongID(), xp);
+                    LevelManager.addUserXP(guild, user.getLongID(), xp);
                     namesToGive.add(UserManager.getUserName(user.getLongID()));
                     System.out.println("Gave " + xp + "xp to " + user.getName());
                 }

@@ -108,7 +108,7 @@ public class UserManager {
            
     //Methods for viewing/modifying user data
     
-    private static User getUser(long id) {
+    public static User getUserFromID(long id) {
         for (User user : users) {
             if (user.getID() == id) 
                 return user;
@@ -138,76 +138,27 @@ public class UserManager {
     }*/
     
     public static String getUserName(long id) {
-        return getUser(id).getName();
+        return getUserFromID(id).getName();
     }
     
     public static int getUserLevel(long id) {
-        return getUser(id).getLevel();
+        return getUserFromID(id).getLevel();
     }
     
     public static int getUserXP(long id) {
-        return getUser(id).getXP();
+        return getUserFromID(id).getXP();
     }
     
     public static int getUserXPNeeded(long id) {
-        return getUser(id).getXPForLevel();
+        return getUserFromID(id).getXPForLevel();
     }
     
     public static int getUserBalance(long id) {
-        return getUser(id).getBalance();
+        return getUserFromID(id).getBalance();
     }
     
     public static void addToUserBalance(long id, int amount) {
-        getUser(id).addBalance(amount);
-    }
-    
-    public static void addUserXP(IGuild guild, long id, int amount) {
-        User user = getUser(id);
-        user.addXP(amount); 
-        if (checkLevelupUser(user))
-            addLevelsUser(guild, user, 1);
-        else if (checkLeveldownUser(user))
-            addLevelsUser(guild, user, -1);
-    }
-    
-    //this needs to be a lot cleaner, fix it sooner
-    private static void addLevelsUser(IGuild guild, User user, int amount) {
-        IChannel botsChannel = guild.getChannelByID(250084663618568192L);
-        
-        if (amount > 0) {
-            user.addXP(-user.getXPForLevel()); //carry over xp to next level
-        }
-        
-        user.addLevels(amount); 
-        
-        if (amount < 0) {
-            user.addXP(user.getXPForLevel() + user.getXP()); //subtract from the max
-        }      
-        NameManager.formatNameOfUser(guild, user);
-     
-        BotUtils.sendMessage(botsChannel, guild.getUserByID(user.getID()).mention() 
-                + "```Level up! You are now level " + user.getLevel() + ".```"); 
-        
-        Rank rankNeeded = RankManager.getRankForLevel(user.getLevel());
-        if (!user.getRank().equals(rankNeeded)) {         
-            user.setRank(rankNeeded);
-            RankManager.setRankOfUser(guild, user);
-            BotUtils.sendMessage(botsChannel,
-                    "```Congratulations! You are now (a/an) " + rankNeeded.getName() + ".```");
-        }
-        
-        if (checkLevelupUser(user)) 
-            addLevelsUser(guild, user, 1);
-        if (checkLeveldownUser(user))
-            addLevelsUser(guild, user, -1);
-    }
-    
-    private static boolean checkLevelupUser(User user) {
-        return (user.getXP() >= user.getXPForLevel());
-    }
-    
-    private static boolean checkLeveldownUser(User user) {
-        return (user.getXP() < 0);
+        getUserFromID(id).addBalance(amount);
     }
       
 }

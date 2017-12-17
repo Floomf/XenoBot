@@ -424,10 +424,7 @@ public class CommandHandler {
                         return;
                     }
                 }   
-                BotUtils.sendInfoMessage(channel, String.format("Level %d\n%d/%d XP",
-                        UserManager.getUserLevel(id),
-                        UserManager.getUserXP(id),
-                        UserManager.getUserXPNeeded(id)));
+                channel.sendMessage(LevelManager.buildInfo(UserManager.getUserFromID(id)));
                 return;
 
             //todo better argument checking
@@ -445,7 +442,7 @@ public class CommandHandler {
                     return;
                 }
                 
-                UserManager.addUserXP(guild, Long.parseLong(args[1]), Integer.parseInt(args[2]));
+                LevelManager.addUserXP(guild, Long.parseLong(args[1]), Integer.parseInt(args[2]));
                 BotUtils.sendMessage(channel, "Success", "Gave " + args[2] 
                         + "xp to " + UserManager.getUserName(Long.parseLong(args[1])));
                 return;     
