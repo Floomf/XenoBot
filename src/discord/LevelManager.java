@@ -62,10 +62,10 @@ public class LevelManager {
         EmbedBuilder builder = new EmbedBuilder();
         
         builder.withColor(0, 255, 127);
-        builder.withTitle("__**" + user.getName() + "**__");
+        builder.withTitle("__" + user.getName() + "__");
         builder.withDesc(user.getRank().getName());
-        builder.appendField("Level", "```" + user.getLevel() + "```", true);
-        builder.appendField("XP", "```" + user.getXP() + "/"+ user.getXPForLevel() + "```", true);
+        builder.appendField("Level", "`" + user.getLevel() + "`", true);
+        builder.appendField("XP", "`" + user.getXP() + "/"+ user.getXPForLevel() + "`", true);
         builder.appendField("Progress", getProgress(user), false);
         
         return builder.build();
