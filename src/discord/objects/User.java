@@ -79,5 +79,10 @@ public class User {
     public void genXPForLevel() {
         xpforLevel = BotUtils.XP_MULTIPLIER * (level * 40 + 25);
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
     
 }
