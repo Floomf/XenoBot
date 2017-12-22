@@ -35,12 +35,22 @@ public class XPHandler {
                 int xp = 5 * users.size() + 10; // min 300/hr
                 for (IUser user : users) {  
                     LevelManager.addUserXP(guild, user.getLongID(), xp);
-                    System.out.println("Gave " + xp + "xp to " + user.getName());
+                    System.out.println("Gave " + xp + "xp to " + user.getName());                    
                 }
                 BotUtils.sendMessage(guild.getChannelByID(250084663618568192L), 
-                        String.format("```py\n+%dXP %s```", xp, users.toString()));
+                        String.format("```py\n+%dXP [%s]```", xp, buildNames(users, guild)));
                 UserManager.saveDatabase();
             }          
         }
+    }
+    
+    private static String buildNames(List<IUser> users, IGuild guild) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < users.size() - 1; i++) {
+            sb.append(users.get(i).getNicknameForGuild(guild));
+            sb.append(", ");
+        }
+        sb.append(users.get(users.size() - 1));
+        return sb.toString();
     }
 }
