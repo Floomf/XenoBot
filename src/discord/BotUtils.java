@@ -10,7 +10,7 @@ import sx.blah.discord.util.RequestBuffer;
 
 public class BotUtils {  
     
-    public static final String VERSION = "2.1.7";
+    public static final String VERSION = "2.1.8";
     public static final String CHANGEDATE = "12/21/17";
     public static final String CMD_PREFIX = "!";
     public static final long REALM_ID = 98236427971592192L; //The Realm long id
