@@ -38,7 +38,8 @@ public class XPHandler {
                 for (IUser user : users) {  
                     LevelManager.addUserXP(guild, user.getLongID(), xp);
                     names.add(user.getNicknameForGuild(guild));
-                    System.out.println("Gave " + xp + "xp to " + user.getName());                    
+                    System.out.println("Gave " + xp + "xp to " 
+                            + UserManager.getUserFromID(user.getLongID()).getName());                    
                 }
                 BotUtils.sendMessage(guild.getChannelByID(250084663618568192L), 
                         String.format("```py\n+%dXP %s```", xp, names.toString()));
