@@ -36,10 +36,10 @@ public class XPHandler {
                 List<String> names = new ArrayList<>();
                 int xp = 5 * users.size() + 10; // min 300/hr
                 for (IUser user : users) {  
+                    String name = UserManager.getUserFromID(user.getLongID()).getName();
                     LevelManager.addUserXP(guild, user.getLongID(), xp);
-                    names.add(user.getNicknameForGuild(guild));
-                    System.out.println("Gave " + xp + "xp to " 
-                            + UserManager.getUserFromID(user.getLongID()).getName());                    
+                    names.add(name);
+                    System.out.println("Gave " + xp + "xp to " + name);                  
                 }
                 BotUtils.sendMessage(guild.getChannelByID(250084663618568192L), 
                         String.format("```py\n+%dXP %s```", xp, names.toString()));
