@@ -1,7 +1,5 @@
 package discord.objects;
 
-import discord.BotUtils;
-
 public class User {
     
     private final long id; //Discord long id
@@ -24,7 +22,6 @@ public class User {
         level = 1;
         xp = 0;
         balance = 100;
-        genXPForLevel();
     }
     
     //Accessors
@@ -56,16 +53,19 @@ public class User {
     public Rank getRank() {
         return rank;
     }
+  
+    //Mutators
     
     public void setRank(Rank rank) {
         this.rank = rank;
     }
     
-    //Mutators
+    public void setXPForLevel(int xpforLevel) {
+        this.xpforLevel = xpforLevel;
+    }
     
     public void addLevels(int amount) {
-        level += amount;
-        genXPForLevel();          
+        level += amount;         
     }
     
     public void addXP(int amount) {
@@ -74,10 +74,6 @@ public class User {
     
     public void addBalance(int amount) {
         balance += amount;
-    }
-    
-    public void genXPForLevel() {
-        xpforLevel = BotUtils.XP_MULTIPLIER * (level * 40 + 25);
-    }
+    }   
     
 }

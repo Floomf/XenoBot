@@ -1,6 +1,5 @@
 package discord;
 
-import discord.objects.Rank;
 import discord.objects.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -8,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -24,7 +22,7 @@ public class UserManager {
             checkUsersInGuild(guild);
         } else {
             System.out.println("Creating database...");
-            users = new ArrayList<User>();
+            users = new ArrayList<>();
             List<IUser> allUsers = guild.getUsers();
             allUsers.removeIf(user -> user.isBot());
             for (IUser user : allUsers) {
@@ -48,7 +46,7 @@ public class UserManager {
             System.out.println("Database loaded.");
             
             for (User user : users) {
-                user.genXPForLevel();
+                user.setXPForLevel(user.getLevel());
             }
             
         } catch (IOException ex) {
@@ -124,18 +122,6 @@ public class UserManager {
         }
         return -1;
     }
-    
-    /*
-    public static void test(IGuild guild) {
-        for (User user : users) {
-            int level = user.getLevel();
-            for (int i = 1; i < level; i++) {
-                user.addXP(-level * 5);
-                if (checkLeveldownUser(user))
-                    addLevelsUser(guild, user, -1);
-            }
-        }
-    }*/
     
     public static String getUserName(long id) {
         return getUserFromID(id).getName();

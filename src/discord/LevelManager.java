@@ -27,10 +27,12 @@ public class LevelManager {
         }
         
         user.addLevels(amount); 
+        user.setXPForLevel(genXPForLevel(user.getLevel()));
         
         if (amount < 0) {
             user.addXP(user.getXPForLevel() + user.getXP()); //subtract from the max
-        }      
+        }
+        
         NameManager.formatNameOfUser(guild, user);
      
         BotUtils.sendMessage(botsChannel, guild.getUserByID(user.getID()).mention() 
@@ -56,6 +58,10 @@ public class LevelManager {
     
     private static boolean checkLeveldownUser(User user) {
         return (user.getXP() < 0);
+    }
+    
+    public static int genXPForLevel(int level) {
+        return BotUtils.XP_MULTIPLIER * (level * 40 + 50);
     }
     
     public static EmbedObject buildInfo(User user) {
@@ -84,5 +90,11 @@ public class LevelManager {
         }
         return builder.toString();
     }
-    
+    /*   
+    public static void fixUserLevels(IGuild guild, User user) {
+        user.addXP(user.getLevel() * -25);
+        if (checkLeveldownUser(user))
+            addLevelsUser(guild, user, -1);       
+    }*/
+   
 }
