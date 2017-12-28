@@ -20,6 +20,10 @@ public class UserManager {
         if (new File("users.json").exists()) {            
             loadDatabase();
             checkUsersInGuild(guild);
+            validateDatabase(guild);
+            for (User user : users) {
+                LevelManager.setUserXPForLevel(user);
+            }
         } else {
             System.out.println("Creating database...");
             users = new ArrayList<>();
@@ -43,12 +47,7 @@ public class UserManager {
             System.out.println("Loading database...");
             users = new ArrayList<>(Arrays.asList(
                     mapper.readValue(new File("users.json"), User[].class)));
-            System.out.println("Database loaded.");
-            
-            for (User user : users) {
-                LevelManager.setUserXPForLevel(user);
-            }
-            
+            System.out.println("Database loaded.");                    
         } catch (IOException ex) {
             System.out.println(ex);
             System.out.println("Database failed to load.");
@@ -66,6 +65,15 @@ public class UserManager {
         } catch (IOException ex) {
             System.out.println(ex);
             System.out.println("Database failed to save.");
+        }
+    }
+    
+    public static void validateDatabase(IGuild guild) {
+        for (User user : new ArrayList<>(users)) {
+            if (guild.getUserByID(user.getID()) == null) {
+                users.remove(user);
+                System.out.println("Removed " + user.getName() + " from the database.");
+            }
         }
     }
     
