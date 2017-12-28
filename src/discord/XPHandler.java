@@ -37,7 +37,7 @@ public class XPHandler {
                 int xp = 5 * users.size() + 10; // min 300/hr
                 for (IUser user : users) {  
                     String name = UserManager.getUserFromID(user.getLongID()).getName();
-                    LevelManager.addUserXP(guild, user.getLongID(), xp);
+                    LevelManager.addUserXPFromID(guild, user.getLongID(), xp);
                     names.add(name);
                     System.out.println("Gave " + xp + "xp to " + name);                  
                 }

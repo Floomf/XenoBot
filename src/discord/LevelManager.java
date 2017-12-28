@@ -9,32 +9,30 @@ import sx.blah.discord.util.EmbedBuilder;
 
 public class LevelManager {
     
-    public static void addUserXP(IGuild guild, long id, int amount) {
+    public static void addUserXPFromID(IGuild guild, long id, int amount) {
         User user = UserManager.getUserFromID(id);
         user.addXP(amount); 
-        if (checkLevelupUser(user))
-            addLevelsUser(guild, user, 1);
-        else if (checkLeveldownUser(user))
-            addLevelsUser(guild, user, -1);
-    }
+        checkXPUser(guild, user);
+    }   
     
     //this needs to be a lot cleaner, fix it sooner
-    private static void addLevelsUser(IGuild guild, User user, int amount) {
+    private static void changeLevelUser(IGuild guild, User user, boolean levelUp) {
         IChannel botsChannel = guild.getChannelByID(250084663618568192L);
+        int amount = (levelUp) ? 1 : -1;
         
-        if (amount > 0) {
+        if (levelUp) {          
             user.addXP(-user.getXPForLevel()); //carry over xp to next level
-        }
+        }       
         
-        user.addLevels(amount); 
-        user.setXPForLevel(genXPForLevel(user.getLevel()));
+        user.addLevels(amount);
+        setUserXPForLevel(user);     
         
-        if (amount < 0) {
+        if (!levelUp) {           
             user.addXP(user.getXPForLevel() + user.getXP()); //subtract from the max
         }
         
-        NameManager.formatNameOfUser(guild, user);
-     
+        NameManager.formatNameOfUser(guild, user);        
+             
         BotUtils.sendMessage(botsChannel, guild.getUserByID(user.getID()).mention() 
                 + "```Level up! You are now level " + user.getLevel() + ".```"); 
         
@@ -46,22 +44,19 @@ public class LevelManager {
                     "```Congratulations! You are now (a/an) " + rankNeeded.getName() + ".```");
         }
         
-        if (checkLevelupUser(user)) 
-            addLevelsUser(guild, user, 1);
-        if (checkLeveldownUser(user))
-            addLevelsUser(guild, user, -1);
+        checkXPUser(guild, user);
     }
     
-    private static boolean checkLevelupUser(User user) {
-        return (user.getXP() >= user.getXPForLevel());
+    private static void checkXPUser(IGuild guild, User user) {
+        int xp = user.getXP();
+        if (xp >= user.getXPForLevel())
+            changeLevelUser(guild, user, true);
+        else if (xp < 0)
+            changeLevelUser(guild, user, false);
     }
     
-    private static boolean checkLeveldownUser(User user) {
-        return (user.getXP() < 0);
-    }
-    
-    public static int genXPForLevel(int level) {
-        return BotUtils.XP_MULTIPLIER * (level * 40 + 50);
+    public static void setUserXPForLevel(User user) {
+        user.setXPForLevel(BotUtils.XP_MULTIPLIER * (user.getLevel() * 40 + 55));
     }
     
     public static EmbedObject buildInfo(User user) {
@@ -90,11 +85,10 @@ public class LevelManager {
         }
         return builder.toString();
     }
-    /*   
+    /* Used for nerfing xp system  
     public static void fixUserLevels(IGuild guild, User user) {
-        user.addXP(user.getLevel() * -25);
-        if (checkLeveldownUser(user))
-            addLevelsUser(guild, user, -1);       
+        user.addXP((user.getLevel() - 1) * -30);
+        checkXPUser(guild, user);    
     }*/
    
 }

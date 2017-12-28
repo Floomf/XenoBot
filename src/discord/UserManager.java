@@ -46,12 +46,13 @@ public class UserManager {
             System.out.println("Database loaded.");
             
             for (User user : users) {
-                user.setXPForLevel(user.getLevel());
+                LevelManager.setUserXPForLevel(user);
             }
             
         } catch (IOException ex) {
             System.out.println(ex);
             System.out.println("Database failed to load.");
+            System.exit(0);
         }
     }
     

@@ -442,7 +442,7 @@ public class CommandHandler {
                     return;
                 }
                 
-                LevelManager.addUserXP(guild, Long.parseLong(args[1]), Integer.parseInt(args[2]));
+                LevelManager.addUserXPFromID(guild, Long.parseLong(args[1]), Integer.parseInt(args[2]));
                 BotUtils.sendMessage(channel, "Success", "Gave " + args[2] 
                         + "xp to " + UserManager.getUserName(Long.parseLong(args[1])));
                 return;     
