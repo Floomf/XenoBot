@@ -10,8 +10,9 @@ import sx.blah.discord.util.RequestBuffer;
 
 public class BotUtils {  
     
-    public static final String VERSION = "2.2.0";
-    public static final String CHANGEDATE = "12/28/17";
+    //hardcoded constants
+    public static final String VERSION = "2.3.0";
+    public static final String CHANGEDATE = "1/9/18";
     public static final String CMD_PREFIX = "!";
     public static final long REALM_ID = 98236427971592192L; //The Realm long id
     public static final int XP_MULTIPLIER = 1;
@@ -56,6 +57,7 @@ public class BotUtils {
         RequestBuffer.request(() -> {
             try{
                 guild.setUserNickname(user, name);
+                System.out.println("Set nickname of " + user.getName() + " to " + name);
             } catch (DiscordException e){
                 System.err.println("Name could not be set with error: " + e);
             }

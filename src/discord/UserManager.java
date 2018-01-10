@@ -19,11 +19,8 @@ public class UserManager {
     public static void createDatabase(IGuild guild) {
         if (new File("users.json").exists()) {            
             loadDatabase();
-            checkUsersInGuild(guild);
-            validateDatabase(guild);
-            for (User user : users) {
-                LevelManager.setUserXPForLevel(user);
-            }
+            checkNewUsersInGuild(guild);
+            checkRemovedUsersInGuild(guild);
         } else {
             System.out.println("Creating database...");
             users = new ArrayList<>();
@@ -35,10 +32,8 @@ public class UserManager {
             }
             System.out.println("Database created.");
             saveDatabase();
-            RankManager.setRanksForGuild(guild, users);
         }
-        NameManager.formatAllNames(guild, users);
-        RankManager.setRanksForGuild(guild, users);
+        validateUsers(guild);
     }
     
     private static void loadDatabase() {
@@ -68,7 +63,16 @@ public class UserManager {
         }
     }
     
-    public static void validateDatabase(IGuild guild) {
+    public static void validateUsers(IGuild guild) {
+        for (User user : users) {
+            LevelManager.setUserXPForLevel(user);
+            NameManager.formatNameOfUser(guild, user);
+            RankManager.setRankOfUser(guild, user);
+        }
+    }
+    
+    //Check possible users that have left the guild, if so, remove them from the database
+    public static void checkRemovedUsersInGuild(IGuild guild) {
         for (User user : new ArrayList<>(users)) {
             if (guild.getUserByID(user.getID()) == null) {
                 users.remove(user);
@@ -78,7 +82,7 @@ public class UserManager {
     }
     
     //Check possible users that are not already in database in guild, add them if found
-    private static void checkUsersInGuild(IGuild guild) {
+    private static void checkNewUsersInGuild(IGuild guild) {
         List<IUser> guildUsers = guild.getUsers();
         boolean foundNewUser = false;
         

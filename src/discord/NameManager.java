@@ -20,13 +20,4 @@ public class NameManager {
         }
     }
     
-    public static void formatAllNames(IGuild guild, List<User> users) {
-        System.out.println("Formatting all names...");
-        for (User user : users) {
-            formatNameOfUser(guild, user);
-        }
-        //System.out.println("Finished formatting all names.");
-        //fix this
-    }
-    
 }

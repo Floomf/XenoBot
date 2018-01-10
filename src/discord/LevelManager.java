@@ -31,19 +31,11 @@ public class LevelManager {
             user.addXP(user.getXPForLevel() + user.getXP()); //subtract from the max
         }
         
-        NameManager.formatNameOfUser(guild, user);        
-             
+        NameManager.formatNameOfUser(guild, user);                     
         BotUtils.sendMessage(botsChannel, guild.getUserByID(user.getID()).mention() 
                 + "```Level up! You are now level " + user.getLevel() + ".```"); 
         
-        Rank rankNeeded = RankManager.getRankForLevel(user.getLevel());
-        if (!user.getRank().equals(rankNeeded)) {         
-            user.setRank(rankNeeded);
-            RankManager.setRankOfUser(guild, user);
-            BotUtils.sendMessage(botsChannel,
-                    "```Congratulations! You are now (a/an) " + rankNeeded.getName() + ".```");
-        }
-        
+        RankManager.setRankOfUser(guild, user);       
         checkXPUser(guild, user);
     }
     
