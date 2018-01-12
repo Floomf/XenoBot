@@ -31,6 +31,6 @@ public class Rank {
     }
     
     public boolean equals(Rank other) {
-        return (other.getID() == this.getID());
+        return (other.getID() == this.id && other.getLevelRequired() == this.levelRequired);
     }
 }

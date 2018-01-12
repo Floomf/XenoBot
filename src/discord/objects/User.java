@@ -8,6 +8,7 @@ public class User {
     private int xp;
     private int xpforLevel;
     private int balance;
+    private int emojicp;
     private Rank rank;
 
     public User() {
@@ -22,6 +23,7 @@ public class User {
         level = 1;
         xp = 0;
         balance = 100;
+        emojicp = 0;
     }
     
     //Accessors
@@ -53,6 +55,10 @@ public class User {
     public Rank getRank() {
         return rank;
     }
+    
+    public int getEmoji() {
+        return emojicp;
+    }
   
     //Mutators
     
@@ -74,6 +80,10 @@ public class User {
     
     public void addBalance(int amount) {
         balance += amount;
-    }   
+    }
+    
+    public void setEmoji(int codepoint) {
+        emojicp = codepoint;
+    }
     
 }

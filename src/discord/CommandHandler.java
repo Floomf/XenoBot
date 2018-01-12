@@ -1,5 +1,7 @@
 package discord;
 
+import com.vdurmont.emoji.EmojiManager;
+import discord.objects.User;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
 import java.util.List;
@@ -463,6 +465,32 @@ public class CommandHandler {
                                 + "\nCoded by Frozen"
                                 + "\nMessage me for bot support."
                                 + "\nFrozen#9260");
+                return;
+                
+            case "emoji":
+                if (!hasArgs) {
+                    BotUtils.sendUsageMessage(channel, "!emoji [emoji]"
+                            + "\n\nSet an emoji next to your name."
+                            + "\n(Requires Level 35+)");
+                    return;
+                }
+                User currUser = UserManager.getUserFromID(id);
+                String emoji = args[1];
+                if (!(currUser.getLevel() >= 35)) {
+                    BotUtils.sendErrorMessage(channel, "You must be at least level 35 to set your name emoji!");
+                    return;
+                } //fancy regex to check for emoji, found it online
+                if (EmojiManager.isEmoji(emoji)) {
+                    if (emoji.length() == 2) {
+                        currUser.setEmoji(Character.toCodePoint(emoji.charAt(0), emoji.charAt(1)));
+                    } else {
+                        currUser.setEmoji(emoji.codePointAt(0));
+                    }
+                    NameManager.formatNameOfUser(guild, currUser);
+                    BotUtils.sendInfoMessage(channel, "Set your name emoji to " + emoji);
+                    return;
+                }
+                BotUtils.sendErrorMessage(channel, "Could not parse an emoji from input.");
                 return;
                 
             default:

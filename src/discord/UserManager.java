@@ -73,6 +73,8 @@ public class UserManager {
     
     //Check possible users that have left the guild, if so, remove them from the database
     public static void checkRemovedUsersInGuild(IGuild guild) {
+        System.out.println("Checking possible new users to remove from the database...");   
+        
         for (User user : new ArrayList<>(users)) {
             if (guild.getUserByID(user.getID()) == null) {
                 users.remove(user);
