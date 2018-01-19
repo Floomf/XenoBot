@@ -1,7 +1,6 @@
 package discord;
 
 import discord.objects.User;
-import java.util.List;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 

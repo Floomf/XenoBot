@@ -17,6 +17,7 @@ import java.util.Arrays;
 
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
+import sx.blah.discord.api.IDiscordClient;
 
 public class CommandHandler {
 
@@ -24,7 +25,11 @@ public class CommandHandler {
         ALL, ONLINE, OFFLINE, VOICE
     }
 
-    private List<IRole> colorRoles;
+    //hardcoded color role names
+    private final String[] COLORS = {"Dark Red", "Red", "Dark Orange", "Orange", "Gold", "Yellow",
+        "Green Yellow", "Mint", "Lime", "Green", "Dark Green", "Turqoise", "Teal", "Light Blue", 
+        "Blue", "Dark Blue", "Indigo", "Violet", "Purple", "Magenta", "Hot Pink", "Pink",
+        "Light Brown", "Brown", "Gray"};
 
     public List<IUser> getUsers(PoolType pool, IGuild guild, IMessage message) {
         List<IUser> users = guild.getUsers();    
@@ -40,31 +45,22 @@ public class CommandHandler {
         return users;
     }
 
-    //TO RE-ADD
-    /*public String listRolesByName() {
-        StringBuilder sb = new StringBuilder();
-        for (IRole role : colorRoles) {
-            sb.append(role.getName());
-            sb.append(", ");
-        }
-        sb.delete(sb.length() - 2, sb.length());
-        return sb.toString();
-    }*/
-
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
+        IDiscordClient client = event.getClient();
         IMessage message = event.getMessage();
-        IUser user = message.getAuthor();
-        long id = user.getLongID();
+        IUser dUser = message.getAuthor();
+        long id = dUser.getLongID();
+        User user = UserManager.getUserFromID(id);
         IGuild guild = message.getGuild();
-        IChannel channel = message.getChannel();
+        IChannel channel = message.getChannel();     
 
         //seperate the contents of the message into an array of strings
         String[] args = message.getContent().toLowerCase()
                 .trim().replaceAll("\\s\\s+", " ").split("\\s");
         
         boolean hasArgs = (args.length > 1);
-        boolean isOwner = user.equals(guild.getOwner());
+        boolean isOwner = dUser.equals(guild.getOwner());
 
         if (args.length == 0) {
             return;
@@ -111,40 +107,41 @@ public class CommandHandler {
                         + "\n!cat     - See a random cat."
                         + "\n!dadjoke - Read a random dad joke."
                         + "\n!raffle  - Choose a random user."
+                        + "\n!emoji   - Customize an emoji in your name (Lvl 35+)."
+                        + "\n!color   - Set the color of your name (Lvl 45+)."
                         + "\n!info    - View bot information.");
                 return;
 
-            //TO RE-ADD WITH LEVEL SYSTEM
-            /*case "color":
-                //Check if the command was sent in The Realm
-                if (!(guild.getLongID() == 98236427971592192L)) {
-                    BotUtils.sendMessage(channel, "**Info**```This command only functions on The Realm. Sorry about that.```");
+            case "color":
+                if (!(user.getLevel() >= 45)) {
+                    BotUtils.sendErrorMessage(channel, "You must be at least level 45 to set your name color!");
                     return;
                 }
 
                 if (!hasArgs) {
-                    BotUtils.sendMessage(channel, "**Usage** ```.color [name]\n\nChanges the color of your name.```"
-                            + "\n**Available choices:**```" + listRolesByName() + "```");
-                    return;
-                    //Combine args for colors like "light blue"      
-                } else if (args.length > 2) {
-                    for (int i = 2; i <= args.length - 1; i++) {
-                        args[1] += " " + args[i];
-                    }
+                    BotUtils.sendUsageMessage(channel, "!color [name]\n\nChanges the color of your name. (Level 45+)");
+                    BotUtils.sendMessage(channel, "Available Choices", Arrays.toString(COLORS));
+                    return;                       
+                }               
+                String color = args[1];              
+                //Combine args for colors like "light blue" 
+                if (args.length > 2 ) {
+                    color += " " + args[2];
                 }
-
-                //Loop through roles and check for the color
-                for (IRole color : colorRoles) {
-                    if (args[1].equals(color.getName().toLowerCase())) {
-                        guild.editUserRoles(user, new IRole[]{client.getRoleByID(275486798699036683L), color});
-                        BotUtils.sendMessage(channel, 
-                                String.format("```Your name is now %s!```", color.getName()));
+                
+                for (int i = 0; i <= COLORS.length; i++) {
+                    if (COLORS[i].toLowerCase().equals(color)) {
+                        List<IRole> roles = dUser.getRolesForGuild(guild);
+                        roles.removeIf(role -> Arrays.asList(COLORS).contains(role.getName()));
+                        roles.add(guild.getRolesByName(COLORS[i]).get(0));       
+                        BotUtils.setRoles(guild, dUser, roles.toArray(new IRole[roles.size()]));
+                        BotUtils.sendInfoMessage(channel, 
+                                String.format("Your name is now %s!", color));
                         return;
                     }
                 }
-                BotUtils.sendMessage(channel, "**Unknown color!** Available choices: ```"
-                        + listRolesByName() + "```");
-                return;*/
+                BotUtils.sendMessage(channel, "**Unknown color!** Available choices:", Arrays.toString(COLORS));
+                return;
 
             case "rng":
                 if (!hasArgs) {
@@ -379,7 +376,7 @@ public class CommandHandler {
                     return;
                 }
                 
-                if (user.getVoiceStateForGuild(guild).getChannel() == null) {
+                if (dUser.getVoiceStateForGuild(guild).getChannel() == null) {
                     BotUtils.sendErrorMessage(channel, 
                             "You are not currently connected to any voice channel on this server!");
                     return;
@@ -390,9 +387,9 @@ public class CommandHandler {
                     if (amount > 0 && amount <= 300) {
                         for (int i = 1; i <= amount; i++) {
                             try {
-                                user.getVoiceStateForGuild(guild).getChannel().join();
+                                dUser.getVoiceStateForGuild(guild).getChannel().join();
                                 TimeUnit.MILLISECONDS.sleep(400);
-                                user.getVoiceStateForGuild(guild).getChannel().leave();
+                                dUser.getVoiceStateForGuild(guild).getChannel().leave();
                                 TimeUnit.MILLISECONDS.sleep(400);
                             } catch (InterruptedException ex) {
 
@@ -415,7 +412,7 @@ public class CommandHandler {
                     }
                 }
                 BotUtils.sendMessage(channel, "Balance", "$" 
-                        + UserManager.getUserBalance(user.getLongID()));
+                        + UserManager.getUserBalance(dUser.getLongID()));
                 return;
                 
             case "level":
@@ -474,19 +471,18 @@ public class CommandHandler {
                             + "\n(Requires Level 35+)");
                     return;
                 }
-                User currUser = UserManager.getUserFromID(id);
                 String emoji = args[1];
-                if (!(currUser.getLevel() >= 35)) {
+                if (!(user.getLevel() >= 35)) {
                     BotUtils.sendErrorMessage(channel, "You must be at least level 35 to set your name emoji!");
                     return;
                 } //fancy regex to check for emoji, found it online
                 if (EmojiManager.isEmoji(emoji)) {
                     if (emoji.length() == 2) {
-                        currUser.setEmoji(Character.toCodePoint(emoji.charAt(0), emoji.charAt(1)));
+                        user.setEmoji(Character.toCodePoint(emoji.charAt(0), emoji.charAt(1)));
                     } else {
-                        currUser.setEmoji(emoji.codePointAt(0));
+                        user.setEmoji(emoji.codePointAt(0));
                     }
-                    NameManager.formatNameOfUser(guild, currUser);
+                    NameManager.formatNameOfUser(guild, user);
                     BotUtils.sendInfoMessage(channel, "Set your name emoji to " + emoji);
                     return;
                 }
