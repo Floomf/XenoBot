@@ -107,7 +107,7 @@ public class CommandHandler {
                         + "\n!cat     - See a random cat."
                         + "\n!dadjoke - Read a random dad joke."
                         + "\n!raffle  - Choose a random user."
-                        + "\n!emoji   - Customize an emoji in your name (Lvl 35+)."
+                        + "\n!emoji   - Customize an emoji in your name (Lvl 30+)."
                         + "\n!color   - Set the color of your name (Lvl 45+)."
                         + "\n!info    - View bot information.");
                 return;
@@ -129,7 +129,7 @@ public class CommandHandler {
                     color += " " + args[2];
                 }
                 
-                for (int i = 0; i <= COLORS.length; i++) {
+                for (int i = 0; i < COLORS.length; i++) {
                     if (COLORS[i].toLowerCase().equals(color)) {
                         List<IRole> roles = dUser.getRolesForGuild(guild);
                         roles.removeIf(role -> Arrays.asList(COLORS).contains(role.getName()));
@@ -472,8 +472,8 @@ public class CommandHandler {
                     return;
                 }
                 String emoji = args[1];
-                if (!(user.getLevel() >= 35)) {
-                    BotUtils.sendErrorMessage(channel, "You must be at least level 35 to set your name emoji!");
+                if (!(user.getLevel() >= 30)) {
+                    BotUtils.sendErrorMessage(channel, "You must be at least level 30 to set your name emoji!");
                     return;
                 } //fancy regex to check for emoji, found it online
                 if (EmojiManager.isEmoji(emoji)) {
