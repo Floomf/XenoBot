@@ -1,5 +1,7 @@
 package discord;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vdurmont.emoji.EmojiManager;
 import discord.objects.User;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -14,10 +16,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
-
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.util.EmbedBuilder;
 
 public class CommandHandler {
 
@@ -106,6 +108,7 @@ public class CommandHandler {
                         + "\n!flip    - Flip a coin."
                         + "\n!cat     - See a random cat."
                         + "\n!dadjoke - Read a random dad joke."
+                        + "\n!coin    - View price and info on a cryptocurrency."
                         + "\n!raffle  - Choose a random user."
                         + "\n!emoji   - Customize an emoji in your name (Lvl 30+)."
                         + "\n!color   - Set the color of your name (Lvl 45+)."
@@ -140,7 +143,7 @@ public class CommandHandler {
                         return;
                     }
                 }
-                BotUtils.sendMessage(channel, "**Unknown color!** Available choices:", Arrays.toString(COLORS));
+                BotUtils.sendMessage(channel, "Unknown color! Available choices:", Arrays.toString(COLORS));
                 return;
 
             case "rng":
@@ -204,10 +207,10 @@ public class CommandHandler {
                     hc.connect();
                     BufferedReader br = new BufferedReader(new InputStreamReader(hc.getInputStream()));
                     BotUtils.sendMessage(channel, String.format("```%s```", br.readLine()));
-                    return;
                 } catch (IOException ex) {
                     System.out.println(ex);
                 }
+                return;
 
             case "raffle":
                 if (!hasArgs) {
@@ -468,7 +471,7 @@ public class CommandHandler {
                 if (!hasArgs) {
                     BotUtils.sendUsageMessage(channel, "!emoji [emoji]"
                             + "\n\nSet an emoji next to your name."
-                            + "\n(Requires Level 35+)");
+                            + "\n(Requires Level 30+)");
                     return;
                 }
                 String emoji = args[1];
@@ -488,7 +491,45 @@ public class CommandHandler {
                 }
                 BotUtils.sendErrorMessage(channel, "Could not parse an emoji from input.");
                 return;
-                
+            
+            case "coin":
+                if (!hasArgs) {
+                    BotUtils.sendUsageMessage(channel, "!coin [name]"
+                            + "\n\nView current price and other info on a crpytocurrency.");
+                    return;
+                }
+                StringBuilder sb = new StringBuilder();
+                EmbedBuilder builder = new EmbedBuilder();
+                try {
+                    URL url = new URL("https://api.coinmarketcap.com/v1/ticker/" + args[1]);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    in.close();
+                    sb.deleteCharAt(0).deleteCharAt(sb.length() - 1); //TERRIBLE WAY TO DO THIS BUT WORKS
+                    String json = sb.toString().replace("null", "\"Unknown\""); //ALSO PROBABLY BAD               
+                    JsonNode node = new ObjectMapper().readTree(json);                           
+                    builder.withColor(0, 255, 127);
+                    builder.withTimestamp(node.path("last_updated").asLong() * 1000);
+                    builder.withTitle(String.format("__%s (%s)__", 
+                            node.path("name").asText(), node.path("symbol").asText()));
+                    builder.withDesc("Rank " + node.path("rank").asText());
+                    builder.appendField("Price (USD)", "$" + node.path("price_usd").asText(), true);
+                    builder.appendField("Price (BTC)", node.path("price_btc").asText(), true);
+                    builder.appendField("Change (Past Hour)", node.path("percent_change_1h").asText() + "%", true);
+                    builder.appendField("Change (Past Day)", node.path("percent_change_24h").asText() + "%", true);
+                    builder.appendField("Max Supply", node.path("max_supply").asText(), true);
+                    builder.appendField("Total Supply", node.path("total_supply").asText(), true);
+                    builder.appendField("Circulating Supply", node.path("available_supply").asText(), true);
+                    builder.withFooterText("coinmarketcap.com");
+                    BotUtils.sendEmbedMessage(channel, builder.build());
+                } catch (IOException e) {
+                    BotUtils.sendErrorMessage(channel, "Specified coin was not found in the database.");
+                }
+                return;
+                                                            
             default:
                 BotUtils.sendErrorMessage(channel, "Unknown command. Type \"!help\" for available commands.");
         }
