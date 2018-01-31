@@ -512,14 +512,19 @@ public class CommandHandler {
                     String json = sb.toString().replace("null", "\"Unknown\""); //ALSO PROBABLY BAD               
                     JsonNode node = new ObjectMapper().readTree(json);                           
                     builder.withColor(0, 255, 127);
+                    builder.withThumbnail(String.format(
+                            "https://files.coinmarketcap.com/static/img/coins/32x32/%s.png", node.path("id").asText()));
                     builder.withTimestamp(node.path("last_updated").asLong() * 1000);
                     builder.withTitle(String.format("__%s (%s)__", 
                             node.path("name").asText(), node.path("symbol").asText()));
                     builder.withDesc("Rank " + node.path("rank").asText());
                     builder.appendField("Price (USD)", "$" + node.path("price_usd").asText(), true);
                     builder.appendField("Price (BTC)", node.path("price_btc").asText(), true);
+                    builder.appendField("Market Cap", "$" + node.path("market_cap_usd").asText(), true);
+                    builder.appendField("Volume (Past Day)","$" + node.path("24h_volume_usd").asText(), true);
                     builder.appendField("Change (Past Hour)", node.path("percent_change_1h").asText() + "%", true);
                     builder.appendField("Change (Past Day)", node.path("percent_change_24h").asText() + "%", true);
+                    builder.appendField("Change (Past Week)", node.path("percent_change_7d").asText() + "%", true);
                     builder.appendField("Max Supply", node.path("max_supply").asText(), true);
                     builder.appendField("Total Supply", node.path("total_supply").asText(), true);
                     builder.appendField("Circulating Supply", node.path("available_supply").asText(), true);
