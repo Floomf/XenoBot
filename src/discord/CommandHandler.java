@@ -49,7 +49,6 @@ public class CommandHandler {
 
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
-        IDiscordClient client = event.getClient();
         IMessage message = event.getMessage();
         IUser dUser = message.getAuthor();
         long id = dUser.getLongID();
@@ -110,19 +109,19 @@ public class CommandHandler {
                         + "\n!dadjoke - Read a random dad joke."
                         + "\n!coin    - View price and info on a cryptocurrency."
                         + "\n!raffle  - Choose a random user."
-                        + "\n!emoji   - Customize an emoji in your name (Lvl 30+)."
-                        + "\n!color   - Set the color of your name (Lvl 45+)."
+                        + "\n!emoji   - Customize an emoji in your name (Lvl 40+)."
+                        + "\n!color   - Set the color of your name (Lvl 70+)."
                         + "\n!info    - View bot information.");
                 return;
 
             case "color":
-                if (!(user.getLevel() >= 45)) {
-                    BotUtils.sendErrorMessage(channel, "You must be at least level 45 to set your name color!");
+                if (!(user.getLevel() >= 70)) {
+                    BotUtils.sendErrorMessage(channel, "You must be at least level 70 to set your name color!");
                     return;
                 }
 
                 if (!hasArgs) {
-                    BotUtils.sendUsageMessage(channel, "!color [name]\n\nChanges the color of your name. (Level 45+)");
+                    BotUtils.sendUsageMessage(channel, "!color [name]\n\nChanges the color of your name. (Level 70+)");
                     BotUtils.sendMessage(channel, "Available Choices", Arrays.toString(COLORS));
                     return;                       
                 }               
@@ -471,12 +470,12 @@ public class CommandHandler {
                 if (!hasArgs) {
                     BotUtils.sendUsageMessage(channel, "!emoji [emoji]"
                             + "\n\nSet an emoji next to your name."
-                            + "\n(Requires Level 30+)");
+                            + "\n(Requires Level 40+)");
                     return;
                 }
                 String emoji = args[1];
-                if (!(user.getLevel() >= 30)) {
-                    BotUtils.sendErrorMessage(channel, "You must be at least level 30 to set your name emoji!");
+                if (!(user.getLevel() >= 40)) {
+                    BotUtils.sendErrorMessage(channel, "You must be at least level 40 to set your name emoji!");
                     return;
                 } //fancy regex to check for emoji, found it online
                 if (EmojiManager.isEmoji(emoji)) {

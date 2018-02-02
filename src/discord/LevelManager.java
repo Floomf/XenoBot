@@ -1,6 +1,5 @@
 package discord;
 
-import discord.objects.Rank;
 import discord.objects.User;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
@@ -48,7 +47,7 @@ public class LevelManager {
     }
     
     public static void setUserXPForLevel(User user) {
-        user.setXPForLevel(BotUtils.XP_MULTIPLIER * (user.getLevel() * 40 + 55));
+        user.setXPForLevel(user.getLevel() * 30 + 70);
     }
     
     public static EmbedObject buildInfo(User user) {
@@ -77,10 +76,12 @@ public class LevelManager {
         }
         return builder.toString();
     }
-    /* Used for nerfing xp system  
+    /* Used for changing xp system  
     public static void fixUserLevels(IGuild guild, User user) {
-        user.addXP((user.getLevel() - 1) * -30);
-        checkXPUser(guild, user);    
+        for (int i = 1; i < user.getLevel(); i++) {
+            user.addXP(i * 10 + 15);
+            checkXPUser(guild, user);    
+        }
     }*/
    
 }

@@ -81,6 +81,7 @@ public class UserManager {
                 System.out.println("Removed " + user.getName() + " from the database.");
             }
         }
+        System.out.println("Finished checking possible users to remove.");
     }
     
     //Check possible users that are not already in database in guild, add them if found
@@ -96,7 +97,7 @@ public class UserManager {
                 foundNewUser = true;
             }
         }
-        System.out.println("Finished checking guild users.");
+        System.out.println("Finished checking possible new guild users.");
         if (foundNewUser) 
             saveDatabase();
     }
