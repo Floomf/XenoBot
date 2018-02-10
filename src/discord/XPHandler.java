@@ -31,7 +31,8 @@ public class XPHandler {
             users.removeIf(user -> user.isBot() 
                     || user.getVoiceStateForGuild(guild).isSelfDeafened() 
                     || user.getVoiceStateForGuild(guild).isSelfMuted()
-                    || user.getVoiceStateForGuild(guild).isMuted());
+                    || user.getVoiceStateForGuild(guild).isMuted()
+                    || UserManager.getUserLevel(user.getLongID()) == BotUtils.MAX_LEVEL); //if level 80
             if (users.size() >= 2) {
                 List<String> names = new ArrayList<>();
                 int xp = 5 * users.size() + 10; // min 300/hr

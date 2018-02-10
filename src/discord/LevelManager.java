@@ -34,8 +34,21 @@ public class LevelManager {
         BotUtils.sendMessage(botsChannel, guild.getUserByID(user.getID()).mention() 
                 + "```Level up! You are now level " + user.getLevel() + ".```"); 
         
-        RankManager.setRankOfUser(guild, user);       
-        checkXPUser(guild, user);
+        RankManager.setRankOfUser(guild, user);
+        
+        if (user.getLevel() == BotUtils.MAX_LEVEL) 
+            maxOutUser(botsChannel, user);
+        else 
+            checkXPUser(guild, user);
+    }
+    
+    private static void maxOutUser(IChannel channel, User user) {
+        user.setXPForLevel(0);
+        user.addXP(-user.getXP());
+        BotUtils.sendMessage(channel, "```Congratulations! You have reached the max level."
+                + "\n\nYou can now prestige and carry over back to level one with \"!prestige\"! "
+                + "\n\nYour prestige will show with your name. Level perks need to be unlocked again to use them. "
+                + "Prestiging is permanent. Only do so if you are ready.```");
     }
     
     private static void checkXPUser(IGuild guild, User user) {
@@ -57,8 +70,8 @@ public class LevelManager {
         builder.withTitle("__" + user.getName() + "__");
         builder.withDesc(user.getRank().getName());
         builder.appendField("Level", "`" + user.getLevel() + "`", true);
-        builder.appendField("XP", "`" + user.getXP() + "/"+ user.getXPForLevel() + "`", true);
-        builder.appendField("Progress", getProgress(user), false);
+        builder.appendField("XP", "`" + user.getXP() + "/" + user.getXPForLevel() + "`", true);
+        builder.appendField("Progress to Next Level", getProgress(user), false);
         
         return builder.build();
     }
