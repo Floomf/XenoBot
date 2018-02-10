@@ -3,6 +3,7 @@ package discord;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vdurmont.emoji.EmojiManager;
+import com.vdurmont.emoji.EmojiParser;
 import discord.objects.User;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
@@ -18,7 +19,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.util.EmbedBuilder;
 
 public class CommandHandler {
@@ -57,8 +57,7 @@ public class CommandHandler {
         IChannel channel = message.getChannel();     
 
         //seperate the contents of the message into an array of strings
-        String[] args = message.getContent().toLowerCase()
-                .trim().replaceAll("\\s\\s+", " ").split("\\s");
+        String[] args = message.getContent().trim().replaceAll("\\s\\s+", " ").split("\\s");
         
         boolean hasArgs = (args.length > 1);
         boolean isOwner = dUser.equals(guild.getOwner());
@@ -92,6 +91,7 @@ public class CommandHandler {
 
         switch (commandStr) {
 
+            case "commands":
             case "help":
                 if (isOwner) {
                     BotUtils.sendMessage(channel, "Owner Commands", 
@@ -99,19 +99,20 @@ public class CommandHandler {
                             + "\n!resetnames - Mass reset users' nicknames."
                             + "\n!flood      - Flood your connected voice channel."
                             + "\n!givexp     - Give XP to a specifed user.");
-                }               
-                BotUtils.sendMessage(channel, "User Commands", 
+                }              
+                BotUtils.sendMessage(channel, "General Commands", 
                         "!level   - View your or another user's level progress."
-                        + "\n!balance - View your or another user's balance."
                         + "\n!rng     - Generate a random number."
                         + "\n!flip    - Flip a coin."
                         + "\n!cat     - See a random cat."
                         + "\n!dadjoke - Read a random dad joke."
                         + "\n!coin    - View price and info on a cryptocurrency."
-                        + "\n!raffle  - Choose a random user."
-                        + "\n!emoji   - Customize an emoji in your name (Lvl 40+)."
-                        + "\n!color   - Set the color of your name (Lvl 70+)."
+                        + "\n!raffle  - Choose a random user."                       
                         + "\n!info    - View bot information.");
+                BotUtils.sendMessage(channel, "Perk Commands",
+                        "!emoji   - Customize an emoji in your name. (Lvl 40+)"
+                        + "\n!name    - Change your name. (Lvl 60+)"
+                        + "\n!color   - Set the color of your name. (Lvl 70+)");
                 return;
 
             case "color":
@@ -125,10 +126,10 @@ public class CommandHandler {
                     BotUtils.sendMessage(channel, "Available Choices", Arrays.toString(COLORS));
                     return;                       
                 }               
-                String color = args[1];              
+                String color = args[1].toLowerCase();              
                 //Combine args for colors like "light blue" 
                 if (args.length > 2 ) {
-                    color += " " + args[2];
+                    color += " " + args[2].toLowerCase();
                 }
                 
                 for (int i = 0; i < COLORS.length; i++) {
@@ -491,6 +492,30 @@ public class CommandHandler {
                 BotUtils.sendErrorMessage(channel, "Could not parse an emoji from input.");
                 return;
             
+            case "name":
+                if (!hasArgs) {
+                    BotUtils.sendUsageMessage(channel, "!name [name]"
+                            + "\n\nChange your name."
+                            + "\n(Requires Level 60+)");
+                    return;
+                }
+                
+                if (!(user.getLevel() >= 60)) {
+                    BotUtils.sendErrorMessage(channel, "You must be at least level 60 to change your name!");
+                    return;
+                }
+                String name = EmojiParser.removeAllEmojis(args[1]);
+                if (name.length() > 14) 
+                    name = name.substring(0, 13);
+                
+                if (!UserManager.databaseContainsName(name)) {
+                    user.setName(name);
+                    BotUtils.sendInfoMessage(channel, "Your name is now " + name + "!");
+                    return;
+                }                
+                BotUtils.sendErrorMessage(channel, "That name is already taken.");
+                return;              
+                
             case "coin":
                 if (!hasArgs) {
                     BotUtils.sendUsageMessage(channel, "!coin [name]"

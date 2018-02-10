@@ -3,7 +3,7 @@ package discord.objects;
 public class User {
     
     private final long id; //Discord long id
-    private final String name;
+    private String name;
     private int level;
     private int xp;
     private int xpforLevel;
@@ -13,7 +13,6 @@ public class User {
 
     public User() {
         this.id = 0;   
-        this.name = "";
     }
  
     public User(long id, String name, Rank rank) {
@@ -61,6 +60,10 @@ public class User {
     }
   
     //Mutators
+    
+    public void setName(String name) {
+        this.name = name;
+    }
     
     public void setRank(Rank rank) {
         this.rank = rank;

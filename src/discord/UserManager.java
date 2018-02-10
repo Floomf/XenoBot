@@ -119,6 +119,14 @@ public class UserManager {
         }
         return false;
     }
+    
+    public static boolean databaseContainsName(String name) {
+        for (User user : users) {
+            if (user.getName().toLowerCase().equals(name.toLowerCase()))
+                return true;
+        }
+         return false;
+    }
            
     //Methods for viewing/modifying user data
     
