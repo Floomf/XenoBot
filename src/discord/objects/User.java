@@ -7,21 +7,19 @@ public class User {
     private int level;
     private int xp;
     private int xpforLevel;
-    private int balance;
     private int emojicp;
     private Rank rank;
-
+    
     public User() {
         this.id = 0;   
     }
- 
+    
     public User(long id, String name, Rank rank) {
         this.id = id;
         this.name = name;
         this.rank = rank;
         level = 1;
         xp = 0;
-        balance = 100;
         emojicp = 0;
     }
     
@@ -46,10 +44,6 @@ public class User {
     public int getXPForLevel() {
         return xpforLevel;
     }
-    
-    public int getBalance() {
-        return balance;
-    }  
     
     public Rank getRank() {
         return rank;
@@ -79,11 +73,7 @@ public class User {
     
     public void addXP(int amount) {
         xp += amount;
-    }
-    
-    public void addBalance(int amount) {
-        balance += amount;
-    }
+    }    
     
     public void setEmoji(int codepoint) {
         emojicp = codepoint;

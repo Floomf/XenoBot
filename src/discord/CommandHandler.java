@@ -405,19 +405,7 @@ public class CommandHandler {
                 }
                 BotUtils.sendErrorMessage(channel, "Amount is not an integer between 1 and 300.");
                 return;
-                
-            case "balance":
-                if (hasArgs) {
-                    id = UserManager.getUserIDFromName(args[1]);
-                    if (id == -1L) {
-                        BotUtils.sendErrorMessage(channel, "Specified user was not found in the database.");
-                        return;
-                    }
-                }
-                BotUtils.sendMessage(channel, "Balance", "$" 
-                        + UserManager.getUserBalance(dUser.getLongID()));
-                return;
-                
+
             case "level":
                 if (hasArgs) {
                     id = UserManager.getUserIDFromName(args[1]);

@@ -162,13 +162,5 @@ public class UserManager {
     public static int getUserXPNeeded(long id) {
         return getUserFromID(id).getXPForLevel();
     }
-    
-    public static int getUserBalance(long id) {
-        return getUserFromID(id).getBalance();
-    }
-    
-    public static void addToUserBalance(long id, int amount) {
-        getUserFromID(id).addBalance(amount);
-    }
-      
+
 }
