@@ -504,12 +504,19 @@ public class CommandHandler {
                     BotUtils.sendErrorMessage(channel, "You must be at least level 60 to change your name!");
                     return;
                 }
-                String name = EmojiParser.removeAllEmojis(args[1]);
+                String name = args[1];
+                if (args.length > 2) {
+                    for (int i = 2; i <= args.length - 1; i++) {
+                        name += " " + args[i];
+                    }
+                }
+                name = EmojiParser.removeAllEmojis(name);
                 if (name.length() > 14) 
                     name = name.substring(0, 13);
                 
                 if (!UserManager.databaseContainsName(name)) {
                     user.setName(name);
+                    NameManager.formatNameOfUser(guild, user);
                     BotUtils.sendInfoMessage(channel, "Your name is now " + name + "!");
                     return;
                 }                
