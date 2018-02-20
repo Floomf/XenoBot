@@ -407,7 +407,9 @@ public class CommandHandler {
                 }
                 BotUtils.sendErrorMessage(channel, "Amount is not an integer between 1 and 300.");
                 return;
-
+            //TERRIBLE WAY TO DO THIS
+            case "stats":
+            case "xp":
             case "level":
                 if (hasArgs) {
                     id = UserManager.getUserIDFromName(args[1]);

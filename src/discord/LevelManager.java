@@ -80,6 +80,8 @@ public class LevelManager {
         builder.withTitle("__" + user.getName() + "__");
         builder.withDesc(user.getRank().getName());
         builder.appendField("Level", "`" + user.getLevel() + "`", true);
+        if (user.getPrestige() > 0) 
+            builder.appendField("Prestige", String.valueOf(user.getPrestige()), true);
         builder.appendField("XP", "`" + user.getXP() + "/" + user.getXPForLevel() + "`", true);
         builder.appendField("Progress to Next Level", getProgress(user), false);
         

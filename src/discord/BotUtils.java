@@ -11,8 +11,8 @@ import sx.blah.discord.util.RequestBuffer;
 public class BotUtils {  
   
     //hardcoded constants
-    public static final String VERSION = "2.9.3";
-    public static final String CHANGEDATE = "2/11/18";
+    public static final String VERSION = "2.10.1";
+    public static final String CHANGEDATE = "2/20/18";
     public static final String CMD_PREFIX = "!";
     public static final long REALM_ID = 98236427971592192L; //The Realm long id
     public static final int XP_MULTIPLIER = 1;
