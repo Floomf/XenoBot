@@ -26,7 +26,7 @@ public class NameManager {
             sb.append(" ").appendCodePoint(emojicp).append(" ");
         }
         if (prestige > 0) {
-            sb.append(" [P").append(prestige).append("]");
+            sb.append(" (").append(BotUtils.PRESTIGE_SYMBOLS[prestige - 1]).append(")");
         }
         return sb.toString();
     }

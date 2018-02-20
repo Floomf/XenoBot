@@ -74,14 +74,15 @@ public class LevelManager {
     }
     
     public static EmbedObject buildInfo(User user) {
-        EmbedBuilder builder = new EmbedBuilder();
-        
+        EmbedBuilder builder = new EmbedBuilder();       
         builder.withColor(0, 255, 127);
         builder.withTitle("__" + user.getName() + "__");
         builder.withDesc(user.getRank().getName());
         builder.appendField("Level", "`" + user.getLevel() + "`", true);
-        if (user.getPrestige() > 0) 
-            builder.appendField("Prestige", String.valueOf(user.getPrestige()), true);
+        int prestige = user.getPrestige();
+        if (prestige > 0) 
+            builder.appendField("Prestige", String.format("`%d%c`", 
+                    prestige, BotUtils.PRESTIGE_SYMBOLS[prestige - 1]), true);
         builder.appendField("XP", "`" + user.getXP() + "/" + user.getXPForLevel() + "`", true);
         builder.appendField("Progress to Next Level", getProgress(user), false);
         
@@ -101,6 +102,7 @@ public class LevelManager {
         }
         return builder.toString();
     }
+    
     /* Used for changing xp system  
     public static void fixUserLevels(IGuild guild, User user) {
         for (int i = 1; i < user.getLevel(); i++) {
