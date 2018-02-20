@@ -7,6 +7,7 @@ public class User {
     private int level;
     private int xp;
     private int xpforLevel;
+    private int prestige;
     private int emojicp;
     private Rank rank;
     
@@ -20,6 +21,7 @@ public class User {
         this.rank = rank;
         level = 1;
         xp = 0;
+        prestige = 0;
         emojicp = 0;
     }
     
@@ -43,6 +45,10 @@ public class User {
     
     public int getXPForLevel() {
         return xpforLevel;
+    }
+    
+    public int getPrestige() {
+        return prestige;
     }
     
     public Rank getRank() {
@@ -77,6 +83,13 @@ public class User {
     
     public void setEmoji(int codepoint) {
         emojicp = codepoint;
+    }
+    
+    public void prestige() {
+        prestige += 1;
+        level = 1;
+        xp = 0;
+        emojicp = 0;
     }
     
 }

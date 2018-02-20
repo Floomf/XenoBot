@@ -110,19 +110,21 @@ public class CommandHandler {
                         + "\n!raffle  - Choose a random user."                       
                         + "\n!info    - View bot information.");
                 BotUtils.sendMessage(channel, "Perk Commands",
-                        "!emoji   - Customize an emoji in your name. (Lvl 40+)"
+                        "!emoji   - Set an emoji in your name. (Lvl 40+)"
                         + "\n!name    - Change your name. (Lvl 60+)"
-                        + "\n!color   - Set the color of your name. (Lvl 70+)");
+                        + "\n!color   - Set the color of your name. (Lvl 70+ or Prestiged)");
                 return;
 
             case "color":
-                if (!(user.getLevel() >= 70)) {
-                    BotUtils.sendErrorMessage(channel, "You must be at least level 70 to set your name color!");
+                if (!(user.getLevel() >= 70 || user.getPrestige() > 0)) {
+                    BotUtils.sendErrorMessage(channel, 
+                            "You must be at least level 70 or prestiged to set your name color!");
                     return;
                 }
 
                 if (!hasArgs) {
-                    BotUtils.sendUsageMessage(channel, "!color [name]\n\nChanges the color of your name. (Level 70+)");
+                    BotUtils.sendUsageMessage(channel, 
+                            "!color [name]\n\nChanges the color of your name. (Level 70+ or Prestiged)");
                     BotUtils.sendMessage(channel, "Available Choices", Arrays.toString(COLORS));
                     return;                       
                 }               
@@ -553,7 +555,15 @@ public class CommandHandler {
                     BotUtils.sendErrorMessage(channel, "Specified coin was not found in the database.");
                 }
                 return;
-                                                            
+                
+            case "prestige":
+                if (!(user.getLevel() == BotUtils.MAX_LEVEL)) {
+                    BotUtils.sendErrorMessage(channel, "You must be level 80 to prestige.");
+                    return;
+                }
+                LevelManager.prestigeUser(channel, user);
+                return;
+                                                                           
             default:
                 BotUtils.sendErrorMessage(channel, "Unknown command. Type \"!help\" for available commands.");
         }

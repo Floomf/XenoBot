@@ -46,9 +46,19 @@ public class LevelManager {
         user.setXPForLevel(0);
         user.addXP(-user.getXP());
         BotUtils.sendMessage(channel, "```Congratulations! You have reached the max level."
-                + "\n\nYou can now prestige and carry over back to level one with \"!prestige\"! "
-                + "\n\nYour prestige will show with your name. Level perks need to be unlocked again to use them. "
-                + "Prestiging is permanent. Only do so if you are ready.```");
+                + "\n\nYou can now prestige and carry over back to level one with \"!prestige\"!"
+                + "\n\nYour prestige will show with your name. "
+                + "All level perks besides a custom name color need to be earned again."
+                + "\n\nPrestiging is PERMANENT. Only do so if you are ready.```");
+    }
+    
+    public static void prestigeUser(IChannel channel, User user) {
+        user.prestige();
+        setUserXPForLevel(user);
+        IGuild guild = channel.getGuild();
+        NameManager.formatNameOfUser(guild, user);
+        RankManager.setRankOfUser(guild, user);
+        BotUtils.sendMessage(channel, "@here```" + user.getName() + " has prestiged! Praise unto thee.```");
     }
     
     private static void checkXPUser(IGuild guild, User user) {

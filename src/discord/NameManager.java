@@ -7,7 +7,7 @@ import sx.blah.discord.handle.obj.IUser;
 public class NameManager {
     
     public static void formatNameOfUser(IGuild guild, User user) {        
-        String name = buildName(user.getName(), user.getEmoji());
+        String name = buildName(user.getName(), user.getEmoji(), user.getPrestige());
         IUser dUser = guild.getUserByID(user.getID());
         String nick = dUser.getNicknameForGuild(guild);
         if (nick == null || !nick.equals(name)) {
@@ -19,11 +19,14 @@ public class NameManager {
         }
     }
     
-    private static String buildName(String name, int emojicp) {
+    private static String buildName(String name, int emojicp, int prestige) {
         StringBuilder sb = new StringBuilder();
-        sb.append(name).append(" ");
+        sb.append(name);
         if (emojicp > 0) {
-            sb.appendCodePoint(emojicp).append(" ");
+            sb.append(" ").appendCodePoint(emojicp).append(" ");
+        }
+        if (prestige > 0) {
+            sb.append(" [P").append(prestige).append("]");
         }
         return sb.toString();
     }
