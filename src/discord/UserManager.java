@@ -140,7 +140,7 @@ public class UserManager {
     
     public static long getUserIDFromName(String name) {
         for (User user : users) {
-            if (user.getName().toLowerCase().equals(name)) {
+            if (user.getName().toLowerCase().equals(name.toLowerCase())) {
                 return user.getID();
             }
         }

@@ -46,6 +46,13 @@ public class CommandHandler {
         users.removeIf(user -> user.isBot());
         return users;
     }
+    
+    private static String combineArgs(int index, String[] args) {       
+        for (int i = index + 1; i < args.length; i++) {
+             args[index] += " " + args[i];
+        }
+        return args[index];
+    }
 
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
@@ -412,7 +419,8 @@ public class CommandHandler {
             case "xp":
             case "level":
                 if (hasArgs) {
-                    id = UserManager.getUserIDFromName(args[1]);
+                    String name = combineArgs(1, args);
+                    id = UserManager.getUserIDFromName(name);
                     if (id == -1L) {
                         BotUtils.sendErrorMessage(channel, "Specified user was not found in the database.");
                         return;
@@ -496,15 +504,10 @@ public class CommandHandler {
                     BotUtils.sendErrorMessage(channel, "You must be at least level 60 to change your name!");
                     return;
                 }
-                String name = args[1];
-                if (args.length > 2) {
-                    for (int i = 2; i <= args.length - 1; i++) {
-                        name += " " + args[i];
-                    }
-                }
+                String name = combineArgs(1, args);
                 name = EmojiParser.removeAllEmojis(name);
-                if (name.length() > 14) 
-                    name = name.substring(0, 13);
+                if (name.length() > 16) 
+                    name = name.substring(0, 15);
                 
                 if (!UserManager.databaseContainsName(name)) {
                     user.setName(name);
