@@ -262,6 +262,7 @@ public class CommandHandler {
                         raffleUsers.get((int) (Math.random() * raffleUsers.size())).getDisplayName(guild));
                 return;
 
+            /*DOESNT WORK ANYMORE WITH NAMING SYSTEM
             case "setnames":
                 //Make sure the command can only be run by the server owner
                 if (!isOwner) {
@@ -372,6 +373,7 @@ public class CommandHandler {
                 }
 
                 return;
+            */
             
             //this a terrible fucking command and needs to go or be rewritten
             case "flood":
@@ -434,8 +436,7 @@ public class CommandHandler {
                 if (!isOwner) {
                     BotUtils.sendErrorMessage(channel, "You are not this server's owner.");
                     return;
-                }
-                
+                }      
                 if (args.length < 3) {
                     BotUtils.sendUsageMessage(channel, 
                             "!givexp [userID] [amount]"
@@ -447,7 +448,28 @@ public class CommandHandler {
                 LevelManager.addUserXPFromID(guild, Long.parseLong(args[1]), Integer.parseInt(args[2]));
                 BotUtils.sendMessage(channel, "Success", "Gave " + args[2] 
                         + "xp to " + UserManager.getUserName(Long.parseLong(args[1])));
-                return;     
+                return;
+                
+            case "setname": 
+                if (!isOwner) {
+                    BotUtils.sendErrorMessage(channel, "You are not this server's owner.");
+                    return;
+                }
+                if (args.length < 3) {
+                    BotUtils.sendUsageMessage(channel, 
+                            "!setname [userID] [name]"
+                            + "\n\nChange the name of a user in the database."
+                            + "\n\nuserID - The user's long ID.");
+                    return;
+                }
+                User userToChange = UserManager.getUserFromID(Long.parseLong(args[1]));
+                if (userToChange == null) {
+                    BotUtils.sendErrorMessage(channel, "Specified ID was not found in the database.");
+                    return;
+                }
+                NameManager.setNameOfUser(guild, userToChange, args[2]);
+                BotUtils.sendMessage(channel, "Success", "Name set to " + args[2]);
+                return;
                 
             case "savedata":
                 if (!isOwner) {
@@ -510,8 +532,7 @@ public class CommandHandler {
                     name = name.substring(0, 15);
                 
                 if (!UserManager.databaseContainsName(name)) {
-                    user.setName(name);
-                    NameManager.formatNameOfUser(guild, user);
+                    NameManager.setNameOfUser(guild, user, name);
                     BotUtils.sendInfoMessage(channel, "Your name is now " + name + "!");
                     return;
                 }                

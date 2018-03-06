@@ -18,6 +18,11 @@ public class NameManager {
             BotUtils.setNickname(guild, dUser, name);
         }
     }
+     
+    public static void setNameOfUser(IGuild guild, User user, String name) {
+        user.setName(name);
+        formatNameOfUser(guild, user);        
+    }
     
     private static String buildName(String name, int emojicp, int prestige) {
         StringBuilder sb = new StringBuilder();
