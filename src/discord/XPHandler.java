@@ -22,7 +22,7 @@ public class XPHandler {
                checkUsers(guild);
             }
         };
-        scheduler.scheduleAtFixedRate(pinger, 0, 4, TimeUnit.MINUTES);
+        scheduler.scheduleAtFixedRate(pinger, 4, 4, TimeUnit.MINUTES);
     }
 
     private static void checkUsers(IGuild guild) {
