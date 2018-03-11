@@ -1,5 +1,7 @@
 package discord;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -20,7 +22,7 @@ public class XPHandler {
                checkUsers(guild);
             }
         };
-        scheduler.scheduleAtFixedRate(pinger, 4, 4, TimeUnit.MINUTES);
+        scheduler.scheduleAtFixedRate(pinger, 0, 4, TimeUnit.MINUTES);
     }
 
     private static void checkUsers(IGuild guild) {
@@ -42,10 +44,13 @@ public class XPHandler {
                     names.add(name);
                     System.out.println("Gave " + xp + "xp to " + name);                  
                 }
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mma");
                 BotUtils.sendMessage(guild.getChannelByID(250084663618568192L), 
-                        String.format("```py\n+%dXP %s```", xp, names.toString()));
+                        String.format("```py\n+%dXP (%s)\n%s```", xp, 
+                                LocalDateTime.now().format(formatter),
+                                names.toString()));
                 UserManager.saveDatabase();
-            }          
+            }
         }
     }
     
