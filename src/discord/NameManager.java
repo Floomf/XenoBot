@@ -10,7 +10,8 @@ public class NameManager {
         String name = buildName(user.getName(), user.getEmoji(), user.getPrestige());
         IUser dUser = guild.getUserByID(user.getID());
         String nick = dUser.getNicknameForGuild(guild);
-        if (nick != null && !nick.equals(name)) {
+        if ((nick == null && !dUser.getName().equals(name)) 
+                || (nick != null && !nick.equals(name))) {
             if (guild.getOwner().getLongID() == user.getID()) {
                 System.out.println("Need to set owner's name to " + name);
                 return;
@@ -31,7 +32,7 @@ public class NameManager {
             sb.append(" ").appendCodePoint(emojicp);
         }
         if (prestige > 0) {
-            sb.append(" ").append(BotUtils.PRESTIGE_SYMBOLS[prestige - 1]).append(" ");
+            sb.append(" ").append(BotUtils.PRESTIGE_SYMBOLS[prestige - 1]);
         }
         return sb.toString();
     }
