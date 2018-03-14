@@ -44,8 +44,8 @@ public class XPHandler {
                     names.add(name);
                     System.out.println("Gave " + xp + "xp to " + name);                  
                 }
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mma");
-                BotUtils.sendMessage(guild.getChannelByID(250084663618568192L), 
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE hh:mma");
+                BotUtils.sendMessage(guild.getChannelsByName("log").get(0), 
                         String.format("```py\n+%dXP (%s)\n%s```", xp, 
                                 LocalDateTime.now().format(formatter),
                                 names.toString()));
