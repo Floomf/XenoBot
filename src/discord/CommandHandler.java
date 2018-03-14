@@ -419,6 +419,7 @@ public class CommandHandler {
             //TERRIBLE WAY TO DO THIS
             case "stats":
             case "xp":
+            case "info":
             case "level":
                 if (hasArgs) {
                     String name = combineArgs(1, args);
@@ -479,16 +480,7 @@ public class CommandHandler {
                 UserManager.saveDatabase();
                 BotUtils.sendInfoMessage(channel, "Database saved.");
                 return;
-                
-            case "info":
-                BotUtils.sendInfoMessage(channel,
-                        "Zeno Bot " + BotUtils.VERSION + " - Last Updated " 
-                                + BotUtils.CHANGEDATE
-                                + "\nCoded by Frozen"
-                                + "\nMessage me for bot support."
-                                + "\nFrozen#9260");
-                return;
-                
+        
             case "emoji":
                 if (!hasArgs) {
                     BotUtils.sendUsageMessage(channel, "!emoji [emoji]"

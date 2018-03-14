@@ -4,8 +4,10 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.guild.member.UserJoinEvent;
+import sx.blah.discord.handle.obj.ActivityType;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.StatusType;
 
 public class EventsHandler {
     
@@ -14,8 +16,8 @@ public class EventsHandler {
         IDiscordClient client = event.getClient();
         IGuild guild = client.getGuildByID(BotUtils.REALM_ID);
        
-        client.online("Type !help");
-               
+        client.changePresence(StatusType.ONLINE, ActivityType.WATCHING, BotUtils.VERSION);
+  
         UserManager.createDatabase(guild);       
         XPHandler.startChecker(guild);      
     }
