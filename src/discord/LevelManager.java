@@ -16,7 +16,6 @@ public class LevelManager {
     
     //this needs to be a lot cleaner, fix it sooner
     private static void changeLevelUser(IGuild guild, User user, boolean levelUp) {
-        IChannel botsChannel = guild.getChannelByID(250084663618568192L);
         int amount = (levelUp) ? 1 : -1;
         
         if (levelUp) {          
@@ -30,14 +29,15 @@ public class LevelManager {
             user.addXP(user.getXPForLevel() + user.getXP()); //subtract from the max
         }
         
-        NameManager.formatNameOfUser(guild, user);                     
-        BotUtils.sendMessage(botsChannel, guild.getUserByID(user.getID()).mention() 
-                + "```Level up! You are now level " + user.getLevel() + ".```"); 
+        NameManager.formatNameOfUser(guild, user);         
+        int level = user.getLevel();
+        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), String.format("%s```http\nLevel up! %d → %d```", 
+                guild.getUserByID(user.getID()).mention(), level - 1, level)); 
         
         RankManager.setRankOfUser(guild, user);
         
         if (user.getLevel() == BotUtils.MAX_LEVEL) 
-            maxOutUser(botsChannel, user);
+            maxOutUser(guild.getChannelByID(250084663618568192L), user);
         else 
             checkXPUser(guild, user);
     }
