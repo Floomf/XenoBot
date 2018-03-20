@@ -33,11 +33,11 @@ public class XPHandler {
             users.removeIf(user -> user.isBot() 
                     || user.getVoiceStateForGuild(guild).isSelfDeafened() 
                     || user.getVoiceStateForGuild(guild).isSelfMuted()
-                    || user.getVoiceStateForGuild(guild).isMuted()
-                    || UserManager.getUserLevel(user.getLongID()) == BotUtils.MAX_LEVEL); //if level 80
-            if (users.size() >= 2) {
+                    || user.getVoiceStateForGuild(guild).isMuted());
+            if (users.size() >= 2) {                
                 List<String> names = new ArrayList<>();
                 int xp = 5 * users.size() + 10; // min 300/hr
+                users.removeIf(user -> UserManager.getUserLevel(user.getLongID()) == BotUtils.MAX_LEVEL);
                 for (IUser user : users) {  
                     String name = UserManager.getUserFromID(user.getLongID()).getName();
                     LevelManager.addUserXPFromID(guild, user.getLongID(), xp);
