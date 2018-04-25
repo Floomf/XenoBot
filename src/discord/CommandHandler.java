@@ -102,8 +102,7 @@ public class CommandHandler {
             case "help":
                 if (isOwner) {
                     BotUtils.sendMessage(channel, "Owner Commands", 
-                            "!setnames   - Mass change users' nicknames."
-                            + "\n!resetnames - Mass reset users' nicknames."
+                            "!setname   - Change the name of a user in the database."
                             + "\n!flood      - Flood your connected voice channel."
                             + "\n!givexp     - Give XP to a specifed user.");
                 }              
@@ -117,21 +116,22 @@ public class CommandHandler {
                         + "\n!raffle  - Choose a random user."                       
                         + "\n!info    - View bot information.");
                 BotUtils.sendMessage(channel, "Perk Commands",
-                        "!emoji   - Set an emoji in your name. (Lvl 40+)"
-                        + "\n!name    - Change your name. (Lvl 60+)"
-                        + "\n!color   - Set the color of your name. (Lvl 70+ or Prestiged)");
+                        "!emoji    - Set an emoji in your name. (Lvl 40+)"
+                        + "\n!name     - Change your name. (Lvl 60+)"
+                        + "\n!prestige - Reset"
+                        + "\n!color    - Set the color of your name. (Prestiged)");
                 return;
 
             case "color":
-                if (!(user.getLevel() >= 70 || user.getPrestige() > 0)) {
+                if (!(user.getPrestige() > 0)) {
                     BotUtils.sendErrorMessage(channel, 
-                            "You must be at least level 70 or prestiged to set your name color!");
+                            "You must be prestiged to set your name color!");
                     return;
                 }
 
                 if (!hasArgs) {
                     BotUtils.sendUsageMessage(channel, 
-                            "!color [name]\n\nChanges the color of your name. (Level 70+ or Prestiged)");
+                            "!color [name]\n\nChanges the color of your name. (Prestiged)");
                     BotUtils.sendMessage(channel, "Available Choices", Arrays.toString(COLORS));
                     return;                       
                 }               
@@ -148,7 +148,7 @@ public class CommandHandler {
                         roles.add(guild.getRolesByName(COLORS[i]).get(0));       
                         BotUtils.setRoles(guild, dUser, roles.toArray(new IRole[roles.size()]));
                         BotUtils.sendInfoMessage(channel, 
-                                String.format("Your name is now %s!", color));
+                                String.format("Your name is now the color %s!", color));
                         return;
                     }
                 }
@@ -420,6 +420,7 @@ public class CommandHandler {
             case "stats":
             case "xp":
             case "info":
+            case "lvl":
             case "level":
                 if (hasArgs) {
                     String name = combineArgs(1, args);
