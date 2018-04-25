@@ -48,7 +48,7 @@ public class RankManager {
             guildRoles.add(guild.getRoleByID(user.getRank().getID()));
             BotUtils.setRoles(guild, dUser, guildRoles.toArray(new IRole[guildRoles.size()]));
             System.out.println("Set role of " + user.getName() + " to " + user.getRank().getName());
-            if (!rankNeeded.getName().equals("Guest")) {
+            if (!rankNeeded.getName().equals("Peasant")) { //hardcoded
                 BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
                     "```Congratulations! You are now (a/an) " + rankNeeded.getName() + ".```");
             }

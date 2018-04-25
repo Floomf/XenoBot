@@ -70,7 +70,7 @@ public class LevelManager {
     }
     
     public static void setUserXPForLevel(User user) {
-        user.setXPForLevel(user.getLevel() * 30 + 70);
+        user.setXPForLevel(user.getLevel() * 24 + 56);
     }
     
     public static EmbedObject buildInfo(User user) {
@@ -102,13 +102,5 @@ public class LevelManager {
         }
         return builder.toString();
     }
-    
-    /* Used for changing xp system  
-    public static void fixUserLevels(IGuild guild, User user) {
-        for (int i = 1; i < user.getLevel(); i++) {
-            user.addXP(i * 10 + 15);
-            checkXPUser(guild, user);    
-        }
-    }*/
-   
+      
 }

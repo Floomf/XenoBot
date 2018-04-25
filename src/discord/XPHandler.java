@@ -22,7 +22,7 @@ public class XPHandler {
                checkUsers(guild);
             }
         };
-        scheduler.scheduleAtFixedRate(pinger, 4, 4, TimeUnit.MINUTES);
+        scheduler.scheduleAtFixedRate(pinger, 2, 2, TimeUnit.MINUTES);
     }
 
     private static void checkUsers(IGuild guild) {
@@ -36,7 +36,7 @@ public class XPHandler {
                     || user.getVoiceStateForGuild(guild).isMuted());
             if (users.size() >= 2) {                
                 List<String> names = new ArrayList<>();
-                int xp = 5 * users.size() + 10; // min 300/hr
+                int xp = 2 * users.size() + 4; // min 240/hr
                 users.removeIf(user -> UserManager.getUserLevel(user.getLongID()) == BotUtils.MAX_LEVEL);
                 for (IUser user : users) {  
                     String name = UserManager.getUserFromID(user.getLongID()).getName();

@@ -85,7 +85,7 @@ public class User {
         emojicp = codepoint;
     }
     
-    public void prestige() {
+    public void prestige() { //move this outside class at some point?
         prestige += 1;
         level = 1;
         xp = 0;
