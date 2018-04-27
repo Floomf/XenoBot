@@ -76,7 +76,8 @@ public class UserManager {
         System.out.println("Checking possible new users to remove from the database...");   
         
         for (User user : new ArrayList<>(users)) {
-            if (guild.getUserByID(user.getID()) == null) {
+            //if id is null they no cant be found on the guild
+            if (user.getLevel() < 10 && guild.getUserByID(user.getID()) == null) {
                 users.remove(user);
                 System.out.println("Removed " + user.getName() + " from the database.");
             }
@@ -109,6 +110,7 @@ public class UserManager {
         RankManager.setRankOfUser(guild, user);
         NameManager.formatNameOfUser(guild, user);
         System.out.println("Added " + user.getName() + " to the database.");
+        saveDatabase();
     }
     
     private static boolean databaseContainsUser(IUser dUser) {
