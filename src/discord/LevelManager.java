@@ -44,7 +44,7 @@ public class LevelManager {
     
     private static void maxOutUser(IChannel channel, User user) {
         user.setXPForLevel(0);
-        user.addXP(-user.getXP());
+        user.setXP(0);
         BotUtils.sendMessage(channel, "```Congratulations! You have reached the max level. "
                 + "You will no longer earn any xp until prestiged."
                 + "\n\nYou can now prestige and carry over back to level one with \"!prestige\"!"
@@ -53,7 +53,10 @@ public class LevelManager {
     }
     
     public static void prestigeUser(IChannel channel, User user) {
-        user.prestige();
+        user.addPrestige();
+        user.setLevel(1);
+        user.setXP(0);
+        user.setEmoji(0);
         setUserXPForLevel(user);
         IGuild guild = channel.getGuild();
         NameManager.formatNameOfUser(guild, user);

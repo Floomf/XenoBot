@@ -73,6 +73,18 @@ public class User {
         this.xpforLevel = xpforLevel;
     }
     
+    public void setXP(int xp) {
+        this.xp = xp;
+    }
+    
+    public void setLevel(int level) {
+        this.level = level;
+    }
+    
+     public void setEmoji(int codepoint) {
+        emojicp = codepoint;
+    }
+     
     public void addLevels(int amount) {
         level += amount;         
     }
@@ -81,15 +93,7 @@ public class User {
         xp += amount;
     }    
     
-    public void setEmoji(int codepoint) {
-        emojicp = codepoint;
+    public void addPrestige() {
+        this.prestige++;
     }
-    
-    public void prestige() { //move this outside class at some point?
-        prestige += 1;
-        level = 1;
-        xp = 0;
-        emojicp = 0;
-    }
-    
 }
