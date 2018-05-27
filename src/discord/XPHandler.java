@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
@@ -14,11 +15,13 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
 public class XPHandler {
 
     private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[EEEE hh:mma]");
 
     public static void startChecker(IGuild guild) {
         final Runnable pinger = new Runnable() {
             public void run() {
-               System.out.println("Checking users to add xp");
+               System.out.println(String.format("[%s] Checking users to add xp",
+                       LocalDateTime.now().format(formatter)));
                checkVoiceChannels(guild);
             }
         };
@@ -29,18 +32,18 @@ public class XPHandler {
         List<IVoiceChannel> channels = guild.getVoiceChannels();
         channels.removeIf(channel -> channel.equals(guild.getAFKChannel()));
         for (IVoiceChannel channel : channels) {
-            checkUsers(channel.getConnectedUsers(), guild);
+            checkUsers(channel.getConnectedUsers(), channel, guild);
         }
     }
     
-    private static void checkUsers(List<IUser> users, IGuild guild) {
+    private static void checkUsers(List<IUser> users, IChannel channel, IGuild guild) {
         users.removeIf(user -> user.isBot()
                 || user.getVoiceStateForGuild(guild).isSelfDeafened()
                 || user.getVoiceStateForGuild(guild).isSelfMuted()
                 || user.getVoiceStateForGuild(guild).isMuted());
         if (users.size() >= 2) {
             List<String> names = new ArrayList<>();
-            int xp = 2 * users.size() + 6; // min 300/hr
+            int xp = 2 * users.size() + 8; // min 360/hr
             users.removeIf(user -> UserManager.getUserLevel(user.getLongID()) == BotUtils.MAX_LEVEL);
             for (IUser user : users) {
                 String name = UserManager.getUserFromID(user.getLongID()).getName();
@@ -48,10 +51,9 @@ public class XPHandler {
                 names.add(name);
                 System.out.println("Gave " + xp + "xp to " + name);
             }
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE hh:mma");
             BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                    String.format("```py\n+%dXP (%s)\n%s```", xp,
-                            LocalDateTime.now().format(formatter),
+                    String.format("```py\n+%dXP in \"%s\" (%s)\n%s```", xp, 
+                            channel.getName(), LocalDateTime.now().format(formatter), 
                             names.toString()));
             UserManager.saveDatabase();
         }
