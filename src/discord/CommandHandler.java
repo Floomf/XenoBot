@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import sx.blah.discord.util.EmbedBuilder;
 
+//this entire thing is a fucking mess
+//needs to change to multiple classes/annotations for commands?
 public class CommandHandler {
 
     public enum PoolType {
@@ -78,18 +80,18 @@ public class CommandHandler {
             return;
         }
 
-        //Make sure the guild has a bots channel
-        if (guild.getChannelsByName("bots").isEmpty()) {
+        //Make sure the guild has a commands channel
+        if (guild.getChannelsByName("commands").isEmpty()) {
             BotUtils.sendInfoMessage(channel,
-                    "Please create a new text channel named \"#bots\"!"
+                    "Please create a new text channel named \"#commands\"!"
                     + " I will only function properly there. Beep boop.");
             return;
         }
         
-        //Make sure command is in the bots channel
-        if (!channel.getName().equals("bots")) {
+        //Make sure command is in the commands channel
+        if (!channel.getName().equals("commands")) {
             BotUtils.sendInfoMessage(channel,
-                    "I only respond to commands within the \"#bots\" channel."
+                    "I only respond to commands within the \"#commands\" channel."
                     + " Please type your command again there.");
             return;
         }

@@ -15,7 +15,7 @@ public class NameManager {
             if (guild.getOwner().getLongID() == user.getID()) {
                 System.out.println("Need to set owner's name to " + name);
                 return;
-            }     
+            }
             BotUtils.setNickname(guild, dUser, name);
         }
     }

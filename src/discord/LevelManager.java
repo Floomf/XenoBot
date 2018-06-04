@@ -20,7 +20,7 @@ public class LevelManager {
         
         if (levelUp) {          
             user.addXP(-user.getXPForLevel()); //carry over xp to next level
-        }       
+        }  
         
         user.addLevels(amount);
         setUserXPForLevel(user);     
@@ -37,7 +37,7 @@ public class LevelManager {
         RankManager.setRankOfUser(guild, user);
         
         if (user.getLevel() == BotUtils.MAX_LEVEL) 
-            maxOutUser(guild.getChannelByID(250084663618568192L), user);
+            maxOutUser(guild.getChannelsByName("commmands").get(0), user);
         else 
             checkXPUser(guild, user);
     }
@@ -45,7 +45,7 @@ public class LevelManager {
     private static void maxOutUser(IChannel channel, User user) {
         user.setXPForLevel(0);
         user.setXP(0);
-        BotUtils.sendMessage(channel, "```Congratulations! You have reached the max level. "
+        BotUtils.sendMessage(channel, "%s```http\nCongratulations! You have reached the max level. "
                 + "You will no longer earn any xp until prestiged."
                 + "\n\nYou can now prestige and carry over back to level one with \"!prestige\"!"
                 + "\n\nAll level perks will be lost, but you will gain the ability to change your name color."
