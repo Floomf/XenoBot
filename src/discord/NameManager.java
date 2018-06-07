@@ -27,12 +27,12 @@ public class NameManager {
     
     private static String buildName(String name, int emojicp, int prestige) {
         StringBuilder sb = new StringBuilder();
+        if (prestige > 0) {
+            sb.append(BotUtils.PRESTIGE_SYMBOLS[prestige - 1]).append(" ");
+        }
         sb.append(name);
         if (emojicp > 0) {
             sb.append(" ").appendCodePoint(emojicp);
-        }
-        if (prestige > 0) {
-            sb.append(" ").append(BotUtils.PRESTIGE_SYMBOLS[prestige - 1]);
         }
         return sb.toString();
     }
