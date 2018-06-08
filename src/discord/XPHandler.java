@@ -43,7 +43,7 @@ public class XPHandler {
                 || user.getVoiceStateForGuild(guild).isMuted());
         if (users.size() >= 2) {
             List<String> names = new ArrayList<>();
-            int xp = 4 * users.size() + 12; // min 600/hr
+            int xp = 1 * users.size() + 13; // min 450/hr
             users.removeIf(user -> UserManager.getUserLevel(user.getLongID()) == BotUtils.MAX_LEVEL);
             for (IUser user : users) {
                 String name = UserManager.getUserFromID(user.getLongID()).getName();

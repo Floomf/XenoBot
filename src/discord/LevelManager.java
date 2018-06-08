@@ -31,13 +31,14 @@ public class LevelManager {
         
         NameManager.formatNameOfUser(guild, user);         
         int level = user.getLevel();
+        System.out.println(user.getName() + " is now level " + level);
         BotUtils.sendMessage(guild.getChannelsByName("log").get(0), String.format("%s```http\nLevel up! %d → %d```", 
                 guild.getUserByID(user.getID()).mention(), level - 1, level)); 
         
         RankManager.setRankOfUser(guild, user);
         
         if (user.getLevel() == BotUtils.MAX_LEVEL) 
-            maxOutUser(guild.getChannelsByName("commmands").get(0), user);
+            maxOutUser(guild.getChannelsByName("log").get(0), user);
         else 
             checkXPUser(guild, user);
     }
@@ -45,7 +46,7 @@ public class LevelManager {
     private static void maxOutUser(IChannel channel, User user) {
         user.setXPForLevel(0);
         user.setXP(0);
-        BotUtils.sendMessage(channel, "%s```http\nCongratulations! You have reached the max level. "
+        BotUtils.sendMessage(channel, "```http\nCongratulations! You have reached the max level. "
                 + "You will no longer earn any xp until prestiged."
                 + "\n\nYou can now prestige and carry over back to level one with \"!prestige\"!"
                 + "\n\nAll level perks will be lost, but you will gain the ability to change your name color."
@@ -64,7 +65,7 @@ public class LevelManager {
         BotUtils.sendMessage(channel, "@here```" + user.getName() + " has prestiged! Praise unto thee.```");
     }
     
-    private static void checkXPUser(IGuild guild, User user) {
+    public static void checkXPUser(IGuild guild, User user) {
         int xp = user.getXP();
         if (xp >= user.getXPForLevel())
             changeLevelUser(guild, user, true);
@@ -73,7 +74,7 @@ public class LevelManager {
     }
     
     public static void setUserXPForLevel(User user) {
-        user.setXPForLevel(user.getLevel() * 24 + 56);
+        user.setXPForLevel(user.getLevel() * 10 + 50);       
     }
     
     public static EmbedObject buildInfo(User user) {
