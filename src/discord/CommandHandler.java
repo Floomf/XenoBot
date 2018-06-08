@@ -115,12 +115,11 @@ public class CommandHandler {
                         + "\n!cat     - See a random cat."
                         + "\n!dadjoke - Read a random dad joke."
                         + "\n!coin    - View price and info on a cryptocurrency."
-                        + "\n!raffle  - Choose a random user."                       
-                        + "\n!info    - View bot information.");
+                        + "\n!raffle  - Choose a random user.");
                 BotUtils.sendMessage(channel, "Perk Commands",
                         "!emoji    - Set an emoji in your name. (Lvl 40+)"
                         + "\n!name     - Change your name. (Lvl 60+)"
-                        + "\n!prestige - Reset"
+                        + "\n!prestige - Carry over to level one."
                         + "\n!color    - Set the color of your name. (Prestiged)");
                 return;
 

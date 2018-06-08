@@ -65,7 +65,6 @@ public class UserManager {
     
     public static void validateUsers(IGuild guild) {
         for (User user : users) {
-            LevelManager.checkXPUser(guild, user);
             NameManager.formatNameOfUser(guild, user);
             RankManager.setRankOfUser(guild, user);
         }
