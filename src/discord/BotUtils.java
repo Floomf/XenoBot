@@ -13,7 +13,7 @@ import sx.blah.discord.util.RequestBuffer;
 public class BotUtils {  
   
     //hardcoded constants
-    public static final String VERSION = "2.14.1";
+    public static final String VERSION = "2.14.2";
     public static final String CMD_PREFIX = "!";
     //todo remove hardcoded id
     public static final long REALM_ID = 98236427971592192L; //The Realm long id

@@ -431,7 +431,7 @@ public class CommandHandler {
                         return;
                     }
                 }   
-                BotUtils.sendEmbedMessage(channel, LevelManager.buildInfo(UserManager.getUserFromID(id)));
+                BotUtils.sendEmbedMessage(channel, LevelManager.buildInfo(UserManager.getUserFromID(id), dUser));
                 return;
 
             //todo better argument checking

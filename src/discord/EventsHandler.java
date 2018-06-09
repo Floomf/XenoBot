@@ -23,7 +23,7 @@ public class EventsHandler {
     }
     
     @EventSubscriber
-    //Add user to database when they join The Realm
+    //Add user to database when they join the server
     public void onUserJoinEvent(UserJoinEvent event) {
        IGuild guild = event.getGuild();
        IUser user = event.getUser();

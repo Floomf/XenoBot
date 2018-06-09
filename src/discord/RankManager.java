@@ -2,6 +2,7 @@ package discord;
 
 import discord.objects.Rank;
 import discord.objects.User;
+import java.awt.Color;
 import java.util.List;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -50,7 +51,8 @@ public class RankManager {
             System.out.println("Set role of " + user.getName() + " to " + user.getRank().getName());
             if (!rankNeeded.equals(RANKS[0])) {
                 BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                    "```Congratulations! You are now (a/an) " + rankNeeded.getName() + ".```");
+                    "Rank up!", "You have been promoted to (a/an) **" + rankNeeded.getName() + "**.", 
+                    Color.PINK);
             }
         }
     }

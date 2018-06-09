@@ -1,9 +1,11 @@
 package discord;
 
 import discord.objects.User;
+import java.awt.Color;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
 public class LevelManager {
@@ -32,8 +34,8 @@ public class LevelManager {
         NameManager.formatNameOfUser(guild, user);         
         int level = user.getLevel();
         System.out.println(user.getName() + " is now level " + level);
-        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), String.format("%s```http\nLevel up! %d → %d```", 
-                guild.getUserByID(user.getID()).mention(), level - 1, level)); 
+        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), guild.getUserByID(user.getID()).mention(),
+                String.format("Level up! **%d** → **%d**", level - 1, level), Color.ORANGE); 
         
         RankManager.setRankOfUser(guild, user);
         
@@ -77,10 +79,11 @@ public class LevelManager {
         user.setXPForLevel(user.getLevel() * 10 + 50);       
     }
     
-    public static EmbedObject buildInfo(User user) {
+    public static EmbedObject buildInfo(User user, IUser dUser) {
         EmbedBuilder builder = new EmbedBuilder();       
-        builder.withColor(0, 255, 127);
-        builder.withTitle("__" + user.getName() + "__");
+        builder.withColor(Color.CYAN);
+        builder.withAuthorIcon(dUser.getAvatarURL());
+        builder.withAuthorName(user.getName());
         builder.withDesc(user.getRank().getName());
         builder.appendField("Level", "`" + user.getLevel() + "`", true);
         int prestige = user.getPrestige();
