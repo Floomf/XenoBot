@@ -13,7 +13,7 @@ import sx.blah.discord.util.RequestBuffer;
 public class BotUtils {  
   
     //hardcoded constants
-    public static final String VERSION = "2.14.0";
+    public static final String VERSION = "2.14.1";
     public static final String CMD_PREFIX = "!";
     //todo remove hardcoded id
     public static final long REALM_ID = 98236427971592192L; //The Realm long id
@@ -24,7 +24,7 @@ public class BotUtils {
     private static EmbedObject buildMessage(String title, String message, Color color) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.withColor(color);
-        builder.withTitle("__**" + title + "**__");
+        if (title.trim().length() > 0) builder.withTitle(title);
         builder.withDesc(message);
         return builder.build();
     }
@@ -39,12 +39,12 @@ public class BotUtils {
         }).get(); //.get() makes sure they send in order cause async??
     }
     
-    public static void sendMessage(IChannel channel, String title, String message) {
-        sendMessage(channel, title, message, Color.BLACK);
+    public static void sendMessage(IChannel channel, String header, String body) {
+        sendMessage(channel, header, body, Color.WHITE);
     }
     
     public static void sendMessage(IChannel channel, String message) {
-        sendMessage(channel, "", message, Color.BLACK);
+        sendMessage(channel, "", message, Color.WHITE);
     }
     
     public static void sendEmbedMessage(IChannel channel, EmbedObject object) {

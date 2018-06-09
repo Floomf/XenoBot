@@ -15,7 +15,7 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
 public class XPHandler {
 
     private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[EEEE hh:mma]");
+    private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE hh:mma");
 
     public static void startChecker(IGuild guild) {
         final Runnable pinger = new Runnable() {
@@ -52,9 +52,9 @@ public class XPHandler {
                 System.out.println("Gave " + xp + "xp to " + name);
             }
             BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                    String.format("```py\n+%dXP in \"%s\" (%s)\n%s```", xp, 
-                            channel.getName(), LocalDateTime.now().format(formatter), 
-                            names.toString()));
+                    String.format("**+%dXP** in \"%s\" (*%s*)", xp, 
+                            channel.getName(), LocalDateTime.now().format(formatter)),
+                            names.toString());
             UserManager.saveDatabase();
         }
     }
