@@ -13,7 +13,7 @@ import sx.blah.discord.util.RequestBuffer;
 public class BotUtils {  
   
     //hardcoded constants
-    public static final String VERSION = "2.14.2";
+    public static final String VERSION = "2.14.3";
     public static final String CMD_PREFIX = "!";
     //todo remove hardcoded id
     public static final long REALM_ID = 98236427971592192L; //The Realm long id
@@ -29,10 +29,14 @@ public class BotUtils {
         return builder.build();
     }
     
-    public static void sendMessage(IChannel channel, String header, String body, Color color) {
+    public static void sendMessage(IChannel channel, String outside, String header, String body, Color color) {
         RequestBuffer.request(() -> {           
             try{
-                channel.sendMessage(buildMessage(header, body, color));
+                if (outside.trim().length() > 0) {
+                    channel.sendMessage(outside, buildMessage(header, body, color));
+                } else {
+                    channel.sendMessage(buildMessage(header, body, color));
+                }
             } catch (DiscordException e){
                 System.err.println("Message could not be sent with error: " + e);
             }
@@ -40,11 +44,11 @@ public class BotUtils {
     }
     
     public static void sendMessage(IChannel channel, String header, String body) {
-        sendMessage(channel, header, body, Color.WHITE);
+        sendMessage(channel, "", header, body, Color.WHITE);
     }
     
     public static void sendMessage(IChannel channel, String message) {
-        sendMessage(channel, "", message, Color.WHITE);
+        sendMessage(channel, "", "", message, Color.WHITE);
     }
     
     public static void sendEmbedMessage(IChannel channel, EmbedObject object) {
@@ -58,15 +62,15 @@ public class BotUtils {
     }
     
     public static void sendInfoMessage(IChannel channel, String message) {
-        sendMessage(channel, "Info", message, Color.GREEN);
+        sendMessage(channel, "", "Info", message, Color.GREEN);
     }
     
     public static void sendErrorMessage(IChannel channel, String message) {
-        sendMessage(channel, "Error", message, Color.RED);
+        sendMessage(channel, "", "Error", message, Color.RED);
     }
     
     public static void sendUsageMessage(IChannel channel, String message) {
-        sendMessage(channel, "Usage", message, Color.ORANGE);
+        sendMessage(channel, "", "Usage", message, Color.ORANGE);
     }
     
     public static void setNickname(IGuild guild, IUser user, String name) {

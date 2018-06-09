@@ -50,9 +50,10 @@ public class RankManager {
             BotUtils.setRoles(guild, dUser, guildRoles.toArray(new IRole[guildRoles.size()]));
             System.out.println("Set role of " + user.getName() + " to " + user.getRank().getName());
             if (!rankNeeded.equals(RANKS[0])) {
-                BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                    "Rank up!", "You have been promoted to (a/an) **" + rankNeeded.getName() + "**.", 
-                    Color.PINK);
+                BotUtils.sendMessage(guild.getChannelsByName("log").get(0), 
+                        guild.getUserByID(user.getID()).mention(), "Rank up!", 
+                        "You have been promoted to (a/an) **" + rankNeeded.getName() + "**.", 
+                        Color.MAGENTA);
             }
         }
     }

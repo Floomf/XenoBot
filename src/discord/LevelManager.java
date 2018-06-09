@@ -34,8 +34,9 @@ public class LevelManager {
         NameManager.formatNameOfUser(guild, user);         
         int level = user.getLevel();
         System.out.println(user.getName() + " is now level " + level);
-        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), guild.getUserByID(user.getID()).mention(),
-                String.format("Level up! **%d** → **%d**", level - 1, level), Color.ORANGE); 
+        BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
+                guild.getUserByID(user.getID()).mention(), "Level up!",
+                String.format("**%d** → **%d**", level - 1, level), Color.ORANGE); 
         
         RankManager.setRankOfUser(guild, user);
         
@@ -64,7 +65,8 @@ public class LevelManager {
         IGuild guild = channel.getGuild();
         NameManager.formatNameOfUser(guild, user);
         RankManager.setRankOfUser(guild, user);
-        BotUtils.sendMessage(channel, "@here```" + user.getName() + " has prestiged! Praise unto thee.```");
+        BotUtils.sendMessage(channel, "@here", "", 
+                user.getName() + " has prestiged! Praise unto thee.```", Color.CYAN);
     }
     
     public static void checkXPUser(IGuild guild, User user) {
