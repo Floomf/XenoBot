@@ -28,7 +28,7 @@ public class LevelManager {
         setUserXPForLevel(user);     
         
         if (!levelUp) {           
-            user.addXP(user.getXPForLevel() + user.getXP()); //subtract from the max
+            user.addXP(user.getXPForLevel()); //subtract from the max
         }
         
         NameManager.formatNameOfUser(guild, user);         
@@ -49,11 +49,11 @@ public class LevelManager {
     private static void maxOutUser(IChannel channel, User user) {
         user.setXPForLevel(0);
         user.setXP(0);
-        BotUtils.sendMessage(channel, "```http\nCongratulations! You have reached the max level. "
-                + "You will no longer earn any xp until prestiged."
+        BotUtils.sendMessage(channel, "Congratulations!", "You have reached the max level. "
+                + "*You will no longer earn any xp until prestiged.*"
                 + "\n\nYou can now prestige and carry over back to level one with \"!prestige\"!"
                 + "\n\nAll level perks will be lost, but you will gain the ability to change your name color."
-                + "\n\nPrestiging is PERMANENT. Only do so if you are ready.```");
+                + "\n\nPrestiging is **PERMANENT.** Only do so if you are ready.");
     }
     
     public static void prestigeUser(IChannel channel, User user) {
@@ -66,7 +66,7 @@ public class LevelManager {
         NameManager.formatNameOfUser(guild, user);
         RankManager.setRankOfUser(guild, user);
         BotUtils.sendMessage(channel, "@here", "", 
-                user.getName() + " has prestiged! Praise unto thee.```", Color.CYAN);
+                user.getName() + " has **prestiged!** Praise unto thee.", Color.CYAN);
     }
     
     public static void checkXPUser(IGuild guild, User user) {
