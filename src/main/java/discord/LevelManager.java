@@ -51,7 +51,7 @@ public class LevelManager {
         user.setXP(0);
         BotUtils.sendMessage(channel, "Congratulations!", "You have reached the max level. "
                 + "*You will no longer earn any xp until prestiged.*"
-                + "\n\nYou can now prestige and carry over back to level one with \"!prestige\"!"
+                + "\n\nYou can now prestige and carry over back to level one with `!prestige`!"
                 + "\n\nAll level perks will be lost, but you will gain the ability to change your name color."
                 + "\n\nPrestiging is **PERMANENT.** Only do so if you are ready.");
     }

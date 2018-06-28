@@ -13,11 +13,9 @@ import sx.blah.discord.util.RequestBuffer;
 public class BotUtils {  
   
     //hardcoded constants
-    public static final String VERSION = "2.14.4";
     public static final String CMD_PREFIX = "!";
     //todo remove hardcoded id
     public static final long REALM_ID = 98236427971592192L; //The Realm long id
-    public static final int XP_MULTIPLIER = 1;
     public static final int MAX_LEVEL = 80;
     public static final char[] PRESTIGE_SYMBOLS = {'✦','✸','❃','✠','❂','☬','♆','∰'};
 
@@ -94,4 +92,14 @@ public class BotUtils {
         });
     }
     
+    public static String combineArgs(int index, String[] args) {       
+        for (int i = index + 1; i < args.length; i++) {
+             args[index] += " " + args[i];
+        }
+        return args[index];
+    }
+    
+    public static String buildUsage(String alias, String args, String desc) {
+        return (String.format("!%s %s \n\n%s", alias, args, desc));
+    }
 }

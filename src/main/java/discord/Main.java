@@ -8,7 +8,7 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 
-public class Main {
+public class Main { 
        
     public static void main(String[] args) {
         File tokenFile = new File("token.txt");

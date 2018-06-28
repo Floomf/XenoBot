@@ -1,0 +1,45 @@
+package discord.commands.perk;
+
+import com.vdurmont.emoji.EmojiParser;
+import discord.BotUtils;
+import discord.NameManager;
+import discord.UserManager;
+import discord.commands.AbstractCommand;
+import discord.objects.User;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IMessage;
+
+public class NameCommand extends AbstractCommand {
+    
+    public NameCommand() {
+        super(new String[] {"name", "nick"}, 1, false);
+    }
+    
+    public void execute(IMessage message, String[] args) {
+        User user = UserManager.getUserFromID(message.getAuthor().getLongID());
+        IChannel channel = message.getChannel();
+        if (!(user.getLevel() >= 60)) {
+            BotUtils.sendErrorMessage(channel, "You must be at least level 60 to change your name!"
+                    + " You can view your progress with `!lvl`.");
+            return;
+        }
+        String name = BotUtils.combineArgs(0, args);
+        name = EmojiParser.removeAllEmojis(name);
+        if (name.length() > 16) { //name can't be too long
+            name = name.substring(0, 15);
+        }
+
+        if (!UserManager.databaseContainsName(name)) {
+            NameManager.setNameOfUser(message.getGuild(), user, name);
+            BotUtils.sendInfoMessage(channel, "Your name is now " + name + "!");
+        } else {
+            BotUtils.sendErrorMessage(channel, "Sorry, but that name is already taken.");    
+        }
+    }
+    
+    public String getUsage(String alias) {
+        return BotUtils.buildUsage(alias, "[name]", "Change your name on this guild."
+                + "\n*(Requires Level 60+)*");
+    }
+    
+}

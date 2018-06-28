@@ -1,5 +1,7 @@
 package discord;
 
+import java.io.IOException;
+import java.util.Properties;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
@@ -15,10 +17,17 @@ public class EventsHandler {
     public void onReadyEvent(ReadyEvent event) {
         IDiscordClient client = event.getClient();
         IGuild guild = client.getGuildByID(BotUtils.REALM_ID);
-       
-        client.changePresence(StatusType.ONLINE, ActivityType.WATCHING, BotUtils.VERSION);
+        final Properties properties = new Properties();
+        try {
+            properties.load(this.getClass().getClassLoader().getResourceAsStream("project.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        client.changePresence(StatusType.ONLINE, ActivityType.WATCHING, 
+                properties.getProperty("version"));
   
-        UserManager.createDatabase(guild);       
+        UserManager.createDatabase(guild);      
+        CommandManager.createCommands();
         XPHandler.startChecker(guild);      
     }
     
