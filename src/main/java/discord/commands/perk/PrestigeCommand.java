@@ -18,7 +18,7 @@ public class PrestigeCommand extends AbstractCommand {
         User user = UserManager.getUserFromID(message.getAuthor().getLongID());
         IChannel channel = message.getChannel();
         if (!(user.getLevel() == BotUtils.MAX_LEVEL)) {
-                    BotUtils.sendErrorMessage(channel, "You must be level 80 to prestige."
+                    BotUtils.sendErrorMessage(channel, "You must be level **80** to prestige."
                             + " You can view your progress with `!lvl`.");
         } else {
             LevelManager.prestigeUser(channel, user);
@@ -27,6 +27,6 @@ public class PrestigeCommand extends AbstractCommand {
     
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "", "Prestige and carry over back to level one."
-                + "\n*(Requires Level 80)*");
+                + "\n*(Level 80)*");
     }
 }

@@ -20,8 +20,8 @@ public class EmojiCommand extends AbstractCommand{
         IChannel channel = message.getChannel();
         String emoji = args[0];
         
-        if (!(user.getLevel() >= 40)) {
-            BotUtils.sendErrorMessage(channel, "You must be at least level 40 to set your name emoji!"
+        if (!(user.getLevel() >= 40 || user.getPrestige() > 0)) {
+            BotUtils.sendErrorMessage(channel, "You must be at least level **40** to set your name emoji!"
                     + " You can view your progress with `!lvl`.");
             return;
         }
@@ -43,7 +43,7 @@ public class EmojiCommand extends AbstractCommand{
     
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[emoji]", "Set an emoji next to your name."
-                            + "\n*(Requires Level 40+)*");
+                            + "\n*(Level 40+ or Prestiged)*");
     }
     
 }

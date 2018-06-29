@@ -55,7 +55,7 @@ public class ColorCommand extends AbstractCommand {
     
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[name]", "Change the color of your name."
-                + "*(Must be prestiged)*\n\n" + Arrays.toString(COLORS));
+                + "\n*(Prestiged)*\n\n**Available Choices**:\n`" + Arrays.toString(COLORS) + "`");
     }
     
 }

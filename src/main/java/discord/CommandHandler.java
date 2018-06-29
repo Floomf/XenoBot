@@ -7,7 +7,7 @@ import sx.blah.discord.api.events.EventSubscriber;
 import discord.commands.AbstractCommand;
 
 public class CommandHandler {
-
+    /* to be reimplemented in raffle command
     public enum PoolType {
         ALL, ONLINE, OFFLINE, VOICE
     }
@@ -24,7 +24,7 @@ public class CommandHandler {
         }
         users.removeIf(user -> user.isBot());
         return users;
-    }
+    }*/
 
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
@@ -93,29 +93,6 @@ public class CommandHandler {
     }        
 }
         /*    
-            case "commands":
-            case "help":
-                if (isOwner) {
-                    BotUtils.sendMessage(channel, "Owner Commands", 
-                            "!setname   - Change the name of a user in the database."
-                            + "\n!flood      - Flood your connected voice channel."
-                            + "\n!givexp     - Give XP to a specifed user.");
-                }              
-                BotUtils.sendMessage(channel, "General Commands", 
-                        "!level   - View your or another user's level progress."
-                        + "\n!rng     - Generate a random number."
-                        + "\n!flip    - Flip a coin."
-                        + "\n!cat     - See a random cat."
-                        + "\n!dadjoke - Read a random dad joke."
-                        + "\n!coin    - View price and info on a cryptocurrency."
-                        + "\n!raffle  - Choose a random user.");
-                BotUtils.sendMessage(channel, "Perk Commands",
-                        "!emoji    - Set an emoji in your name. (Lvl 40+)"
-                        + "\n!name     - Change your name. (Lvl 60+)"
-                        + "\n!prestige - Carry over to level one."
-                        + "\n!color    - Set the color of your name. (Prestiged)");
-                return;
-       
             case "raffle":
                 if (!hasArgs) {
                     BotUtils.sendUsageMessage(channel, 

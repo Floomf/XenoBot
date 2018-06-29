@@ -18,8 +18,8 @@ public class NameCommand extends AbstractCommand {
     public void execute(IMessage message, String[] args) {
         User user = UserManager.getUserFromID(message.getAuthor().getLongID());
         IChannel channel = message.getChannel();
-        if (!(user.getLevel() >= 60)) {
-            BotUtils.sendErrorMessage(channel, "You must be at least level 60 to change your name!"
+        if (!(user.getLevel() >= 60 || user.getPrestige() > 0)) {
+            BotUtils.sendErrorMessage(channel, "You must be at least level **60** to change your name!"
                     + " You can view your progress with `!lvl`.");
             return;
         }
@@ -38,8 +38,8 @@ public class NameCommand extends AbstractCommand {
     }
     
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[name]", "Change your name on this guild."
-                + "\n*(Requires Level 60+)*");
+        return BotUtils.buildUsage(alias, "[new name]", "Change your nickname on this guild."
+                + "\n*(Level 60+ or Prestiged)*");
     }
     
 }
