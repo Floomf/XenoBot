@@ -35,8 +35,8 @@ public class LevelManager {
         int level = user.getLevel();
         System.out.println(user.getName() + " is now level " + level);
         BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                guild.getUserByID(user.getID()).mention(), "Level up!",
-                String.format("**%d** → **%d**", level - 1, level), Color.ORANGE); 
+                guild.getUserByID(user.getID()).mention(),
+                String.format("**Level up!**\n%d → %d", level - 1, level), Color.ORANGE); 
         
         RankManager.setRankOfUser(guild, user);
         
@@ -60,7 +60,6 @@ public class LevelManager {
         user.addPrestige();
         user.setLevel(1);
         user.setXP(0);
-        user.setEmoji(0);
         setUserXPForLevel(user);
         IGuild guild = channel.getGuild();
         NameManager.formatNameOfUser(guild, user);

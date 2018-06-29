@@ -41,6 +41,10 @@ public class BotUtils {
         }).get(); //.get() makes sure they send in order cause async??
     }
     
+    public static void sendMessage(IChannel channel, String header, String body, Color color) {
+        sendMessage(channel, "", header, body, color);
+    }
+    
     public static void sendMessage(IChannel channel, String header, String body) {
         sendMessage(channel, "", header, body, Color.WHITE);
     }
