@@ -34,16 +34,21 @@ public class EmojiCommand extends AbstractCommand{
             } else {
                 user.setEmoji(emoji.codePointAt(0));
             }
-            NameManager.formatNameOfUser(message.getGuild(), user);
             BotUtils.sendInfoMessage(channel, "Set your name emoji to " + emoji);
+        } else if (emoji.toLowerCase().equals("none")) {
+            user.setEmoji(0);
+            BotUtils.sendInfoMessage(channel, "Your name emoji has been removed.");
         } else {
             BotUtils.sendErrorMessage(channel, "Could not parse an emoji from input.");
+            return;
         }
+        NameManager.formatNameOfUser(message.getGuild(), user);
     }
     
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[emoji]", "Set an emoji next to your name."
-                            + "\n*(Level 40+ or Prestiged)*");
+                + " Providing \"none\" as the parameter will remove your current emoji."            
+                + "\n*(Level 40+ or Prestiged)*");
     }
     
 }
