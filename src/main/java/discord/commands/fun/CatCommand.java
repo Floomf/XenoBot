@@ -2,6 +2,7 @@ package discord.commands.fun;
 
 import discord.BotUtils;
 import discord.commands.AbstractCommand;
+import discord.commands.CommandCategory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -11,7 +12,7 @@ import sx.blah.discord.handle.obj.IMessage;
 public class CatCommand extends AbstractCommand {
     
     public CatCommand() {
-        super(new String[] {"cat", "kitty"}, 1, false);
+        super(new String[] {"cat", "kitty"}, 1, CommandCategory.FUN);
     }
     
     public void execute(IMessage message, String[] args) {

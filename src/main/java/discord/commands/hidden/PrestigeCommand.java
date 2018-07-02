@@ -1,9 +1,10 @@
-package discord.commands.perk;
+package discord.commands.hidden;
 
 import discord.BotUtils;
 import discord.LevelManager;
 import discord.UserManager;
 import discord.commands.AbstractCommand;
+import discord.commands.CommandCategory;
 import discord.objects.User;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
@@ -11,7 +12,7 @@ import sx.blah.discord.handle.obj.IMessage;
 public class PrestigeCommand extends AbstractCommand {
     
     public PrestigeCommand() {
-        super(new String[] {"prestige"}, 0, false);
+        super(new String[] {"prestige"}, 0, CommandCategory.HIDDEN);
     }
     
     public void execute(IMessage message, String[] args) {

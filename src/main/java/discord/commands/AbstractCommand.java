@@ -6,12 +6,12 @@ public abstract class AbstractCommand {
     
     private final String[] names;
     private final int argsNeeded;
-    private final boolean onlyOwner;   
+    private final CommandCategory category;
     
-    public AbstractCommand(String[] names, int argsNeeded, boolean onlyOwner) {
+    public AbstractCommand(String[] names, int argsNeeded, CommandCategory category) {
         this.names = names;
         this.argsNeeded = argsNeeded;
-        this.onlyOwner = onlyOwner;
+        this.category = category;
     }
     
     public abstract void execute(IMessage message, String[] args);
@@ -30,7 +30,7 @@ public abstract class AbstractCommand {
         return argsNeeded;
     }
     
-    public boolean onlyOwner() {
-        return onlyOwner;
+    public CommandCategory getCategory() {
+        return category;
     }
 }

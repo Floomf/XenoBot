@@ -5,6 +5,7 @@ import sx.blah.discord.handle.obj.*;
 import java.util.List;
 import sx.blah.discord.api.events.EventSubscriber;
 import discord.commands.AbstractCommand;
+import discord.commands.CommandCategory;
 
 public class CommandHandler {
     /* to be reimplemented in raffle command
@@ -71,7 +72,7 @@ public class CommandHandler {
         }
         
         //check if command requires owner (and if owner is executing it)
-        if (command.onlyOwner() && !message.getAuthor().equals(guild.getOwner())) {
+        if (command.getCategory() == CommandCategory.ADMIN && !message.getAuthor().equals(guild.getOwner())) {
             BotUtils.sendErrorMessage(channel, "You must be this guild's owner to use this command.");
             return;
         }

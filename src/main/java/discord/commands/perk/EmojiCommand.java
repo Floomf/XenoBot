@@ -5,6 +5,7 @@ import discord.BotUtils;
 import discord.NameManager;
 import discord.UserManager;
 import discord.commands.AbstractCommand;
+import discord.commands.CommandCategory;
 import discord.objects.User;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
@@ -12,7 +13,7 @@ import sx.blah.discord.handle.obj.IMessage;
 public class EmojiCommand extends AbstractCommand{
     
     public EmojiCommand() {
-        super(new String[] {"emoji"}, 1, false); 
+        super(new String[] {"emoji"}, 1, CommandCategory.PERK); 
     }
     
     public void execute(IMessage message, String[] args) {

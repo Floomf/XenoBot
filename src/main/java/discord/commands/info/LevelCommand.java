@@ -4,12 +4,13 @@ import discord.BotUtils;
 import discord.LevelManager;
 import discord.UserManager;
 import discord.commands.AbstractCommand;
+import discord.commands.CommandCategory;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class LevelCommand extends AbstractCommand{
     
     public LevelCommand() {
-        super(new String[] {"level", "lvl", "info", "xp", "stats"}, 0, false);
+        super(new String[] {"level", "lvl", "info", "xp", "stats"}, 0, CommandCategory.INFO);
     }
     
     public void execute(IMessage message, String[] args) {

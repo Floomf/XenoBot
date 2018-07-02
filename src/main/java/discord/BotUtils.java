@@ -103,7 +103,14 @@ public class BotUtils {
         return args[index];
     }
     
+    public static EmbedBuilder getBuilder(String title) {    
+        return new EmbedBuilder()
+                .withAuthorIcon(Main.getClient().getOurUser().getAvatarURL())
+                .withAuthorName(title);
+    }
+    
     public static String buildUsage(String alias, String args, String desc) {
         return (String.format("!%s %s \n\n%s", alias, args, desc));
     }
+    
 }

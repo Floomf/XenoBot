@@ -2,6 +2,7 @@ package discord.commands.fun;
 
 import discord.BotUtils;
 import discord.commands.AbstractCommand;
+import discord.commands.CommandCategory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,7 +13,7 @@ import sx.blah.discord.handle.obj.IMessage;
 public class DadJokeCommand extends AbstractCommand {
     
     public DadJokeCommand() {
-        super(new String[] {"dadjoke", "dj"}, 0, false);
+        super(new String[] {"dadjoke", "dj"}, 0, CommandCategory.FUN);
     }
     
     public void execute(IMessage message, String[] args) {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.BotUtils;
 import discord.commands.AbstractCommand;
+import discord.commands.CommandCategory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,7 +16,7 @@ import sx.blah.discord.util.EmbedBuilder;
 public class CryptoCommand extends AbstractCommand {
     
     public CryptoCommand() {
-        super(new String[] {"crypto", "cryptocurrency", "cc", "price"}, 1, false);
+        super(new String[] {"crypto", "cryptocurrency", "cc", "price"}, 1, CommandCategory.INFO);
     }
     
     public void execute(IMessage message, String[] args) {

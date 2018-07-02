@@ -3,6 +3,7 @@ package discord.commands.perk;
 import discord.BotUtils;
 import discord.UserManager;
 import discord.commands.AbstractCommand;
+import discord.commands.CommandCategory;
 import discord.objects.User;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +22,7 @@ public class ColorCommand extends AbstractCommand {
         "Light Brown", "Brown", "Gray"};
     
     public ColorCommand() {
-        super(new String[] {"color"}, 1, false);
+        super(new String[] {"color"}, 1, CommandCategory.PERK);
     }
     
     public void execute(IMessage message, String[] args) {

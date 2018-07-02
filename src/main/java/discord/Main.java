@@ -9,6 +9,8 @@ import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 
 public class Main { 
+    
+    private static IDiscordClient client;
        
     public static void main(String[] args) {
         File tokenFile = new File("token.txt");
@@ -21,11 +23,11 @@ public class Main {
             System.exit(0);
         }
         try {
-            IDiscordClient client = new ClientBuilder()
+            client = new ClientBuilder()
                     .withToken(getTextFromFile(tokenFile))
                     .login();
             client.getDispatcher().registerListeners(
-                    new CommandHandler(), new EventsHandler());           
+                    new CommandHandler(), new EventsHandler());
         } catch (DiscordException e) {
             System.out.println(e);
         }          
@@ -39,6 +41,11 @@ public class Main {
             System.out.println(e);
         }
         return "";
+    }
+    
+    //is this bad practice?
+    public static IDiscordClient getClient() {
+        return client;
     }
     
 }

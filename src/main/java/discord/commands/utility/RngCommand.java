@@ -1,13 +1,14 @@
-package discord.commands.fun;
+package discord.commands.utility;
 
 import discord.BotUtils;
 import discord.commands.AbstractCommand;
+import discord.commands.CommandCategory;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class RngCommand extends AbstractCommand {
     
     public RngCommand() {
-        super(new String[] {"rng", "number", "num"}, 1, false);
+        super(new String[] {"rng", "number", "num"}, 1, CommandCategory.UTILITY);
     }
     
     public void execute(IMessage message, String[] args) {

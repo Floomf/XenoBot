@@ -4,6 +4,7 @@ import discord.BotUtils;
 import discord.NameManager;
 import discord.UserManager;
 import discord.commands.AbstractCommand;
+import discord.commands.CommandCategory;
 import discord.objects.User;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
@@ -11,7 +12,7 @@ import sx.blah.discord.handle.obj.IMessage;
 public class SetNameCommand extends AbstractCommand{
     
     public SetNameCommand() {
-        super(new String[] {"setname", "changename"}, 2, true);
+        super(new String[] {"setname", "changename"}, 2, CommandCategory.ADMIN);
     }
     
     public void execute(IMessage message, String[] args) {

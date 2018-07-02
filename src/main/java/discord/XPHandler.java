@@ -52,7 +52,7 @@ public class XPHandler {
                 System.out.println("Gave " + xp + "xp to " + name);
             }
             BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                    String.format("**+%dXP** in \"%s\" (*%s*)", xp, 
+                    String.format("+%dXP in %s (%s)", xp, 
                             channel.getName(), LocalDateTime.now().format(formatter)),
                             names.toString());
             UserManager.saveDatabase();
