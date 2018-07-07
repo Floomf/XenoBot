@@ -1,6 +1,7 @@
 package discord.commands.perk;
 
 import discord.BotUtils;
+import discord.CommandHandler;
 import discord.UserManager;
 import discord.commands.AbstractCommand;
 import discord.commands.CommandCategory;
@@ -35,7 +36,7 @@ public class ColorCommand extends AbstractCommand {
             return;
         }
         //get the color from message (combine args)
-        String color = BotUtils.combineArgs(0, args).toLowerCase();       
+        String color =  CommandHandler.combineArgs(0, args).toLowerCase();       
         for (int i = 0; i < COLORS.length; i++) {
             if (COLORS[i].toLowerCase().equals(color)) {
                 IGuild guild = message.getGuild();

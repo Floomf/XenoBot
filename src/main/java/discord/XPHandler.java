@@ -44,7 +44,8 @@ public class XPHandler {
         if (users.size() >= 2) {
             List<String> names = new ArrayList<>();
             int xp = 1 * users.size() + 13; // min 450/hr
-            users.removeIf(user -> UserManager.getUserLevel(user.getLongID()) == BotUtils.MAX_LEVEL);
+            users.removeIf(user -> UserManager.getUserLevel(
+                    user.getLongID()) == LevelManager.MAX_LEVEL);
             for (IUser user : users) {
                 String name = UserManager.getUserFromID(user.getLongID()).getName();
                 LevelManager.addUserXPFromID(guild, user.getLongID(), xp);

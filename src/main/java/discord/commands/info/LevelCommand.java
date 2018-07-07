@@ -1,6 +1,7 @@
 package discord.commands.info;
 
 import discord.BotUtils;
+import discord.CommandHandler;
 import discord.LevelManager;
 import discord.UserManager;
 import discord.commands.AbstractCommand;
@@ -16,18 +17,19 @@ public class LevelCommand extends AbstractCommand{
     public void execute(IMessage message, String[] args) {
         long id;
         if (args.length > 0) {
-            String name = BotUtils.combineArgs(0, args);
+            String name = CommandHandler.combineArgs(0, args);
             id = UserManager.getUserIDFromName(name);
             if (id == -1L) {
                 BotUtils.sendErrorMessage(message.getChannel(), 
-                        "Specified user was not found in the database.");;
+                        "Specified user was not found in the database.");
+                return;
             }
         } else {
             id = message.getAuthor().getLongID();
-            BotUtils.sendEmbedMessage(message.getChannel(), 
+        }
+        BotUtils.sendEmbedMessage(message.getChannel(), 
                     LevelManager.buildInfo(UserManager.getUserFromID(id),
                     message.getGuild().getUserByID(id)));
-        }
     }
     
     public String getUsage(String alias) {

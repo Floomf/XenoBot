@@ -1,7 +1,7 @@
 package discord.commands.perk;
 
-import com.vdurmont.emoji.EmojiParser;
 import discord.BotUtils;
+import discord.CommandHandler;
 import discord.NameManager;
 import discord.UserManager;
 import discord.commands.AbstractCommand;
@@ -24,10 +24,15 @@ public class NameCommand extends AbstractCommand {
                     + " You can view your progress with `!lvl`.");
             return;
         }
-        String name = BotUtils.combineArgs(0, args);
-        name = EmojiParser.removeAllEmojis(name);
+        String name = CommandHandler.combineArgs(0, args);
         if (name.length() > 16) { //name can't be too long
             name = name.substring(0, 15);
+        }
+        
+        if (!name.matches("[ -~]+")) { //regex for char codes between 32-126
+            BotUtils.sendErrorMessage(channel, "Your name can only contain letters, "
+                    + "numbers, and default keyboard symbols.");
+            return;
         }
 
         if (!UserManager.databaseContainsName(name)) {

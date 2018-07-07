@@ -1,6 +1,7 @@
 package discord.commands.admin;
 
 import discord.BotUtils;
+import discord.CommandHandler;
 import discord.NameManager;
 import discord.UserManager;
 import discord.commands.AbstractCommand;
@@ -23,7 +24,7 @@ public class SetNameCommand extends AbstractCommand{
                     "Specified ID was not found in the database.");
             return;
         }
-        args[1] = BotUtils.combineArgs(1, args);
+        args[1] = CommandHandler.combineArgs(1, args);
         NameManager.setNameOfUser(message.getGuild(), userToChange, args[1]);
         BotUtils.sendInfoMessage(channel, "Name set to " + args[1]);
         return;

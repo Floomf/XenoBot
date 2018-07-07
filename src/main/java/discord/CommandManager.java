@@ -30,7 +30,7 @@ public class CommandManager {
     }   
     
     public static HashSet<AbstractCommand> getCommands() {
-        return new HashSet<AbstractCommand>(commands.values());
+        return new HashSet<>(commands.values());
     }
     
 }

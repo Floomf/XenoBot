@@ -27,8 +27,8 @@ public class HelpCommand extends AbstractCommand {
                 BotUtils.sendUsageMessage(channel, cmd.getUsage(name));
             }
         } else {
-            EmbedBuilder builder = BotUtils.getBuilder("Available Commands");
-            builder.withDesc("*For info on a command, use:* **!help [command]**");
+            EmbedBuilder builder = BotUtils.getBuilder("Available Commands", 
+                    "*For info on a command, use:* **!help [command]**");
             
             HashSet<AbstractCommand> commands = CommandManager.getCommands();
             commands.removeIf(command -> command.getCategory() == CommandCategory.HIDDEN);

@@ -92,6 +92,13 @@ public class CommandHandler {
         }        
         command.execute(message, args);
     }        
+    
+    public static String combineArgs(int index, String[] args) {       
+        for (int i = index + 1; i < args.length; i++) {
+             args[index] += " " + args[i];
+        }
+        return args[index];
+    }
 }
         /*    
             case "raffle":

@@ -10,6 +10,8 @@ import sx.blah.discord.util.EmbedBuilder;
 
 public class LevelManager {
     
+    public static final int MAX_LEVEL = 80;
+    
     public static void addUserXPFromID(IGuild guild, long id, int amount) {
         User user = UserManager.getUserFromID(id);
         user.addXP(amount); 
@@ -34,13 +36,13 @@ public class LevelManager {
         NameManager.formatNameOfUser(guild, user);         
         int level = user.getLevel();
         System.out.println(user.getName() + " is now level " + level);
-        BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                guild.getUserByID(user.getID()).mention(),
-                String.format("**Level up!**\n%d → %d", level - 1, level), Color.ORANGE); 
+        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), "Level up!",
+                String.format("%s\n**%d → %d**", BotUtils.getMention(user), 
+                        level - 1, level), Color.ORANGE); 
         
         RankManager.setRankOfUser(guild, user);
         
-        if (user.getLevel() == BotUtils.MAX_LEVEL) 
+        if (user.getLevel() == MAX_LEVEL) 
             maxOutUser(guild.getChannelsByName("log").get(0), user);
         else 
             checkXPUser(guild, user);
@@ -64,7 +66,7 @@ public class LevelManager {
         IGuild guild = channel.getGuild();
         NameManager.formatNameOfUser(guild, user);
         RankManager.setRankOfUser(guild, user);
-        BotUtils.sendMessage(channel, "@here", "", 
+        BotUtils.sendMessage(channel, "@here", "Alert", 
                 user.getName() + " has **prestiged!** Praise unto thee.", Color.CYAN);
     }
     
@@ -81,7 +83,7 @@ public class LevelManager {
     }
     
     public static EmbedObject buildInfo(User user, IUser dUser) {
-        EmbedBuilder builder = new EmbedBuilder();       
+        EmbedBuilder builder = new EmbedBuilder();
         builder.withColor(Color.CYAN);
         builder.withAuthorIcon(dUser.getAvatarURL());
         builder.withAuthorName(user.getName());

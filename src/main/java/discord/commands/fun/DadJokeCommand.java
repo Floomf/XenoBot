@@ -24,7 +24,7 @@ public class DadJokeCommand extends AbstractCommand {
             hc.setRequestProperty("User-Agent", "Discord Bot");
             hc.connect();
             BufferedReader br = new BufferedReader(new InputStreamReader(hc.getInputStream()));
-            BotUtils.sendMessage(message.getChannel(), String.format("```%s```", br.readLine()));
+            BotUtils.sendMessage(message.getChannel(), "Get this:", String.format("`%s`", br.readLine()));
         } catch (IOException ex) {
             System.out.println(ex);
         }
