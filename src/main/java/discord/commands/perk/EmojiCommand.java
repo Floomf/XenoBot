@@ -44,6 +44,7 @@ public class EmojiCommand extends AbstractCommand{
             return;
         }
         NameManager.formatNameOfUser(message.getGuild(), user);
+        UserManager.saveDatabase();
     }
     
     public String getUsage(String alias) {

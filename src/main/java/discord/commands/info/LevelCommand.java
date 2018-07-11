@@ -11,7 +11,7 @@ import sx.blah.discord.handle.obj.IMessage;
 public class LevelCommand extends AbstractCommand{
     
     public LevelCommand() {
-        super(new String[] {"level", "lvl", "info", "xp", "stats"}, 0, CommandCategory.INFO);
+        super(new String[] {"level", "lvl", "info", "stats"}, 0, CommandCategory.INFO);
     }
     
     public void execute(IMessage message, String[] args) {

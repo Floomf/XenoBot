@@ -4,31 +4,34 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
-public class XPHandler {
+public class XPChecker implements Runnable {
 
-    private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final IDiscordClient client;
     private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE hh:mma");
 
-    public static void startChecker(IGuild guild) {
-        final Runnable pinger = new Runnable() {
-            public void run() {
-               System.out.println(String.format("[%s] Checking users to add xp",
-                       LocalDateTime.now().format(formatter)));
-               checkVoiceChannels(guild);
-            }
-        };
-        scheduler.scheduleAtFixedRate(pinger, 2, 2, TimeUnit.MINUTES);
+    public XPChecker(IDiscordClient client) {
+         this.client = client;
+    }
+    
+    public void run() {
+        System.out.println(String.format("[%s] Checking all guild users to add xp",
+                LocalDateTime.now().format(formatter)));
+        checkGuilds(client.getGuilds());
     }
 
-    private static void checkVoiceChannels(IGuild guild) {
+    private void checkGuilds(List<IGuild> guilds) {
+        for (IGuild guild : guilds) {
+            checkVoiceChannels(guild);
+        }
+    }
+    
+    private void checkVoiceChannels(IGuild guild) {
         List<IVoiceChannel> channels = guild.getVoiceChannels();
         channels.removeIf(channel -> channel.equals(guild.getAFKChannel()));
         for (IVoiceChannel channel : channels) {
@@ -36,8 +39,8 @@ public class XPHandler {
         }
     }
     
-    private static void checkUsers(List<IUser> users, IChannel channel, IGuild guild) {
-        users.removeIf(user -> user.isBot()
+    private void checkUsers(List<IUser> users, IChannel channel, IGuild guild) {
+        users.removeIf(user -> user.isBot() //only count people that are "talking"
                 || user.getVoiceStateForGuild(guild).isSelfDeafened()
                 || user.getVoiceStateForGuild(guild).isSelfMuted()
                 || user.getVoiceStateForGuild(guild).isMuted());

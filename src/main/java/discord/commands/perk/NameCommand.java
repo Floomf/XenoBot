@@ -38,6 +38,7 @@ public class NameCommand extends AbstractCommand {
         if (!UserManager.databaseContainsName(name)) {
             NameManager.setNameOfUser(message.getGuild(), user, name);
             BotUtils.sendInfoMessage(channel, "Your name is now " + name + "!");
+            UserManager.saveDatabase();
         } else {
             BotUtils.sendErrorMessage(channel, "Sorry, but that name is already taken.");    
         }
