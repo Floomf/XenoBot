@@ -11,6 +11,8 @@ import sx.blah.discord.util.EmbedBuilder;
 public class LevelManager {
     
     public static final int MAX_LEVEL = 80;
+    public static final int MAX_PRESTIGE = 10; //unused for now
+    public static final char[] PRESTIGE_SYMBOLS = {'★','✷','⁂','❖','❃','✠','✪','☭','☬','♆'};
     
     public static void addUserXPFromID(IGuild guild, long id, int amount) {
         User user = UserManager.getUserFromID(id);
@@ -92,7 +94,7 @@ public class LevelManager {
         int prestige = user.getPrestige();
         if (prestige > 0) 
             builder.appendField("Prestige", String.format("`%d%c`", 
-                    prestige, BotUtils.PRESTIGE_SYMBOLS[prestige - 1]), true);
+                    prestige, PRESTIGE_SYMBOLS[prestige - 1]), true);
         builder.appendField("XP", "`" + user.getXP() + "/" + user.getXPForLevel() + "`", true);
         builder.appendField("Progress to Next Level", getProgress(user), false);
         

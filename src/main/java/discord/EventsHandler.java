@@ -25,7 +25,7 @@ public class EventsHandler {
     @EventSubscriber
     public void onReadyEvent(ReadyEvent event) {
         IDiscordClient client = event.getClient();
-        IGuild guild = client.getGuildByID(BotUtils.REALM_ID);
+        IGuild guild = client.getGuilds().get(0);
         final Properties properties = new Properties();
         try {
             properties.load(this.getClass().getClassLoader()
@@ -44,10 +44,9 @@ public class EventsHandler {
     @EventSubscriber
     //Add user to database when they join the server
     public void onUserJoinEvent(UserJoinEvent event) {
-       IGuild guild = event.getGuild();
        IUser user = event.getUser();
-       if (guild.getLongID() == BotUtils.REALM_ID && !user.isBot()) {
-           UserManager.addUserToDatabase(event.getUser(), guild);
+       if (!user.isBot()) {
+           UserManager.addUserToDatabase(event.getUser(), event.getGuild());
        }
     }
     

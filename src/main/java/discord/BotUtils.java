@@ -14,11 +14,7 @@ import sx.blah.discord.util.RequestBuffer;
 
 public class BotUtils {  
   
-    //hardcoded constants
     public static final String CMD_PREFIX = "!";
-    //todo remove hardcoded id
-    public static final long REALM_ID = 98236427971592192L; //The Realm long id
-    public static final char[] PRESTIGE_SYMBOLS = {'✦','✸','❃','✠','❂','☬','♆','∰'};
     
     public static void sendEmbedMessage(IChannel channel, EmbedObject object) {
         RequestBuffer.request(() -> {           

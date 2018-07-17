@@ -2,7 +2,6 @@ package discord;
 
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
-import java.util.List;
 import sx.blah.discord.api.events.EventSubscriber;
 import discord.commands.AbstractCommand;
 import discord.commands.CommandCategory;
@@ -295,25 +294,6 @@ public class CommandHandler {
                 }
                 BotUtils.sendErrorMessage(channel, "Amount is not an integer between 1 and 300.");
                 return;       
-
-            //todo better argument checking
-            case "givexp":
-                if (!isOwner) {
-                    BotUtils.sendErrorMessage(channel, "You are not this server's owner.");
-                    return;
-                }      
-                if (args.length < 3) {
-                    BotUtils.sendUsageMessage(channel, 
-                            "!givexp [userID] [amount]"
-                            + "\n\nGive xp to the user."
-                            + "\n\nuserID - The user's long ID.");
-                    return;
-                }
-                
-                LevelManager.addUserXPFromID(guild, Long.parseLong(args[1]), Integer.parseInt(args[2]));
-                BotUtils.sendMessage(channel, "Success", "Gave " + args[2] 
-                        + "xp to " + UserManager.getUserName(Long.parseLong(args[1])));
-                return;
                       
             case "savedata":
                 if (!isOwner) {
