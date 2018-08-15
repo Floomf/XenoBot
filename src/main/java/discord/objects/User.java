@@ -1,5 +1,7 @@
 package discord.objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class User {
     
     private final long id; //Discord long id
@@ -37,6 +39,11 @@ public class User {
     
     public int getLevel() {
         return level;
+    }
+    
+    @JsonIgnore
+    public int getTotalLevels() {
+        return prestige * 80 + level;
     }
     
     public int getXP() {

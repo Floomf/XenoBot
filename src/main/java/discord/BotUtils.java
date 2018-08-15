@@ -2,7 +2,7 @@ package discord;
 
 import discord.objects.User;
 import java.awt.Color;
-import static jdk.nashorn.internal.runtime.Debug.id;
+import java.util.List;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
@@ -56,7 +56,7 @@ public class BotUtils {
         sendMessage(channel, "Usage", message, Color.ORANGE);
     }
     
-    public static void setNickname(IGuild guild, IUser user, String name) {
+    public static void setUserNickname(IGuild guild, IUser user, String name) {
         RequestBuffer.request(() -> {
             try{
                 guild.setUserNickname(user, name);
@@ -67,12 +67,12 @@ public class BotUtils {
         });
     }
     
-    public static void setRoles(IGuild guild, IUser user, IRole[] roles) {
+    public static void setUserRoles(IGuild guild, IUser user, List<IRole> roles) {
         RequestBuffer.request(() -> {
             try{
-                guild.editUserRoles(user, roles);
+                guild.editUserRoles(user, roles.toArray(new IRole[roles.size()]));
             } catch (DiscordException e) {
-                System.err.println("Role could not be set with error: " + e);
+                System.err.println("Roles could not be set with error: " + e);
             }
         });
     }   

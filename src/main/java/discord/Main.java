@@ -30,7 +30,7 @@ public class Main {
                     new CommandHandler(), new EventsHandler());
         } catch (DiscordException e) {
             System.out.println(e);
-        }          
+        }  
     }      
     
     public static String getTextFromFile(File file) {

@@ -47,7 +47,7 @@ public class RankManager {
                 }
             }
             guildRoles.add(guild.getRoleByID(user.getRank().getID()));
-            BotUtils.setRoles(guild, dUser, guildRoles.toArray(new IRole[guildRoles.size()]));
+            BotUtils.setUserRoles(guild, dUser, guildRoles);
             System.out.println("Set role of " + user.getName() + " to " + user.getRank().getName());
             if (!rankNeeded.equals(RANKS[0])) {
                 BotUtils.sendMessage(guild.getChannelsByName("log").get(0),

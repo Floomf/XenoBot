@@ -16,7 +16,7 @@ public class NameManager {
                 System.out.println("Need to set owner's name to " + name);
                 return;
             }
-            BotUtils.setNickname(guild, dUser, name);
+            BotUtils.setUserNickname(guild, dUser, name);
         }
     }
     

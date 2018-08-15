@@ -52,7 +52,7 @@ public class EventsHandler {
     
     @EventSubscriber
     public void onShardDisconnectedEvent(DisconnectedEvent event) {
-        if (!future.isCancelled()) { 
+        if (!future.isDone()) { 
             System.out.println("Shard disconnected, shutting down active XP scheduler");
             future.cancel(true);
         }
@@ -60,7 +60,7 @@ public class EventsHandler {
     
     @EventSubscriber
     public void onShardResumedEvent(ResumedEvent event) {
-        if (future.isCancelled()) {
+        if (future.isDone()) {
             System.out.println("Shard resumed, starting XP scheduler");
             future = scheduler.scheduleAtFixedRate(new XPChecker(
                     event.getClient()), 2, 2, TimeUnit.MINUTES);

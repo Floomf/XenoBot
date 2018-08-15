@@ -28,7 +28,7 @@ public class LevelCommand extends AbstractCommand{
             id = message.getAuthor().getLongID();
         }
         BotUtils.sendEmbedMessage(message.getChannel(), 
-                    LevelManager.buildInfo(UserManager.getUserFromID(id),
+                    LevelManager.buildUserInfo(UserManager.getUserFromID(id),
                     message.getGuild().getUserByID(id)));
     }
     

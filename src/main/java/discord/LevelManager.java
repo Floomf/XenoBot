@@ -44,20 +44,48 @@ public class LevelManager {
         
         RankManager.setRankOfUser(guild, user);
         
-        if (user.getLevel() == MAX_LEVEL) 
-            maxOutUser(guild.getChannelsByName("log").get(0), user);
-        else 
-            checkXPUser(guild, user);
+        if (level % 20 == 0) { //check for unlocks
+            IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID()));
+            notifyUnlocks(pmChannel, user);
+            if (level == MAX_LEVEL) {
+                //send DM to user
+                maxOutUser(pmChannel, user);
+                return;
+            }
+        }
+        checkXPUser(guild, user);
+    }
+    
+    //All of this is hardcoded, clean it up eventually
+    private static void notifyUnlocks(IChannel channel, User user) {
+        String message = "";
+        if (user.getPrestige() == 0) {
+            int level = user.getLevel();
+            if (level == 40) {
+                message = "You have unlocked the ability to **set an emoji** in your name on the Realm!"
+                        + "\n\n*You can type `!emoji` on the server to get started.*";
+            } else if (level == 60) {
+                message = "You have unlocked the ability to **change your nickname** on The Realm!"
+                        + "\n\n*You can type `!name` on the server to get started.*";
+            }
+        } else { //already prestiged
+            discord.objects.Color color = ColorManager.getUnlockedColor(user.getTotalLevels());
+            if (color != null) {
+                message = "You have unlocked the name color **" + color.getName() + "** on The Realm!"
+                        + "\n\n*You can type `!color list` on the server to view your unlocked colors.*";
+            }
+        }
+        BotUtils.sendMessage(channel, "Congratulations!", message, Color.ORANGE);
     }
     
     private static void maxOutUser(IChannel channel, User user) {
         user.setXPForLevel(0);
         user.setXP(0);
         BotUtils.sendMessage(channel, "Congratulations!", "You have reached the max level. "
-                + "*You will no longer earn **any xp** until prestiged.*"
+                + "*You will no longer earn **any more xp** until prestiged.*"
                 + "\n\nYou can now prestige and carry over back to level one with `!prestige`"
-                + "\n\nYou will keep all level perks, and gain additional customization perks."
-                + "\n\nPrestiging is **PERMANENT.** Only do so if you are ready.");
+                + "\n\nYou will keep all level perks, and gain additional unlocks as you level again."
+                + "\n\nPrestiging is **PERMANENT.** Only do so if you are ready.", Color.CYAN);
     }
     
     public static void prestigeUser(IChannel channel, User user) {
@@ -69,7 +97,14 @@ public class LevelManager {
         NameManager.formatNameOfUser(guild, user);
         RankManager.setRankOfUser(guild, user);
         BotUtils.sendMessage(channel, "@here", "Alert", 
-                user.getName() + " has **prestiged!** Praise unto thee.", Color.CYAN);
+                user.getName() + " is now **Prestige " + user.getPrestige() 
+                        + "!** Praise unto thee.", Color.CYAN);
+        //bad to put it here, organize unlock messages in future
+        if (user.getPrestige() == 1) {
+            BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID())), 
+                    "Congratulations!", "You have unlocked the ability to **change your name color** on The Realm!"
+                        + "\n\n*You can type `!color` on the server get started.*");
+        }
     }
     
     public static void checkXPUser(IGuild guild, User user) {
@@ -84,7 +119,7 @@ public class LevelManager {
         user.setXPForLevel(user.getLevel() * 10 + 50);       
     }
     
-    public static EmbedObject buildInfo(User user, IUser dUser) {
+    public static EmbedObject buildUserInfo(User user, IUser dUser) {
         EmbedBuilder builder = new EmbedBuilder();
         builder.withColor(Color.CYAN);
         builder.withAuthorIcon(dUser.getAvatarURL());
@@ -92,20 +127,23 @@ public class LevelManager {
         builder.withDesc(user.getRank().getName());
         builder.appendField("Level", "`" + user.getLevel() + "`", true);
         int prestige = user.getPrestige();
-        if (prestige > 0) 
+        if (prestige > 0) {
             builder.appendField("Prestige", String.format("`%d%c`", 
                     prestige, PRESTIGE_SYMBOLS[prestige - 1]), true);
+            builder.appendField("Total Level", "`" + user.getTotalLevels() + "`", true);
+        }
         builder.appendField("XP", "`" + user.getXP() + "/" + user.getXPForLevel() + "`", true);
-        builder.appendField("Progress to Next Level", getProgress(user), false);
+        int percentage = (int) Math.round((double) user.getXP() / user.getXPForLevel() * 100); //percentage calc
+        builder.appendField(percentage + "% to Level " + (user.getLevel() + 1), 
+                getBarProgress(percentage), false);
         
         return builder.build();
     }
     
-    private static String getProgress(User user) {
+    private static String getBarProgress(int percentage) {
         StringBuilder builder = new StringBuilder();
-        //generates an int 1-10 depicting progress based on xp
-        int prog = (int) Math.floor(((double) user.getXP() / user.getXPForLevel()) * 10);
-        
+        //generate an int 1-10 depicting progress based on percentage
+        int prog = percentage / 10;       
         for (int i = 1; i <= 10; i++) {
             if (i <= prog)
                 builder.append(":white_large_square: ");

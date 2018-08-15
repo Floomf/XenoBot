@@ -49,7 +49,7 @@ public class EmojiCommand extends AbstractCommand{
     
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[emoji]", "Set an emoji next to your name."
-                + " Providing \"none\" as the parameter will remove your current emoji."            
+                + " Providing `\"none\"` as the parameter will remove your current emoji."            
                 + "\n*(Level 40+ or Prestiged)*");
     }
     

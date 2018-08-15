@@ -79,7 +79,7 @@ public class UserManager {
         for (User user : new ArrayList<>(users)) {
             //if id is null then they cant be found on the guild
             //but only remove them if they are low enough level
-            if (user.getLevel() < 10 && guild.getUserByID(user.getID()) == null) {
+            if (user.getLevel() < 10 && user.getPrestige() < 1 && guild.getUserByID(user.getID()) == null) {
                 users.remove(user);
                 System.out.println("Removed " + user.getName() + " from the database.");
             }
