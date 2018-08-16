@@ -1,6 +1,6 @@
 package discord;
 
-import discord.commands.AbstractCommand;
+import discord.command.AbstractCommand;
 import java.util.HashMap;
 import java.util.HashSet;
 

@@ -1,10 +1,10 @@
-package discord.commands.info;
+package discord.command.info;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.BotUtils;
-import discord.commands.AbstractCommand;
-import discord.commands.CommandCategory;
+import discord.command.AbstractCommand;
+import discord.command.CommandCategory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -54,6 +54,7 @@ public class CryptoCommand extends AbstractCommand {
             builder.withFooterText("coinmarketcap.com");
             BotUtils.sendEmbedMessage(channel, builder.build());
         } catch (IOException e) {
+            e.printStackTrace();
             BotUtils.sendErrorMessage(channel, "Specified coin was not found in the database.");
         }
     }

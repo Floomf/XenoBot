@@ -1,6 +1,6 @@
 package discord;
 
-import discord.objects.User;
+import discord.object.User;
 import java.awt.Color;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
@@ -63,16 +63,16 @@ public class LevelManager {
             int level = user.getLevel();
             if (level == 40) {
                 message = "You have unlocked the ability to **set an emoji** in your name on the Realm!"
-                        + "\n\n*You can type `!emoji` on the server to get started.*";
+                        + "\n\n*You can type* `!emoji` *on the server to get started.*";
             } else if (level == 60) {
                 message = "You have unlocked the ability to **change your nickname** on The Realm!"
-                        + "\n\n*You can type `!name` on the server to get started.*";
+                        + "\n\n*You can type* `!name` *on the server to get started.*";
             }
         } else { //already prestiged
-            discord.objects.Color color = ColorManager.getUnlockedColor(user.getTotalLevels());
+            discord.object.Color color = ColorManager.getUnlockedColor(user.getTotalLevels());
             if (color != null) {
                 message = "You have unlocked the name color **" + color.getName() + "** on The Realm!"
-                        + "\n\n*You can type `!color list` on the server to view your unlocked colors.*";
+                        + "\n\n*You can type* `!color list` *on the server to view your unlocked colors.*";
             }
         }
         BotUtils.sendMessage(channel, "Congratulations!", message, Color.ORANGE);
@@ -96,14 +96,14 @@ public class LevelManager {
         IGuild guild = channel.getGuild();
         NameManager.formatNameOfUser(guild, user);
         RankManager.setRankOfUser(guild, user);
-        BotUtils.sendMessage(channel, "@here", "Alert", 
+        BotUtils.sendMessage(channel, "@here", "ALERT", 
                 user.getName() + " is now **Prestige " + user.getPrestige() 
                         + "!** Praise unto thee.", Color.CYAN);
         //bad to put it here, organize unlock messages in future
         if (user.getPrestige() == 1) {
             BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID())), 
                     "Congratulations!", "You have unlocked the ability to **change your name color** on The Realm!"
-                        + "\n\n*You can type `!color` on the server get started.*");
+                        + "\n\n*You can type* `!color` *on the server get started.*");
         }
     }
     
@@ -147,7 +147,7 @@ public class LevelManager {
         for (int i = 1; i <= 10; i++) {
             if (i <= prog)
                 builder.append(":white_large_square: ");
-            else
+            else //different emojis handled by discord
                 builder.append(":white_square_button: ");
         }
         return builder.toString();

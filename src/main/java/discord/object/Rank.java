@@ -1,4 +1,4 @@
-package discord.objects;
+package discord.object;
 
 public class Rank {
     

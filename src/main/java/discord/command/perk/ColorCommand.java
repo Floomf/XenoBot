@@ -1,13 +1,13 @@
-package discord.commands.perk;
+package discord.command.perk;
 
 import discord.BotUtils;
 import discord.ColorManager;
 import discord.CommandHandler;
 import discord.UserManager;
-import discord.commands.AbstractCommand;
-import discord.commands.CommandCategory;
-import discord.objects.User;
-import discord.objects.Color;
+import discord.command.AbstractCommand;
+import discord.command.CommandCategory;
+import discord.object.User;
+import discord.object.Color;
 import java.util.Arrays;
 import java.util.List;
 import sx.blah.discord.handle.obj.IChannel;

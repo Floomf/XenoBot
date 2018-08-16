@@ -1,10 +1,10 @@
-package discord.objects;
+package discord.object;
 
 public class Color {
     
-    private String name;
-    private int prestigeRequired;
-    private int levelRequired;
+    private final String name;
+    private final int prestigeRequired;
+    private final int levelRequired;
     
     public Color(String name, int prestige, int level) {
         this.name = name;
@@ -20,6 +20,7 @@ public class Color {
         return prestigeRequired * 80 + levelRequired;
     }
     
+    @Override
     public String toString() {
         return getName();
     }

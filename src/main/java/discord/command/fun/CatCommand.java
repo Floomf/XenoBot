@@ -1,8 +1,8 @@
-package discord.commands.fun;
+package discord.command.fun;
 
 import discord.BotUtils;
-import discord.commands.AbstractCommand;
-import discord.commands.CommandCategory;
+import discord.command.AbstractCommand;
+import discord.command.CommandCategory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -27,8 +27,8 @@ public class CatCommand extends AbstractCommand {
                 FileUtils.copyURLToFile(new URL( //shh, close your eyes
                         "http://thecatapi.com/api/images/get?format=src&api_key=MjA2OTcy&type=" + type), f);
                 message.getChannel().sendFile(f);
-            } catch (IOException ex) {
-                ex.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         } else {
             BotUtils.sendErrorMessage(message.getChannel(), 

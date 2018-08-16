@@ -1,8 +1,8 @@
-package discord.commands.fun;
+package discord.command.fun;
 
 import discord.BotUtils;
-import discord.commands.AbstractCommand;
-import discord.commands.CommandCategory;
+import discord.command.AbstractCommand;
+import discord.command.CommandCategory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,8 +25,8 @@ public class DadJokeCommand extends AbstractCommand {
             hc.connect();
             BufferedReader br = new BufferedReader(new InputStreamReader(hc.getInputStream()));
             BotUtils.sendMessage(message.getChannel(), "Get this:", String.format("`%s`", br.readLine()));
-        } catch (IOException ex) {
-            System.out.println(ex);
+        } catch (IOException e) {
+             e.printStackTrace();
         }
     }
     

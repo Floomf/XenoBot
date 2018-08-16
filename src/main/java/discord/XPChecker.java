@@ -1,5 +1,6 @@
 package discord;
 
+import discord.object.User;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -39,26 +40,27 @@ public class XPChecker implements Runnable {
         }
     }
     
-    private void checkUsers(List<IUser> users, IChannel channel, IGuild guild) {
-        users.removeIf(user -> user.isBot() //only count people that are "talking"
+    private void checkUsers(List<IUser> dUsers, IChannel channel, IGuild guild) {
+        dUsers.removeIf(user -> user.isBot() //only count people that are "talking"
                 || user.getVoiceStateForGuild(guild).isSelfDeafened()
                 || user.getVoiceStateForGuild(guild).isSelfMuted()
                 || user.getVoiceStateForGuild(guild).isMuted());
-        if (users.size() >= 2) {
+        if (dUsers.size() >= 2) {
             List<String> names = new ArrayList<>();
-            int xp = 1 * users.size() + 13; // min 450/hr
-            users.removeIf(user -> UserManager.getUserLevel(
+            int xp = 1 * dUsers.size() + 13; // min 450/hr
+            dUsers.removeIf(user -> UserManager.getUserLevel(
                     user.getLongID()) == LevelManager.MAX_LEVEL);
-            for (IUser user : users) {
-                String name = UserManager.getUserFromID(user.getLongID()).getName();
-                LevelManager.addUserXPFromID(guild, user.getLongID(), xp);
-                names.add(name);
-                System.out.println("Gave " + xp + "xp to " + name);
-            }
+            if (dUsers.size() == 0) return; //if all are max level
+            dUsers.forEach(dUser -> names.add(UserManager.getUserName(dUser.getLongID())));
             BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
                     String.format("+%dXP in %s (%s)", xp, 
                             channel.getName(), LocalDateTime.now().format(formatter)),
                             names.toString());
+            for (IUser dUser : dUsers) {
+                User user = UserManager.getUserFromID(dUser.getLongID());
+                user.addXP(xp);
+                System.out.println("Gave " + xp + "xp to " + user.getName());
+            }                     
             UserManager.saveDatabase();
         }
     }

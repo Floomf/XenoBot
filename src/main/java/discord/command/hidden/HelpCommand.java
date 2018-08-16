@@ -1,9 +1,9 @@
-package discord.commands.hidden;
+package discord.command.hidden;
 
 import discord.BotUtils;
 import discord.CommandManager;
-import discord.commands.AbstractCommand;
-import discord.commands.CommandCategory;
+import discord.command.AbstractCommand;
+import discord.command.CommandCategory;
 import java.util.HashSet;
 import java.util.stream.Stream;
 import sx.blah.discord.handle.obj.IChannel;

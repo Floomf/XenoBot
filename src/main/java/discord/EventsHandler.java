@@ -11,6 +11,7 @@ import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.guild.member.UserJoinEvent;
 import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
+import sx.blah.discord.handle.impl.events.shard.ReconnectFailureEvent;
 import sx.blah.discord.handle.impl.events.shard.ResumedEvent;
 import sx.blah.discord.handle.obj.ActivityType;
 import sx.blah.discord.handle.obj.IGuild;
@@ -64,6 +65,13 @@ public class EventsHandler {
             System.out.println("Shard resumed, starting XP scheduler");
             future = scheduler.scheduleAtFixedRate(new XPChecker(
                     event.getClient()), 2, 2, TimeUnit.MINUTES);
+        }
+    }
+    
+    @EventSubscriber
+    public void onReconnectFailureEvent(ReconnectFailureEvent event) {
+        if (event.isShardAbandoned()) {
+            System.exit(1);
         }
     }
     

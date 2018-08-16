@@ -1,8 +1,8 @@
-package discord.commands.utility;
+package discord.command.utility;
 
 import discord.BotUtils;
-import discord.commands.AbstractCommand;
-import discord.commands.CommandCategory;
+import discord.command.AbstractCommand;
+import discord.command.CommandCategory;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class RngCommand extends AbstractCommand {
@@ -18,7 +18,7 @@ public class RngCommand extends AbstractCommand {
                 BotUtils.sendMessage(message.getChannel(), "Result",
                         String.valueOf((int) (Math.random() * limit + 1)));
             }
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException e) {
             BotUtils.sendErrorMessage(message.getChannel(), 
                 "Parameter is not an integer greater than zero.");
         }

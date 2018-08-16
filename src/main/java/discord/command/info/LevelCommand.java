@@ -1,11 +1,11 @@
-package discord.commands.info;
+package discord.command.info;
 
 import discord.BotUtils;
 import discord.CommandHandler;
 import discord.LevelManager;
 import discord.UserManager;
-import discord.commands.AbstractCommand;
-import discord.commands.CommandCategory;
+import discord.command.AbstractCommand;
+import discord.command.CommandCategory;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class LevelCommand extends AbstractCommand{

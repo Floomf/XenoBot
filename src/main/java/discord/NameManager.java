@@ -1,6 +1,6 @@
 package discord;
 
-import discord.objects.User;
+import discord.object.User;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 

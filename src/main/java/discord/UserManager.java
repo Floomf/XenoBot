@@ -1,6 +1,6 @@
 package discord;
 
-import discord.objects.User;
+import discord.object.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -43,10 +43,8 @@ public class UserManager {
             users = new ArrayList<>(Arrays.asList(
                     mapper.readValue(new File("users.json"), User[].class)));
             System.out.println("Database loaded.");                    
-        } catch (IOException ex) {
-            System.out.println(ex);
-            System.out.println("Database failed to load.");
-            System.exit(0);
+        } catch (IOException e) {
+            System.err.println("Database failed to load with error: ");
         }
     }
     
@@ -57,9 +55,9 @@ public class UserManager {
         try {
             mapper.writerWithDefaultPrettyPrinter().writeValue(new File("users.json"), users);
             System.out.println("Database saved.");
-        } catch (IOException ex) {
-            System.out.println(ex);
-            System.out.println("Database failed to save.");
+        } catch (IOException e) {
+            System.err.println("Database failed to save with error: ");
+            e.printStackTrace();
         }
     }
     
@@ -157,10 +155,6 @@ public class UserManager {
     
     public static int getUserLevel(long id) {
         return getUserFromID(id).getLevel();
-    }
-    
-    public static int getUserXP(long id) {
-        return getUserFromID(id).getXP();
     }
     
     public static int getUserXPNeeded(long id) {

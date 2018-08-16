@@ -1,7 +1,7 @@
 package discord;
 
-import discord.objects.Color;
-import discord.objects.User;
+import discord.object.Color;
+import discord.object.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

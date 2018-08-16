@@ -1,4 +1,4 @@
-package discord.commands;
+package discord.command;
 
 import sx.blah.discord.handle.obj.IMessage;
 

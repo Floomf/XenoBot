@@ -1,8 +1,8 @@
-package discord.commands.utility;
+package discord.command.utility;
 
 import discord.BotUtils;
-import discord.commands.AbstractCommand;
-import discord.commands.CommandCategory;
+import discord.command.AbstractCommand;
+import discord.command.CommandCategory;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class CoinCommand extends AbstractCommand {

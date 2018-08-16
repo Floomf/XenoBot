@@ -17,10 +17,14 @@ public class Main {
         if (!tokenFile.exists()) {
             try {
                 tokenFile.createNewFile();
+                System.out.println("token.txt created.");
+                System.out.println("Please paste your bot token into the file and restart the program.");
+                System.out.println("Press enter to exit...");
+                System.in.read();
+                System.exit(0);
             } catch (IOException e) {
-                System.out.println("Error creating token.txt: " + e);
+                e.printStackTrace();
             }
-            System.exit(0);
         }
         try {
             client = new ClientBuilder()
@@ -29,7 +33,7 @@ public class Main {
             client.getDispatcher().registerListeners(
                     new CommandHandler(), new EventsHandler());
         } catch (DiscordException e) {
-            System.out.println(e);
+             e.printStackTrace();
         }  
     }      
     
@@ -38,9 +42,9 @@ public class Main {
             Scanner sc = new Scanner(file);
             return sc.nextLine();
         } catch (FileNotFoundException e) {
-            System.out.println(e);
+             e.printStackTrace();
         }
-        return "";
+        return null;
     }
     
     //is this bad practice?

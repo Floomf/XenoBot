@@ -1,11 +1,11 @@
-package discord.commands.hidden;
+package discord.command.hidden;
 
 import discord.BotUtils;
 import discord.LevelManager;
 import discord.UserManager;
-import discord.commands.AbstractCommand;
-import discord.commands.CommandCategory;
-import discord.objects.User;
+import discord.command.AbstractCommand;
+import discord.command.CommandCategory;
+import discord.object.User;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 

@@ -1,6 +1,6 @@
 package discord;
 
-import discord.objects.User;
+import discord.object.User;
 import java.awt.Color;
 import java.util.List;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
@@ -21,7 +21,8 @@ public class BotUtils {
             try{
                 channel.sendMessage(object);
             } catch (DiscordException e){
-                System.err.println("Message could not be sent with error: " + e);
+                System.err.println("Message could not be sent with error: ");
+                e.printStackTrace();
             }
         }).get();
     }
@@ -31,7 +32,8 @@ public class BotUtils {
             try {
                 channel.sendMessage(outside, getBuilder(header, body, color).build());
             } catch (DiscordException e){
-                System.err.println("Message could not be sent with error: " + e);
+                System.err.println("Message could not be sent with error: ");
+                 e.printStackTrace();
             }
         }).get(); //.get() makes sure they send in order cause async??
     }
@@ -62,7 +64,8 @@ public class BotUtils {
                 guild.setUserNickname(user, name);
                 System.out.println("Set nickname of " + user.getName() + " to " + name);
             } catch (DiscordException e){
-                System.err.println("Name could not be set with error: " + e);
+                System.err.println("Name could not be set with error: ");
+                e.printStackTrace();
             }
         });
     }
@@ -72,7 +75,8 @@ public class BotUtils {
             try{
                 guild.editUserRoles(user, roles.toArray(new IRole[roles.size()]));
             } catch (DiscordException e) {
-                System.err.println("Roles could not be set with error: " + e);
+                System.err.println("Roles could not be set with error: ");
+                e.printStackTrace();
             }
         });
     }   

@@ -3,8 +3,8 @@ package discord;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.events.EventSubscriber;
-import discord.commands.AbstractCommand;
-import discord.commands.CommandCategory;
+import discord.command.AbstractCommand;
+import discord.command.CommandCategory;
 
 public class CommandHandler {
     /* to be reimplemented in raffle command
@@ -252,49 +252,7 @@ public class CommandHandler {
                 }
 
                 return;
-            
-            //this a terrible fucking command and needs to go or be rewritten
-            case "flood":
-                //Make sure the command can only be run by the server owner
-                if (!isOwner) {
-                    BotUtils.sendErrorMessage(channel, "You are not this server's owner.");
-                    return;
-                }
-                
-                if (!hasArgs) {
-                    BotUtils.sendUsageMessage(channel, "!flood [amount]"
-                            + "\n\nRapidly reconnects to your connected voice channel, spamming the users connected."
-                            + "\n\namount - The amount of reconnections (300 max).");
-                    return;
-                }
-                
-                if (dUser.getVoiceStateForGuild(guild).getChannel() == null) {
-                    BotUtils.sendErrorMessage(channel, 
-                            "You are not currently connected to any voice channel on this server!");
-                    return;
-                }
-                
-                try {
-                    int amount = Integer.parseInt(args[1]);
-                    if (amount > 0 && amount <= 300) {
-                        for (int i = 1; i <= amount; i++) {
-                            try {
-                                dUser.getVoiceStateForGuild(guild).getChannel().join();
-                                TimeUnit.MILLISECONDS.sleep(400);
-                                dUser.getVoiceStateForGuild(guild).getChannel().leave();
-                                TimeUnit.MILLISECONDS.sleep(400);
-                            } catch (InterruptedException ex) {
-
-                            }
-                        }
-                        BotUtils.sendMessage(channel, "Success", "Flooding complete.");
-                        return;
-                    }
-                } catch (NumberFormatException e) {
-                }
-                BotUtils.sendErrorMessage(channel, "Amount is not an integer between 1 and 300.");
-                return;       
-                      
+                  
             case "savedata":
                 if (!isOwner) {
                     BotUtils.sendErrorMessage(channel, "You are not this server's owner.");
