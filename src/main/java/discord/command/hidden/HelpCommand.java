@@ -30,7 +30,7 @@ public class HelpCommand extends AbstractCommand {
             EmbedBuilder builder = BotUtils.getBuilder("Available Commands", 
                     "*For info on a command, use:* **!help [command]**");
             
-            HashSet<AbstractCommand> commands = CommandManager.getCommands();
+            HashSet<AbstractCommand> commands = CommandManager.getAllCommands();
             commands.removeIf(command -> command.getCategory() == CommandCategory.HIDDEN);
             if (!message.getAuthor().equals(message.getGuild().getOwner())) {
                 commands.removeIf(command -> command.getCategory() == CommandCategory.ADMIN);

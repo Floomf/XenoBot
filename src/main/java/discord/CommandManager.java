@@ -11,7 +11,7 @@ public class CommandManager {
     private static HashMap<String, AbstractCommand> commands = new HashMap<>();
     
     public static void createCommands() {       
-        Reflections reflections = new Reflections("discord.commands");
+        Reflections reflections = new Reflections("discord.command");
         for (Class<?> command : reflections.getSubTypesOf(AbstractCommand.class)) {
             try {
                 AbstractCommand cmd = (AbstractCommand) command.newInstance();
@@ -29,7 +29,7 @@ public class CommandManager {
         return commands.get(name);
     }   
     
-    public static HashSet<AbstractCommand> getCommands() {
+    public static HashSet<AbstractCommand> getAllCommands() {
         return new HashSet<>(commands.values());
     }
     
