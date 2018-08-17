@@ -50,10 +50,10 @@ public class XPCommand extends AbstractCommand {
         
         //all data is valid, so perform action based on type
         if (type.equals("give")) {
-            user.addXP(xp);
+            LevelManager.addAndCheckUserXP(message.getGuild(), user, xp);
             BotUtils.sendInfoMessage(channel, "Gave " + user.getName() + " **" + xp + "**XP");
         } else if (type.equals("set")) {
-            user.setXP(xp);
+            user.setXP(xp); //TODO handle this more safely?
             BotUtils.sendInfoMessage(channel, "Set " + user.getName() + "'s XP to **" + xp + "**");
         }        
         LevelManager.checkXPUser(message.getGuild(), user);

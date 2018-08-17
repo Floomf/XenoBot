@@ -14,11 +14,10 @@ public class LevelManager {
     public static final int MAX_PRESTIGE = 10; //unused for now
     public static final char[] PRESTIGE_SYMBOLS = {'★','✷','⁂','❖','❃','✠','✪','☭','☬','♆'};
     
-    public static void addUserXPFromID(IGuild guild, long id, int amount) {
-        User user = UserManager.getUserFromID(id);
-        user.addXP(amount); 
+    public static void addAndCheckUserXP(IGuild guild, User user, int amount) {
+        user.addXP(amount);
         checkXPUser(guild, user);
-    }   
+    }
     
     //this needs to be a lot cleaner, fix it sooner
     private static void changeLevelUser(IGuild guild, User user, boolean levelUp) {

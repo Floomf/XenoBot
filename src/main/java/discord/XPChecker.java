@@ -1,6 +1,5 @@
 package discord;
 
-import discord.object.User;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
 public class XPChecker implements Runnable {
 
     private final IDiscordClient client;
-    private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE hh:mma");
+    private final static DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("EEEE hh:mma");
 
     public XPChecker(IDiscordClient client) {
          this.client = client;
@@ -22,7 +21,7 @@ public class XPChecker implements Runnable {
     
     public void run() {
         System.out.println(String.format("[%s] Checking all guild users to add xp",
-                LocalDateTime.now().format(formatter)));
+                LocalDateTime.now().format(DATE_FORMAT)));
         checkGuilds(client.getGuilds());
     }
 
@@ -50,17 +49,15 @@ public class XPChecker implements Runnable {
             int xp = 1 * dUsers.size() + 13; // min 450/hr
             dUsers.removeIf(user -> UserManager.getUserLevel(
                     user.getLongID()) == LevelManager.MAX_LEVEL);
-            if (dUsers.size() == 0) return; //if all are max level
+            if (dUsers.isEmpty()) return; //if all are max level
             dUsers.forEach(dUser -> names.add(UserManager.getUserName(dUser.getLongID())));
             BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
                     String.format("+%dXP in %s (%s)", xp, 
-                            channel.getName(), LocalDateTime.now().format(formatter)),
+                            channel.getName(), LocalDateTime.now().format(DATE_FORMAT)),
                             names.toString());
             for (IUser dUser : dUsers) {
-                User user = UserManager.getUserFromID(dUser.getLongID());
-                user.addXP(xp);
-                System.out.println("Gave " + xp + "xp to " + user.getName());
-            }                     
+                LevelManager.addAndCheckUserXP(guild, UserManager.getUserFromID(dUser.getLongID()), xp);
+            }
             UserManager.saveDatabase();
         }
     }
