@@ -120,17 +120,19 @@ public class LevelManager {
         user.setXPForLevel(user.getLevel() * 10 + 50);       
     }
     
-    public static EmbedObject buildUserInfo(User user, IUser dUser) {
-        EmbedBuilder builder = BotUtils.getBuilder(user.getName(), user.getRank().getName(), Color.CYAN);
-        builder.withImage(dUser.getAvatarURL());
-        builder.appendField("Level", "`" + user.getLevel() + "`", true);
+    public static EmbedObject buildUserInfo(IGuild guild, User user, IUser dUser) {
+        EmbedBuilder builder = BotUtils.getBuilder(user.getName(), 
+                user.getRank().getName(), dUser.getColorForGuild(guild));
+        builder.withThumbnail(dUser.getAvatarURL());
+        builder.appendField("Level :gem:", "`" + user.getLevel() + "`", true);
         int prestige = user.getPrestige();
         if (prestige > 0) {
-            builder.appendField("Prestige", String.format("`%d%c`", 
+            builder.appendField("Prestige :trophy:", String.format("`%d%c`", 
                     prestige, PRESTIGE_SYMBOLS[prestige - 1]), true);
-            builder.appendField("Total Level", "`" + user.getTotalLevels() + "`", true);
+            builder.appendField("Total Level :clock4:", "`" + user.getTotalLevels() + "`", true);
         }
-        builder.appendField("XP", "`" + user.getXP() + "/" + user.getXPForLevel() + "`", true);
+        builder.appendField("XP :diamond_shape_with_a_dot_inside:", "`" 
+                + user.getXP() + "/" + user.getXPForLevel() + "`", true);
         int percentage = (int) Math.round((double) user.getXP() / user.getXPForLevel() * 100); //percentage calc
         builder.appendField(percentage + "% to Level " + (user.getLevel() + 1), 
                 getBarProgress(percentage), false);
