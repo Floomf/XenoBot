@@ -54,9 +54,9 @@ public class XPCommand extends AbstractCommand {
             BotUtils.sendInfoMessage(channel, "Gave " + user.getName() + " **" + xp + "**XP");
         } else if (type.equals("set")) {
             user.setXP(xp); //TODO handle this more safely?
+            LevelManager.checkXPOfUser(message.getGuild(), user);
             BotUtils.sendInfoMessage(channel, "Set " + user.getName() + "'s XP to **" + xp + "**");
         }        
-        LevelManager.checkXPUser(message.getGuild(), user);
         UserManager.saveDatabase();
     }
     

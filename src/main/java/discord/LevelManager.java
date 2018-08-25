@@ -16,47 +16,57 @@ public class LevelManager {
     
     public static void addAndCheckUserXP(IGuild guild, User user, int amount) {
         user.addXP(amount);
-        checkXPUser(guild, user);
+        checkXPOfUser(guild, user);
     }
     
-    //this needs to be a lot cleaner, fix it sooner
-    private static void changeLevelUser(IGuild guild, User user, boolean levelUp) {
-        int amount = (levelUp) ? 1 : -1;
-        
-        if (levelUp) {          
-            user.addXP(-user.getXPForLevel()); //carry over xp to next level
-        }  
-        
-        user.addLevels(amount);
-        setUserXPForLevel(user);     
-        
-        if (!levelUp) {           
-            user.addXP(user.getXPForLevel()); //subtract from the max
+    public static void checkXPOfUser(IGuild guild, User user) {
+        int xp = user.getXP();
+        if (xp >= user.getXPForLevel()) {
+            levelUpUser(guild, user);
+            checkUnlocksForUser(guild, user);
+        } else if (xp < 0) {
+            levelDownUser(guild, user);
+        }      
+        if (xp >= user.getXPForLevel() || xp < 0) { //finally do these
+            RankManager.setRankOfUser(guild, user);
+            if (user.getLevel() < MAX_LEVEL) checkXPOfUser(guild, user);
         }
-        
-        NameManager.formatNameOfUser(guild, user);         
-        int level = user.getLevel();
-        System.out.println(user.getName() + " is now level " + level);
+    }
+    
+    //Only handles leveling up, logic and xp handling handled elsewhere
+    private static void levelUpUser(IGuild guild, User user) {
+        user.addXP(-user.getXPForLevel()); //carry over xp to next level by subtracting from level xp
+        user.addLevels(1);
+        setUserXPForLevel(user);
         BotUtils.sendMessage(guild.getChannelsByName("log").get(0), "Level up!",
                 String.format("%s\n**%d → %d**", BotUtils.getMention(user), 
-                        level - 1, level), Color.ORANGE); 
-        
-        RankManager.setRankOfUser(guild, user);
-        
-        if (level % 20 == 0) { //check for unlocks
+                        user.getLevel() - 1, user.getLevel()), Color.ORANGE);
+    }
+    
+    //same as leveling up method
+    private static void levelDownUser(IGuild guild, User user) {
+        user.addLevels(-1);
+        setUserXPForLevel(user); 
+        user.addXP(user.getXPForLevel()); //add negative xp to new level xp
+        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), "Level down!",
+                String.format("%s\n**%d → %d**", BotUtils.getMention(user), 
+                        user.getLevel(), user.getLevel() - 1), Color.RED);
+    }
+    
+    private static void checkUnlocksForUser(IGuild guild, User user) {
+        int level = user.getLevel();
+        if (level % 20 == 0) {
             IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID()));
-            notifyUnlocks(pmChannel, user);
+            notifyUnlocksForUser(pmChannel, user);
             if (level == MAX_LEVEL) {
                 //send DM to user
                 maxOutUser(pmChannel, user);
-                return;
             }
         }
-        checkXPUser(guild, user);
     }
     
     //All of this is hardcoded, clean it up eventually
-    private static void notifyUnlocks(IChannel channel, User user) {
+    private static void notifyUnlocksForUser(IChannel channel, User user) {
         String message = "";
         if (user.getPrestige() == 0) {
             int level = user.getLevel();
@@ -106,24 +116,13 @@ public class LevelManager {
         }
     }
     
-    public static void checkXPUser(IGuild guild, User user) {
-        int xp = user.getXP();
-        if (xp >= user.getXPForLevel())
-            changeLevelUser(guild, user, true);
-        else if (xp < 0)
-            changeLevelUser(guild, user, false);
-    }
-    
     public static void setUserXPForLevel(User user) {
         user.setXPForLevel(user.getLevel() * 10 + 50);       
     }
     
     public static EmbedObject buildUserInfo(User user, IUser dUser) {
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.withColor(Color.CYAN);
-        builder.withAuthorIcon(dUser.getAvatarURL());
-        builder.withAuthorName(user.getName());
-        builder.withDesc(user.getRank().getName());
+        EmbedBuilder builder = BotUtils.getBuilder(user.getName(), user.getRank().getName(), Color.CYAN);
+        builder.withImage(dUser.getAvatarURL());
         builder.appendField("Level", "`" + user.getLevel() + "`", true);
         int prestige = user.getPrestige();
         if (prestige > 0) {
