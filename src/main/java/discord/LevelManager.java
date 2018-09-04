@@ -24,10 +24,10 @@ public class LevelManager {
         if (xp >= user.getXPForLevel()) {
             levelUpUser(guild, user);
             checkUnlocksForUser(guild, user);
+            RankManager.setRankOfUser(guild, user);
+            if (user.getLevel() < MAX_LEVEL) checkXPOfUser(guild, user);
         } else if (xp < 0) {
             levelDownUser(guild, user);
-        }      
-        if (xp >= user.getXPForLevel() || xp < 0) { //finally do these
             RankManager.setRankOfUser(guild, user);
             if (user.getLevel() < MAX_LEVEL) checkXPOfUser(guild, user);
         }
