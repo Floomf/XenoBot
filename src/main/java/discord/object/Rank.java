@@ -2,24 +2,17 @@ package discord.object;
 
 public class Rank {
     
-    private final long id;
     private final String name;
     private final int levelRequired;
     
     private Rank() {
-        this.id = 0;
         this.name = "";
         this.levelRequired = 0;
     }
     
-    public Rank(long ID, String name, int levelRequired) {
-        this.id = ID;
+    public Rank(String name, int levelRequired) {
         this.name = name;
         this.levelRequired = levelRequired;
-    }
-    
-    public long getID() {
-        return id;
     }
     
     public String getName() {
@@ -31,6 +24,7 @@ public class Rank {
     }
     
     public boolean equals(Rank other) {
-        return (other.getID() == this.id && other.getLevelRequired() == this.levelRequired);
+        return (other.getName().equals(this.getName()) 
+                && other.getLevelRequired() == this.levelRequired);
     }
 }
