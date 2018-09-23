@@ -25,8 +25,8 @@ public class NameCommand extends AbstractCommand {
             return;
         }
         String name = CommandHandler.combineArgs(0, args);
-        if (name.length() > 16) { //name can't be too long
-            name = name.substring(0, 15);
+        if (name.length() > 17) { //name can't be too long
+            name = name.substring(0, 16);
         }
         
         if (!name.matches("[ -~]+")) { //regex for char codes between 32-126

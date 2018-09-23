@@ -25,7 +25,7 @@ public class CatCommand extends AbstractCommand {
             File f = new File("cat." + type);
             try {
                 FileUtils.copyURLToFile(new URL( //shh, close your eyes
-                        "http://thecatapi.com/api/images/get?format=src&api_key=MjA2OTcy&type=" + type), f);
+                        "https://thecatapi.com/api/images/get?format=src&api_key=MjA2OTcy&type=" + type), f);
                 message.getChannel().sendFile(f);
             } catch (IOException e) {
                 e.printStackTrace();

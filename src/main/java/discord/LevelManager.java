@@ -120,7 +120,7 @@ public class LevelManager {
         user.setXPForLevel(user.getLevel() * 10 + 50);       
     }
     
-    public static EmbedObject buildUserInfo(IGuild guild, User user, IUser dUser) {
+    public static EmbedBuilder buildBasicUserInfo(IGuild guild, User user, IUser dUser) {
         EmbedBuilder builder = BotUtils.getBuilder(user.getName(), 
                 user.getRank().getName(), dUser.getColorForGuild(guild));
         builder.withThumbnail(dUser.getAvatarURL());
@@ -129,16 +129,52 @@ public class LevelManager {
         if (prestige > 0) {
             builder.appendField("Prestige :trophy:", String.format("`%d%c`", 
                     prestige, PRESTIGE_SYMBOLS[prestige - 1]), true);
-            builder.appendField("Total Level :clock4:", "`" + user.getTotalLevels() + "`", true);
         }
         builder.appendField("XP :diamond_shape_with_a_dot_inside:", "`" 
-                + user.getXP() + "/" + user.getXPForLevel() + "`", true);
+                + user.getXP() + "/" + user.getXPForLevel() + "`", true); 
+        return builder;
+    }
+    
+    public static EmbedObject buildFullUserInfo(IGuild guild, User user, IUser dUser) {
+        EmbedBuilder builder = buildBasicUserInfo(guild, user, dUser);
+        builder.appendField("Total XP :clock4:", "`" + getTotalXP(user) + "`", true);
+        if (user.getPrestige() > 0) {
+            builder.appendField("Total Level :arrows_counterclockwise:", "`" + user.getTotalLevels() + "`", true);
+            builder.appendField("Badge Case :beginner: ", "`" + getUserBadges(user) + "`", true);
+        }
         int percentage = (int) Math.round((double) user.getXP() / user.getXPForLevel() * 100); //percentage calc
-        builder.appendField(percentage + "% to Level " + (user.getLevel() + 1), 
-                getBarProgress(percentage), false);
-        
+        if (user.getLevel() < 80) 
+            builder.appendField(percentage + "% to Level " + (user.getLevel() + 1), 
+                getBarProgress(percentage), false);    
         return builder.build();
     }
+    
+    private static String getUserBadges(User user) {
+        String badges = "";
+        for (int i = 0; i < user.getPrestige(); i++) {
+            badges += PRESTIGE_SYMBOLS[i];
+        }
+        return badges;
+    } 
+    
+    private static int getTotalXP(User user) {
+        int xp = 0;      
+        for (int i = 0; i < user.getPrestige(); i++) {
+            xp += getTotalXPForLevel(80);
+        }
+        xp += getTotalXPForLevel(user.getLevel());
+        xp += user.getXP();
+        return xp;
+    }
+       
+    private static int getTotalXPForLevel(int level) {
+        int xp = 0;
+        for (int i = 1; i < level; i++) {
+            xp += i * 10 + 50;
+        }
+        return xp;
+    }
+    
     
     private static String getBarProgress(int percentage) {
         StringBuilder builder = new StringBuilder();
