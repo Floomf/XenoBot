@@ -1,5 +1,7 @@
 package discord;
 
+import discord.object.Prestige;
+import discord.object.Progress;
 import discord.object.User;
 import java.awt.Color;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
@@ -10,10 +12,7 @@ import sx.blah.discord.util.EmbedBuilder;
 
 public class LevelManager {
     
-    public static final int MAX_LEVEL = 80;
-    public static final int MAX_PRESTIGE = 10; //unused for now
-    public static final char[] PRESTIGE_SYMBOLS = {'★','✷','⁂','❖','❃','✠','✪','☭','☬','♆'};
-    
+    /*
     public static void addAndCheckUserXP(IGuild guild, User user, int amount) {
         user.addXP(amount);
         checkXPOfUser(guild, user);
@@ -53,7 +52,8 @@ public class LevelManager {
                         user.getLevel(), user.getLevel() - 1), Color.RED);
     }
     
-    private static void checkUnlocksForUser(IGuild guild, User user) {
+
+    public static void checkUnlocksForUser(IGuild guild, User user) {
         int level = user.getLevel();
         if (level % 20 == 0) {
             IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID()));
@@ -64,12 +64,12 @@ public class LevelManager {
             }
         }
     }
-    
+    */
     //All of this is hardcoded, clean it up eventually
-    private static void notifyUnlocksForUser(IChannel channel, User user) {
+    public static void notifyUnlocksForUser(IChannel channel, User user) {
         String message = "";
-        if (user.getPrestige() == 0) {
-            int level = user.getLevel();
+        if (user.getProgress().getPrestige().getNumber() == 0) {
+            int level = user.getProgress().getLevel();
             if (level == 40) {
                 message = "You have unlocked the ability to **set an emoji** in your name on the Realm!"
                         + "\n\n*You can type* `!emoji` *on the server to get started.*";
@@ -78,7 +78,7 @@ public class LevelManager {
                         + "\n\n*You can type* `!name` *on the server to get started.*";
             }
         } else { //already prestiged
-            discord.object.Color color = ColorManager.getUnlockedColor(user.getTotalLevels());
+            discord.object.Color color = ColorManager.getUnlockedColor(user.getProgress().getTotalLevels());
             if (color != null) {
                 message = "You have unlocked the name color **" + color.getName() + "** on The Realm!"
                         + "\n\n*You can type* `!color list` *on the server to view your unlocked colors.*";
@@ -86,7 +86,7 @@ public class LevelManager {
         }
         BotUtils.sendMessage(channel, "Congratulations!", message, Color.ORANGE);
     }
-    
+    /*
     private static void maxOutUser(IChannel channel, User user) {
         user.setXPForLevel(0);
         user.setXP(0);
@@ -96,9 +96,9 @@ public class LevelManager {
                 + "\n\nYou will keep all level perks, and gain additional unlocks as you level again."
                 + "\n\nPrestiging is **PERMANENT.** Only do so if you are ready.", Color.CYAN);
     }
-    
+   
     public static void prestigeUser(IChannel channel, User user) {
-        user.addPrestige();
+        user.prestige();
         user.setLevel(1);
         user.setXP(0);
         setUserXPForLevel(user);
@@ -119,51 +119,53 @@ public class LevelManager {
     public static void setUserXPForLevel(User user) {
         user.setXPForLevel(user.getLevel() * 10 + 50);       
     }
-    
+    */
     public static EmbedBuilder buildBasicUserInfo(IGuild guild, User user, IUser dUser) {
+        Progress progress = user.getProgress();
         EmbedBuilder builder = BotUtils.getBuilder(user.getName(), 
-                user.getRank().getName(), dUser.getColorForGuild(guild));
+                progress.getRank().getName(), dUser.getColorForGuild(guild));
         builder.withThumbnail(dUser.getAvatarURL());
-        builder.appendField("Level :gem:", "`" + user.getLevel() + "`", true);
-        int prestige = user.getPrestige();
-        if (prestige > 0) {
+        builder.appendField("Level :gem:", "`" + progress.getLevel() + "`", true);
+        Prestige prestige = progress.getPrestige();
+        if (prestige.getNumber() > 0) {
             builder.appendField("Prestige :trophy:", String.format("`%d%c`", 
-                    prestige, PRESTIGE_SYMBOLS[prestige - 1]), true);
+                    prestige.getNumber(), prestige.getBadge()), true);
         }
         builder.appendField("XP :diamond_shape_with_a_dot_inside:", "`" 
-                + user.getXP() + "/" + user.getXPForLevel() + "`", true); 
+                + progress.getXP() + "/" + progress.getXpTotalForLevelUp() + "`", true); 
         return builder;
     }
     
     public static EmbedObject buildFullUserInfo(IGuild guild, User user, IUser dUser) {
+        Progress progress = user.getProgress();
         EmbedBuilder builder = buildBasicUserInfo(guild, user, dUser);
-        builder.appendField("Total XP :clock4:", "`" + getTotalXP(user) + "`", true);
-        if (user.getPrestige() > 0) {
-            builder.appendField("Total Level :arrows_counterclockwise:", "`" + user.getTotalLevels() + "`", true);
-            builder.appendField("Badge Case :beginner: ", "`" + getUserBadges(user) + "`", true);
+        builder.appendField("Total XP :clock4:", "`" + getTotalXP(progress) + "`", true);
+        if (progress.getPrestige().getNumber() > 0) {
+            builder.appendField("Total Level :arrows_counterclockwise:", "`" + progress.getTotalLevels() + "`", true);
+            builder.appendField("Badge Case :beginner: ", "`" + getUserBadges(progress) + "`", true);
         }
-        int percentage = (int) Math.round((double) user.getXP() / user.getXPForLevel() * 100); //percentage calc
-        if (user.getLevel() < 80) 
-            builder.appendField(percentage + "% to Level " + (user.getLevel() + 1), 
+        int percentage = (int) Math.round((double) progress.getXP() / progress.getXpTotalForLevelUp() * 100); //percentage calc
+        if (progress.getLevel() < 80) 
+            builder.appendField(percentage + "% to Level " + (progress.getLevel() + 1), 
                 getBarProgress(percentage), false);    
         return builder.build();
     }
     
-    private static String getUserBadges(User user) {
+    private static String getUserBadges(Progress progress) {
         String badges = "";
-        for (int i = 0; i < user.getPrestige(); i++) {
-            badges += PRESTIGE_SYMBOLS[i];
+        for (int i = 1; i <= progress.getPrestige().getNumber(); i++) {
+            badges += Prestige.BADGES[i];
         }
         return badges;
     } 
     
-    private static int getTotalXP(User user) {
+    private static int getTotalXP(Progress progress) {
         int xp = 0;      
-        for (int i = 0; i < user.getPrestige(); i++) {
+        for (int i = 0; i < progress.getPrestige().getNumber(); i++) {
             xp += getTotalXPForLevel(80);
         }
-        xp += getTotalXPForLevel(user.getLevel());
-        xp += user.getXP();
+        xp += getTotalXPForLevel(progress.getLevel());
+        xp += progress.getXP();
         return xp;
     }
        
@@ -174,8 +176,7 @@ public class LevelManager {
         }
         return xp;
     }
-    
-    
+     
     private static String getBarProgress(int percentage) {
         StringBuilder builder = new StringBuilder();
         //generate an int 1-10 depicting progress based on percentage

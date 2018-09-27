@@ -29,7 +29,7 @@ public class ColorCommand extends AbstractCommand {
         IChannel channel = message.getChannel();
         IGuild guild = message.getGuild();
         
-        if (!(user.getPrestige() > 0)) {
+        if (!(user.getProgress().getPrestige().getNumber() > 0)) {
             BotUtils.sendErrorMessage(channel, "You must be prestiged to change your name color!"
                     + " You can view your level progress with `!lvl`.");
             return;

@@ -1,5 +1,6 @@
 package discord;
 
+import discord.object.Prestige;
 import discord.object.User;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
@@ -7,7 +8,7 @@ import sx.blah.discord.handle.obj.IUser;
 public class NameManager {
     
     public static void formatNameOfUser(IGuild guild, User user) {        
-        String name = buildName(user.getName(), user.getEmoji(), user.getPrestige());
+        String name = buildName(user.getName(), user.getEmoji(), user.getProgress().getPrestige());
         IUser dUser = guild.getUserByID(user.getID());
         String nick = dUser.getNicknameForGuild(guild);
         if ((nick == null && !dUser.getName().equals(name)) 
@@ -25,10 +26,10 @@ public class NameManager {
         formatNameOfUser(guild, user);        
     }
     
-    private static String buildName(String name, int emojicp, int prestige) {
+    private static String buildName(String name, int emojicp, Prestige prestige) {
         StringBuilder sb = new StringBuilder();
-        if (prestige > 0) {
-            sb.append(LevelManager.PRESTIGE_SYMBOLS[prestige - 1]).append(" ");
+        if (prestige.getNumber() > 0) {
+            sb.append(prestige.getBadge()).append(" ");
         }
         sb.append(name);
         if (emojicp > 0) {

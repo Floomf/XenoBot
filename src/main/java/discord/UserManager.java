@@ -1,5 +1,6 @@
 package discord;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import discord.object.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -27,8 +28,7 @@ public class UserManager {
             List<IUser> allUsers = guild.getUsers();
             allUsers.removeIf(user -> user.isBot());
             for (IUser user : allUsers) {
-                users.add(new User(user.getLongID(), 
-                        user.getDisplayName(guild), RankManager.getRankForLevel(1)));
+                users.add(new User(user.getLongID(), user.getDisplayName(guild)));
             }
             System.out.println("Database created.");
             saveDatabase();
@@ -38,13 +38,14 @@ public class UserManager {
     
     private static void loadDatabase() {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
-            System.out.println("Loading database...");
+            System.out.println("Loading database...");         
             users = new ArrayList<>(Arrays.asList(
                     mapper.readValue(new File("users.json"), User[].class)));
             System.out.println("Database loaded.");                    
         } catch (IOException e) {
-            System.err.println("Database failed to load with error: ");
+            System.err.println("Database failed to load with error: " + e);
         }
     }
     
@@ -77,7 +78,8 @@ public class UserManager {
         for (User user : new ArrayList<>(users)) {
             //if id is null then they cant be found on the guild
             //but only remove them if they are low enough level
-            if (user.getLevel() < 10 && user.getPrestige() < 1 && guild.getUserByID(user.getID()) == null) {
+            if (user.getProgress().getLevel() < 10 && user.getProgress().getPrestige().getNumber() < 1 
+                    && guild.getUserByID(user.getID()) == null) {
                 users.remove(user);
                 System.out.println("Removed " + user.getName() + " from the database.");
             }
@@ -104,8 +106,7 @@ public class UserManager {
     }
     
     public static void addUserToDatabase(IUser dUser, IGuild guild) {
-        User user = new User(dUser.getLongID(), 
-                dUser.getDisplayName(guild), RankManager.getRankForLevel(1));
+        User user = new User(dUser.getLongID(), dUser.getDisplayName(guild));
         users.add(user);
         RankManager.setRankOfUser(guild, user);
         NameManager.formatNameOfUser(guild, user);
@@ -148,7 +149,7 @@ public class UserManager {
         }
         return -1;
     }
-    
+    /*
     public static String getUserName(long id) {
         return getUserFromID(id).getName();
     }
@@ -160,5 +161,5 @@ public class UserManager {
     public static int getUserXPNeeded(long id) {
         return getUserFromID(id).getXPForLevel();
     }
-
+    */
 }

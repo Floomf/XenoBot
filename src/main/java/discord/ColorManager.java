@@ -92,7 +92,7 @@ public class ColorManager {
     }
     
     public static boolean hasColorUnlocked(User user, Color color) {
-        return (user.getTotalLevels() >= color.getTotalLevelsRequired());
+        return (user.getProgress().getTotalLevels() >= color.getTotalLevelsRequired());
     }
     
 }

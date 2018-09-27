@@ -1,42 +1,51 @@
 package discord.object;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import sx.blah.discord.handle.obj.IGuild;
 
 public class User {
     
-    private final long id; //Discord long id
+    @JsonProperty("discordID")
+    private final long discordID;
     private String name;
-    private int level;
-    private int xp;
-    private int xpforLevel;
-    private int prestige;
-    private int emojicp;
-    private Rank rank;
+    //private int level;
+    //private int xp;
+    //private int xpforLevel;
+    //private int prestige;
+    private Progress progress;
+    private int emojiCodePoint;
+    //private Rank rank;
     
     public User() {
-        this.id = 0;   
+        this.discordID = 0;   
     }
     
-    public User(long id, String name, Rank rank) {
-        this.id = id;
+    public User(long discordID, String name) {
+        this.discordID = discordID;
         this.name = name;
-        this.rank = rank;
-        level = 1;
-        xp = 0;
-        prestige = 0;
-        emojicp = 0;
+        //this.rank = rank;
+        //level = 1;
+        //xp = 0;
+        //prestige = 0;
+        emojiCodePoint = 0;
+        progress = new Progress();
     }
     
     //Accessors
     
+    @JsonProperty("discordID")
     public long getID() {
-        return id;
+        return discordID;
+    }
+    
+    public Progress getProgress() {
+        return progress;
     }
     
     public String getName() {
         return name;
     }
-    
+    /*
     public int getLevel() {
         return level;
     }
@@ -61,17 +70,21 @@ public class User {
     public Rank getRank() {
         return rank;
     }
-    
+    */
     public int getEmoji() {
-        return emojicp;
+        return emojiCodePoint;
     }
   
     //Mutators
     
+    public void setProgress(Progress progress) {
+        this.progress = progress;
+    }
+    
     public void setName(String name) {
         this.name = name;
     }
-    
+    /*
     public void setRank(Rank rank) {
         this.rank = rank;
     }
@@ -87,20 +100,20 @@ public class User {
     public void setLevel(int level) {
         this.level = level;
     }
-    
+    */
      public void setEmoji(int codepoint) {
-        emojicp = codepoint;
+        emojiCodePoint = codepoint;
     }
-     
+    /*
     public void addLevels(int amount) {
         level += amount;         
     }
-    
-    public void addXP(int amount) {
-        xp += amount;
+    */
+    public void addXP(int amount, IGuild guild) {
+        progress.addXP(amount, guild, this);
     }    
     
-    public void addPrestige() {
-        this.prestige++;
+    public void prestige(IGuild guild) {
+        progress.prestige(guild, this);
     }
 }

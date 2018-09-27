@@ -1,5 +1,6 @@
 package discord;
 
+import com.vdurmont.emoji.EmojiManager;
 import discord.object.Rank;
 import discord.object.User;
 import java.util.List;
@@ -31,13 +32,13 @@ public class RankManager {
     }
     
     public static void setRankOfUser(IGuild guild, User user) {
-        Rank rankNeeded = getRankForLevel(user.getLevel());
+        Rank rankNeeded = getRankForLevel(user.getProgress().getLevel());
         IRole rankRole = guild.getRolesByName(rankNeeded.getName()).get(0);
         IUser dUser = guild.getUserByID(user.getID());
         List<IRole> guildRoles = dUser.getRolesForGuild(guild);
         //if rank isnt what it should be, set it correctly so
-        if (!rankNeeded.equals(user.getRank()) || !guildRoles.contains(rankRole)) {
-            user.setRank(rankNeeded);
+        if (!rankNeeded.equals(user.getProgress().getRank()) || !guildRoles.contains(rankRole)) {
+            user.getProgress().setRank(rankNeeded);
             for (Rank rank : RANKS) { //remove all existing rank roles
                 IRole role = guild.getRolesByName(rank.getName()).get(0);
                 if (guildRoles.contains(role)) {
@@ -47,10 +48,11 @@ public class RankManager {
             }
             guildRoles.add(rankRole);
             BotUtils.setUserRoles(guild, dUser, guildRoles);
-            System.out.println("Set role of " + user.getName() + " to " + user.getRank().getName());
+            System.out.println("Set role of " + user.getName() + " to " + 
+                    user.getProgress().getRank().getName());
             if (!rankNeeded.equals(RANKS[0])) {
                 BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                        BotUtils.getMention(user), "Rank up!",
+                        "", "Rank up!",
                         "You are now a **" + rankNeeded.getName() + "**.",
                         rankRole.getColor());
             }

@@ -19,7 +19,7 @@ public class NameCommand extends AbstractCommand {
     public void execute(IMessage message, String[] args) {
         User user = UserManager.getUserFromID(message.getAuthor().getLongID());
         IChannel channel = message.getChannel();
-        if (!(user.getLevel() >= 60 || user.getPrestige() > 0)) {
+        if (!(user.getProgress().getTotalLevels() > 60)) {
             BotUtils.sendErrorMessage(channel, "You must be at least level **60** to change your name!"
                     + " You can view your progress with `!lvl`.");
             return;

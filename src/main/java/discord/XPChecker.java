@@ -1,5 +1,6 @@
 package discord;
 
+import discord.object.Progress;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -47,16 +48,16 @@ public class XPChecker implements Runnable {
         if (dUsers.size() >= 2) {
             List<String> names = new ArrayList<>();
             int xp = 1 * dUsers.size() + 13; // min 450/hr
-            dUsers.removeIf(user -> UserManager.getUserLevel(
-                    user.getLongID()) == LevelManager.MAX_LEVEL);
+            dUsers.removeIf(user -> UserManager.getUserFromID(
+                    user.getLongID()).getProgress().getLevel() == Progress.MAX_LEVEL);
             if (dUsers.isEmpty()) return; //if all are max level
-            dUsers.forEach(dUser -> names.add(UserManager.getUserName(dUser.getLongID())));
+            dUsers.forEach(dUser -> names.add(UserManager.getUserFromID(dUser.getLongID()).getName()));
             BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
                     String.format("+%dXP in %s (%s)", xp, 
                             channel.getName(), LocalDateTime.now().format(DATE_FORMAT)),
                             names.toString());
             for (IUser dUser : dUsers) {
-                LevelManager.addAndCheckUserXP(guild, UserManager.getUserFromID(dUser.getLongID()), xp);
+                UserManager.getUserFromID(dUser.getLongID()).addXP(xp, guild);
             }
             UserManager.saveDatabase();
         }
