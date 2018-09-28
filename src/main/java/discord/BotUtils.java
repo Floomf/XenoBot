@@ -3,6 +3,7 @@ package discord;
 import discord.object.User;
 import java.awt.Color;
 import java.util.List;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
@@ -13,8 +14,6 @@ import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.RequestBuffer;
 
 public class BotUtils {  
-  
-    public static final String CMD_PREFIX = "!";
     
     public static void sendEmbedMessage(IChannel channel, EmbedObject object) {
         RequestBuffer.request(() -> {           
@@ -30,7 +29,7 @@ public class BotUtils {
     public static void sendMessage(IChannel channel, String outside, String header, String body, Color color) {
         RequestBuffer.request(() -> {
             try {
-                channel.sendMessage(outside, getBuilder(header, body, color).build());
+                channel.sendMessage(outside, getBuilder(channel.getClient(), header, body, color).build());
             } catch (DiscordException e){
                 System.err.println("Message could not be sent with error: ");
                  e.printStackTrace();
@@ -81,16 +80,19 @@ public class BotUtils {
         });
     }   
     
-    public static EmbedBuilder getBuilder(String title, String desc, Color color) {    
-        return new EmbedBuilder()
-                .withAuthorIcon(Main.getClient().getOurUser().getAvatarURL())
+    public static EmbedBuilder getBuilder(IDiscordClient client, String title, String desc, Color color) {    
+        return getBaseBuilder(client)
                 .withAuthorName(title)
                 .withDesc(desc)
                 .withColor(color);              
     }
     
-    public static EmbedBuilder getBuilder(String title, String desc) {
-        return getBuilder(title, desc, Color.WHITE);
+    public static EmbedBuilder getBuilder(IDiscordClient client, String title, String desc) {
+        return getBuilder(client, title, desc, Color.WHITE);
+    }
+    
+    public static EmbedBuilder getBaseBuilder(IDiscordClient client) {
+        return new EmbedBuilder().withAuthorIcon(client.getOurUser().getAvatarURL());
     }
     
     public static String getMention(User user) {
@@ -98,7 +100,7 @@ public class BotUtils {
     }
     
     public static String buildUsage(String alias, String args, String desc) {
-        return (String.format("%s%s %s \n\n%s", CMD_PREFIX, alias, args, desc));
+        return (String.format("%s%s %s \n\n%s", CommandManager.CMD_PREFIX, alias, args, desc));
     }
     
 }

@@ -14,7 +14,7 @@ public class PrestigeCommand extends AbstractCommand {
     }
     
     public void execute(IMessage message, String[] args) {
-        User user = UserManager.getUserFromID(message.getAuthor().getLongID());
+        User user = UserManager.getDBUserFromMessage(message);
         if (!(user.getProgress().isMaxLevel())) {
                     BotUtils.sendErrorMessage(message.getChannel(), "You must be level **80** to prestige."
                             + " You can view your progress with `!lvl`.");

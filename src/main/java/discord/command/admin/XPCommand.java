@@ -1,7 +1,6 @@
 package discord.command.admin;
 
 import discord.BotUtils;
-import discord.LevelManager;
 import discord.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
@@ -28,7 +27,7 @@ public class XPCommand extends AbstractCommand {
         
         //check user id
         try {
-            user = UserManager.getUserFromID(Long.parseLong(args[1]));
+            user = UserManager.getDBUserFromID(Long.parseLong(args[1]));
         } catch (NumberFormatException ex) {
             BotUtils.sendErrorMessage(channel, "Could not parse the specified user ID.");
             return;

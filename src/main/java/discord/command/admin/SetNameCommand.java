@@ -17,7 +17,7 @@ public class SetNameCommand extends AbstractCommand{
     }
     
     public void execute(IMessage message, String[] args) {
-        User userToChange = UserManager.getUserFromID(Long.parseLong(args[0]));
+        User userToChange = UserManager.getDBUserFromID(Long.parseLong(args[0]));
         IChannel channel = message.getChannel();
         if (userToChange == null) {
             BotUtils.sendErrorMessage(channel,

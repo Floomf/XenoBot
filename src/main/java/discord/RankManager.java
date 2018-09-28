@@ -52,7 +52,7 @@ public class RankManager {
                     user.getProgress().getRank().getName());
             if (!rankNeeded.equals(RANKS[0])) {
                 BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                        "", "Rank up!",
+                        BotUtils.getMention(user), "Rank up!",
                         "You are now a **" + rankNeeded.getName() + "**.",
                         rankRole.getColor());
             }

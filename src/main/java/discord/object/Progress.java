@@ -2,7 +2,7 @@ package discord.object;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import discord.BotUtils;
-import discord.LevelManager;
+import discord.ColorManager;
 import discord.NameManager;
 import discord.RankManager;
 import sx.blah.discord.handle.obj.IGuild;
@@ -115,7 +115,7 @@ public class Progress {
     private void checkUnlocksForUser(IGuild guild, User user) {
         if (level % 20 == 0) {
             IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID()));
-            LevelManager.notifyUnlocksForUser(pmChannel, user);
+            notifyUnlocksForUser(pmChannel);
             if (level == MAX_LEVEL) {
                 //send DM to user
                 maxOutUser(pmChannel, user);
@@ -150,6 +150,28 @@ public class Progress {
                     "Congratulations!", "You have unlocked the ability to **change your name color** on The Realm!"
                         + "\n\n*You can type* `!color` *on the server get started.*");
         }
+    }
+    
+    //Moved here until theres a solution/ unlock manager?
+    //All of this is hardcoded, clean it up eventually
+    private void notifyUnlocksForUser(IChannel channel) {
+        String message = "";
+        if (prestige.getNumber() == 0) {
+            if (level == 40) {
+                message = "You have unlocked the ability to **set an emoji** in your name on the Realm!"
+                        + "\n\n*You can type* `!emoji` *on the server to get started.*";
+            } else if (level == 60) {
+                message = "You have unlocked the ability to **change your nickname** on The Realm!"
+                        + "\n\n*You can type* `!name` *on the server to get started.*";
+            }
+        } else { //already prestiged
+            discord.object.Color color = ColorManager.getUnlockedColor(getTotalLevels());
+            if (color != null) {
+                message = "You have unlocked the name color **" + color.getName() + "** on The Realm!"
+                        + "\n\n*You can type* `!color list` *on the server to view your unlocked colors.*";
+            }
+        }
+        BotUtils.sendMessage(channel, "Congratulations!", message, Color.ORANGE);
     }
     
     private void genXPTotalForLevelUp() {

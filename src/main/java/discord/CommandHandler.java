@@ -40,7 +40,7 @@ public class CommandHandler {
         }
 
         //make sure the message has the command prefix
-        if (!contents[0].startsWith(BotUtils.CMD_PREFIX)) {
+        if (!contents[0].startsWith(CommandManager.CMD_PREFIX)) {
             return;
         }
 

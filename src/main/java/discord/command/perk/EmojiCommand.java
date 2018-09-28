@@ -17,7 +17,7 @@ public class EmojiCommand extends AbstractCommand{
     }
     
     public void execute(IMessage message, String[] args) {
-        User user = UserManager.getUserFromID(message.getAuthor().getLongID());
+        User user = UserManager.getDBUserFromMessage(message);
         IChannel channel = message.getChannel();
         String emoji = args[0];
         

@@ -25,7 +25,7 @@ public class ColorCommand extends AbstractCommand {
     
     public void execute(IMessage message, String[] args) {
         IUser dUser = message.getAuthor();
-        User user = UserManager.getUserFromID(dUser.getLongID());
+        User user = UserManager.getDBUserFromID(dUser.getLongID());
         IChannel channel = message.getChannel();
         IGuild guild = message.getGuild();
         
@@ -39,7 +39,7 @@ public class ColorCommand extends AbstractCommand {
         
         //handle special arguments
         if (name.equals("list") || name.equals("choices")) {
-            EmbedBuilder builder = BotUtils.getBuilder("Available Choices", "");
+            EmbedBuilder builder = BotUtils.getBuilder(message.getClient(), "Available Choices", "");
             builder.appendField("Default Colors",
                     "`" + Arrays.toString(ColorManager.getDefaultColors()) + "`", false);
             Color[] unlockedColors = ColorManager.getUnlockedColorsForUser(user);

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
 public class UserManager {
@@ -133,7 +134,7 @@ public class UserManager {
            
     //Methods for viewing/modifying user data
     
-    public static User getUserFromID(long id) {
+    public static User getDBUserFromID(long id) {
         for (User user : users) {
             if (user.getID() == id) 
                 return user;
@@ -141,7 +142,7 @@ public class UserManager {
         return null;
     }    
     
-    public static long getUserIDFromName(String name) {
+    public static long getDBUserIDFromName(String name) {
         for (User user : users) {
             if (user.getName().toLowerCase().equals(name.toLowerCase())) {
                 return user.getID();
@@ -149,17 +150,8 @@ public class UserManager {
         }
         return -1;
     }
-    /*
-    public static String getUserName(long id) {
-        return getUserFromID(id).getName();
-    }
     
-    public static int getUserLevel(long id) {
-        return getUserFromID(id).getLevel();
+    public static User getDBUserFromMessage(IMessage message) {
+        return getDBUserFromID(message.getAuthor().getLongID());
     }
-    
-    public static int getUserXPNeeded(long id) {
-        return getUserFromID(id).getXPForLevel();
-    }
-    */
 }
