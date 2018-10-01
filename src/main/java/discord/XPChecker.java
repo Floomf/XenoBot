@@ -21,9 +21,13 @@ public class XPChecker implements Runnable {
     }
     
     public void run() {
-        System.out.println(String.format("[%s] Checking all guild users to add xp",
+        if (client.isReady()) {
+            System.out.println(String.format("[%s] Checking all guild users to add xp",
                 LocalDateTime.now().format(DATE_FORMAT)));
-        checkGuilds(client.getGuilds());
+            checkGuilds(client.getGuilds());
+        } else {
+            System.out.println(String.format("Client isn't ready, won't check users"));
+        }
     }
 
     private void checkGuilds(List<IGuild> guilds) {
