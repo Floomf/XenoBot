@@ -1,8 +1,7 @@
 package discord;
 
 import discord.object.Progress;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import sx.blah.discord.api.IDiscordClient;
@@ -10,11 +9,11 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.util.EmbedBuilder;
 
 public class XPChecker implements Runnable {
 
     private final IDiscordClient client;
-    private final static DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("EEEE hh:mma");
 
     public XPChecker(IDiscordClient client) {
          this.client = client;
@@ -22,8 +21,7 @@ public class XPChecker implements Runnable {
     
     public void run() {
         if (client.isReady()) {
-            System.out.println(String.format("[%s] Checking all guild users to add xp",
-                LocalDateTime.now().format(DATE_FORMAT)));
+            System.out.println("Checking all guild users to add xp");
             checkGuilds(client.getGuilds());
         } else {
             System.out.println(String.format("Client isn't ready, won't check users"));
@@ -56,13 +54,12 @@ public class XPChecker implements Runnable {
                     user.getLongID()).getProgress().getLevel() == Progress.MAX_LEVEL);
             if (dUsers.isEmpty()) return; //if all are max level
             dUsers.forEach(dUser -> names.add(UserManager.getDBUserFromID(dUser.getLongID()).getName()));
-            BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                    String.format("+%dXP in %s (%s)", xp, 
-                            channel.getName(), LocalDateTime.now().format(DATE_FORMAT)),
-                            names.toString());
-            for (IUser dUser : dUsers) {
-                UserManager.getDBUserFromID(dUser.getLongID()).addXP(xp, guild);
-            }
+            EmbedBuilder builder = BotUtils.getBuilder(guild.getClient(), "+" + xp + "XP", 
+                    "`" + names.toString() + "`"); 
+            builder.withFooterText(channel.getName());
+            builder.withTimestamp(Instant.now());
+            BotUtils.sendEmbedMessage(guild.getChannelsByName("log").get(0), builder.build());
+            dUsers.forEach(dUser -> UserManager.getDBUserFromID(dUser.getLongID()).addXP(xp, guild));
             UserManager.saveDatabase();
         }
     }

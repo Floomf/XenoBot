@@ -63,4 +63,8 @@ public class User {
     public void prestige(IGuild guild) {
         progress.prestige(guild, this);
     }
+    
+    public boolean hasUnlocked(Unlockable unlockable) {
+        return progress.getTotalLevels() >= unlockable.getTotalLevelsRequired();
+    }
 }

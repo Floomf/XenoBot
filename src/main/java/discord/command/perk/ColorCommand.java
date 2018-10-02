@@ -7,7 +7,7 @@ import discord.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.object.User;
-import discord.object.Color;
+import discord.object.Unlockable;
 import java.util.Arrays;
 import java.util.List;
 import sx.blah.discord.handle.obj.IChannel;
@@ -42,7 +42,7 @@ public class ColorCommand extends AbstractCommand {
             EmbedBuilder builder = BotUtils.getBuilder(message.getClient(), "Available Choices", "");
             builder.appendField("Default Colors",
                     "`" + Arrays.toString(ColorManager.getDefaultColors()) + "`", false);
-            Color[] unlockedColors = ColorManager.getUnlockedColorsForUser(user);
+            Unlockable[] unlockedColors = ColorManager.getUnlockedColorsForUser(user);
             builder.appendField("Unlocked Colors [" + unlockedColors.length + "/36]", //hardcoded 36
                     "`" + Arrays.toString(unlockedColors) + "`", false);
             if (unlockedColors.length == 36) {
@@ -58,7 +58,7 @@ public class ColorCommand extends AbstractCommand {
             return;
         }
         
-        Color color = ColorManager.getColor(name);
+        Unlockable color = ColorManager.getColor(name);
         
         //check if color doesnt exist
         if (color == null) {
@@ -66,15 +66,14 @@ public class ColorCommand extends AbstractCommand {
             return;
         }
         
-        //check if user hasn't "unlocked" color
-        if (!ColorManager.hasColorUnlocked(user, color)) {
+        if (!user.hasUnlocked(color)) {
             BotUtils.sendErrorMessage(channel, "You have not unlocked that color yet. "
                     + "You can view your available colors with `!color list`.");
             return;
         }
         
         List<IRole> roles = getUserRolesNoColors(dUser, guild);    
-        List<IRole> colorRole = guild.getRolesByName(color.getName());
+        List<IRole> colorRole = guild.getRolesByName(color.toString());
         
         //make sure color role exists on the guild
         if (colorRole.isEmpty()) {
@@ -87,7 +86,7 @@ public class ColorCommand extends AbstractCommand {
         //set their roles, the same as before (minus last color role(s)) plus new color role
         BotUtils.setUserRoles(guild, dUser, roles);
         BotUtils.sendInfoMessage(channel,
-                String.format("Your name is now the color %s!", color.getName()));      
+                String.format("Your name is now the color %s!", color));      
     }
     
     private List<IRole> getUserRolesNoColors(IUser user, IGuild guild) {
