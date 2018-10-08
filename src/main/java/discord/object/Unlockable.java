@@ -3,17 +3,15 @@ package discord.object;
 public class Unlockable {
     
     private final String name;
-    private final int prestigeRequired;
-    private final int levelRequired;
+    private final int totalLevelRequired;
     
     public Unlockable(String name, int prestige, int level) {
         this.name = name;
-        this.prestigeRequired = prestige;
-        this.levelRequired = level;
+        this.totalLevelRequired = prestige * Progress.MAX_LEVEL + level;
     }
     
-    public int getTotalLevelsRequired() {
-        return prestigeRequired * Progress.MAX_LEVEL + levelRequired;
+    public int getTotalLevelRequired() {
+        return totalLevelRequired;
     }
     
     @Override

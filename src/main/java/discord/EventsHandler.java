@@ -13,9 +13,8 @@ import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.guild.member.UserJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
-import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelMoveEvent;
 import sx.blah.discord.handle.impl.events.shard.ReconnectFailureEvent;
-import sx.blah.discord.handle.impl.events.shard.ResumedEvent;
 import sx.blah.discord.handle.obj.ActivityType;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
@@ -52,53 +51,27 @@ public class EventsHandler {
        if (!user.isBot()) {
            UserManager.addUserToDatabase(event.getUser(), event.getGuild());
        }
-    }
-    
-    private boolean anyChannelHasEnoughUsers(IGuild guild) {
-        List<IVoiceChannel> channels = guild.getVoiceChannels();
-        channels.remove(guild.getAFKChannel());
-        for (IVoiceChannel channel : channels) {
-            List<IUser> users = channel.getConnectedUsers();
-            users.removeIf(IUser::isBot);
-            if (users.size() > 1) return true;
-        }
-        return false;
-    }
+    }   
     
     @EventSubscriber
     public void onUserVoiceChannelJoinEvent(UserVoiceChannelJoinEvent event) {
         List<IUser> users = event.getVoiceChannel().getConnectedUsers();
         users.removeIf(IUser::isBot);
-        if (future.isDone() && event.getVoiceChannel().getConnectedUsers().size() > 1) {
+        if (future.isDone() && users.size() > 1) {
             System.out.println("Voice channel users > 1, starting xp checker");
             future = scheduler.scheduleAtFixedRate(new XPChecker(event.getClient()), 2, 2, TimeUnit.MINUTES);
         }
     }
     
+    @EventSubscriber
+    public void onUserVoiceChannelMoveEvent(UserVoiceChannelMoveEvent event) {
+        checkAnyChannelHasEnoughUsers(event.getGuild());
+    }
+    
     //only works with one guild for bot
     @EventSubscriber
     public void onUserVoiceChannelLeaveEvent(UserVoiceChannelLeaveEvent event) {
-        if (!anyChannelHasEnoughUsers(event.getGuild())) {
-            System.out.println("All guild voice channel users <= 1, stopping xp checker");
-            future.cancel(true);
-        }
-    }
-    
-    @EventSubscriber
-    public void onShardDisconnectedEvent(DisconnectedEvent event) {
-        //if (!future.isDone()) { 
-            //System.out.println("Shard disconnected, shutting down active XP scheduler");
-            //future.cancel(true);
-       // }
-    }       
-    
-    @EventSubscriber
-    public void onShardResumedEvent(ResumedEvent event) {
-        //if (future.isDone()) {
-            //System.out.println("Shard resumed, starting XP scheduler");
-            //future = scheduler.scheduleAtFixedRate(new XPChecker(
-                    //event.getClient()), 2, 2, TimeUnit.MINUTES);
-        //}
+        checkAnyChannelHasEnoughUsers(event.getGuild());
     }
     
     @EventSubscriber
@@ -106,6 +79,32 @@ public class EventsHandler {
         if (event.isShardAbandoned()) {
             System.exit(1);
         }
+    }
+    
+    private void checkAnyChannelHasEnoughUsers(IGuild guild) {
+        boolean hasEnough = anyChannelHasEnoughUsers(guild);
+        if (!future.isDone() && !hasEnough) {
+            System.out.println("All guild voice channel users <= 1, stopping xp checker");
+            future.cancel(true);
+        } else if (future.isDone() && hasEnough) {
+            System.out.println("Voice channel users > 1, starting xp checker");
+            future = scheduler.scheduleAtFixedRate(new XPChecker(guild.getClient()), 2, 2, TimeUnit.MINUTES);
+        }
+    }
+    
+    private boolean anyChannelHasEnoughUsers(IGuild guild) {
+        List<IVoiceChannel> channels = guild.getVoiceChannels();
+        channels.remove(guild.getAFKChannel());
+        for (IVoiceChannel channel : channels) {
+            if (channelHasEnoughUsers(channel)) return true;
+        }
+        return false;
+    }
+    
+    private boolean channelHasEnoughUsers(IVoiceChannel channel) {
+        List<IUser> users = channel.getConnectedUsers();
+        users.removeIf(IUser::isBot);
+        return (users.size() > 1);
     }
     
 }

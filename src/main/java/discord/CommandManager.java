@@ -14,9 +14,9 @@ public class CommandManager {
     
     public static void createCommands() {       
         Reflections reflections = new Reflections("discord.command");
-        for (Class<?> command : reflections.getSubTypesOf(AbstractCommand.class)) {
+        for (Class<? extends AbstractCommand> command : reflections.getSubTypesOf(AbstractCommand.class)) {
             try {
-                AbstractCommand cmd = (AbstractCommand) command.newInstance();
+                AbstractCommand cmd = command.newInstance();
                 for (String alias : cmd.getNames()) {
                     //keys are command names, all point to same command object
                     commands.put(alias, cmd);

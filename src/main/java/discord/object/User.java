@@ -65,6 +65,6 @@ public class User {
     }
     
     public boolean hasUnlocked(Unlockable unlockable) {
-        return progress.getTotalLevels() >= unlockable.getTotalLevelsRequired();
+        return progress.getTotalLevels() >= unlockable.getTotalLevelRequired();
     }
 }

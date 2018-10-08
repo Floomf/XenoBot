@@ -99,7 +99,7 @@ public class Progress {
         genXPTotalForLevelUp();
         BotUtils.sendMessage(guild.getChannelsByName("log").get(0), "Level up!",
                 String.format("%s\n**%d → %d**", BotUtils.getMention(user), 
-                        level - 1, level), Color.GREEN);
+                        level - 1, level), guild.getUserByID(user.getID()).getColorForGuild(guild));
     }
     
     //same as leveling up method
@@ -109,7 +109,7 @@ public class Progress {
         xp += xpTotalForLevelUp; //add negative xp to new level xp
         BotUtils.sendMessage(guild.getChannelsByName("log").get(0), "Level down!",
                 String.format("%s\n**%d → %d**", BotUtils.getMention(user), 
-                        level, level - 1), Color.RED);
+                        level, level - 1), guild.getUserByID(user.getID()).getColorForGuild(guild));
     }
     
     private void checkUnlocksForUser(IGuild guild, User user) {
@@ -117,17 +117,16 @@ public class Progress {
         if (level == MAX_LEVEL)
             maxOutUser(pmChannel, user);
         if (level % 20 == 0) 
-            notifyUnlocksForUser(pmChannel);
+            notifyUnlocksForUser(pmChannel, guild);
     }
     
     private void maxOutUser(IChannel channel, User user) {
         xp = 0;
         xpTotalForLevelUp = 0;
         BotUtils.sendMessage(channel, "Congratulations!", "You have reached the max level. "
-                + "*You will no longer earn **any more xp** until prestiged.*"
                 + "\n\nYou can now prestige and carry over back to level one with `!prestige`"
-                + "\n\nYou will keep all level perks, and gain additional unlocks as you level again."
-                + "\n\nPrestiging is **PERMANENT.** Only do so if you are ready.", Color.CYAN);
+                + "\n\nYou will keep all perks, and gain additional unlocks as you level again."
+                + "\n\nPrestiging is **permanent.** Only do so if you are ready.", Color.CYAN);
     }
     
     //BAD
@@ -143,31 +142,32 @@ public class Progress {
         
         if (prestige.getNumber() == 1) //messy to put this here
             BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID())), 
-                    "Congratulations!", "You have unlocked the ability to **change your name color** on The Realm!"
+                    "Congratulations!", "You have unlocked the ability to **change your name color** on " + guild.getName() + "!"
                     + "\n\n*You can type* `!color` *on the server get started.*", Color.PINK);
     }
     
     //Moved here until theres a solution/ unlock manager?
     //All of this is hardcoded, clean it up eventually
-    private void notifyUnlocksForUser(IChannel channel) {
+    private void notifyUnlocksForUser(IChannel pmChannel, IGuild guild) {
         String message = "";
         int totalLevels = getTotalLevels();
         Color colorToUse = Color.ORANGE;
         if (totalLevels == 40) {
-            message = "You have unlocked the ability to **set an emoji** in your name on the Realm!"
+            message = "You have unlocked the ability to **set an emoji** in your name on " + guild.getName() + "!"
                     + "\n\n*You can type* `!emoji` *on the server to get started.*";
         } else if (totalLevels == 60) {
-            message = "You have unlocked the ability to **change your nickname** on The Realm!"
+            message = "You have unlocked the ability to **change your nickname** on " + guild.getName() + "!"
                     + "\n\n*You can type* `!name` *on the server to get started.*";
         } else if (totalLevels > 80 && totalLevels % 20 == 0) { //already prestiged, unlock color every 20 levels
-            Unlockable color = ColorManager.getUnlockedColor(getTotalLevels());
+            Unlockable color = ColorManager.getUnlockedColor(totalLevels);
+            System.out.println(color);
             if (color != null) {
-                message = "You have unlocked the name color **" + color.toString() + "** on The Realm!"
+                message = "You have unlocked the name color **" + color.toString() + "** on " + guild.getName() + "!"
                         + "\n\n*You can type* `!color list` *on the server to view your unlocked colors.*";
-                colorToUse = channel.getGuild().getRolesByName(color.toString()).get(0).getColor();
+                colorToUse = guild.getRolesByName(color.toString()).get(0).getColor();
             }
         }
-        BotUtils.sendMessage(channel, "Congratulations!", message, colorToUse);
+        BotUtils.sendMessage(pmChannel, "Congratulations!", message, colorToUse);
     }
     
     private void genXPTotalForLevelUp() {

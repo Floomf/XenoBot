@@ -53,12 +53,12 @@ public class ColorManager {
         new Unlockable("Holy Light", 7, 60),
         new Unlockable("Scorpion", 7, 80),
         new Unlockable("Quicksand", 8, 20),
-        new Unlockable("Malibu", 8, 40),
-        new Unlockable("Mint", 8, 60),
+        new Unlockable("Mauve", 8, 40),
+        new Unlockable("Malibu", 8, 60),
         new Unlockable("Swan", 8, 80),
         new Unlockable("Salmon", 9, 20),
-        new Unlockable("Blizzard", 9, 40),
-        new Unlockable("Mauve", 9, 60),
+        new Unlockable("Mint", 9, 40),
+        new Unlockable("Blizzard", 9, 60),
         new Unlockable("Void", 9, 80)        
     };
     
@@ -74,7 +74,7 @@ public class ColorManager {
     
     public static Unlockable getUnlockedColor(int totalLevelsRequired) {
        for (Unlockable color : COLORS_UNLOCKS) { //Sue me 
-           if (color.getTotalLevelsRequired() == totalLevelsRequired)
+           if (color.getTotalLevelRequired() == totalLevelsRequired)
                return color;
        }
        return null;

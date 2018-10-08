@@ -10,8 +10,6 @@ import sx.blah.discord.api.IDiscordClient;
 
 public class Main { 
     
-    private static IDiscordClient client;
-       
     public static void main(String[] args) {
         File tokenFile = new File("token.txt");
         if (!tokenFile.exists()) {
@@ -27,7 +25,7 @@ public class Main {
             }
         }
         try {
-            client = new ClientBuilder()
+            IDiscordClient client = new ClientBuilder()
                     .withToken(getTextFromFile(tokenFile))
                     .login();
             client.getDispatcher().registerListeners(
@@ -47,9 +45,5 @@ public class Main {
         return null;
     }
     
-    //is this bad practice?
-    public static IDiscordClient getClient() {
-        return client;
-    }
     
 }
