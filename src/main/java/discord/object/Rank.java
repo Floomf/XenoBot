@@ -1,16 +1,16 @@
 package discord.object;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Rank {
     
     private final String name;
     private final int levelRequired;
     
-    private Rank() {
-        this.name = "";
-        this.levelRequired = 0;
-    }
-    
-    public Rank(String name, int levelRequired) {
+    @JsonCreator
+    public Rank(@JsonProperty ("name") String name, 
+            @JsonProperty("levelRequired") int levelRequired) {
         this.name = name;
         this.levelRequired = levelRequired;
     }

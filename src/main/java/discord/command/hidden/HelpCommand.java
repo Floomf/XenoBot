@@ -5,7 +5,6 @@ import discord.CommandManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import java.util.HashSet;
-import java.util.stream.Stream;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.util.EmbedBuilder;
@@ -43,7 +42,7 @@ public class HelpCommand extends AbstractCommand {
                     builder.appendField(c.toString(), sb.toString(), false);       
                 }
             }
-                    
+            
             BotUtils.sendEmbedMessage(channel, builder.build());            
         }
     }

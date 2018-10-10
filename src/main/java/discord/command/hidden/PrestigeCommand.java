@@ -19,7 +19,7 @@ public class PrestigeCommand extends AbstractCommand {
                     BotUtils.sendErrorMessage(message.getChannel(), "You must be level **80** to prestige."
                             + " You can view your progress with `!lvl`.");
         } else {
-            user.prestige(message.getGuild());
+            user.getProgress().prestige(message.getGuild());
         }
     }
     

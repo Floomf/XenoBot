@@ -51,15 +51,16 @@ public class XPChecker implements Runnable {
             List<String> names = new ArrayList<>();
             int xp = 1 * dUsers.size() + 13; // min 450/hr
             dUsers.removeIf(user -> UserManager.getDBUserFromID(
-                    user.getLongID()).getProgress().getLevel() == Progress.MAX_LEVEL);
+                    user.getLongID()).getProgress().isMaxLevel());
             if (dUsers.isEmpty()) return; //if all are max level
-            dUsers.forEach(dUser -> names.add(UserManager.getDBUserFromID(dUser.getLongID()).getName()));
+            dUsers.forEach(dUser -> names.add(UserManager.getDBUserFromID(dUser.getLongID()).getName().getNick()));
             EmbedBuilder builder = BotUtils.getBuilder(guild.getClient(), "+" + xp + "XP", 
                     "`" + names.toString() + "`"); 
             builder.withFooterText(channel.getName());
             builder.withTimestamp(Instant.now());
             BotUtils.sendEmbedMessage(guild.getChannelsByName("log").get(0), builder.build());
-            dUsers.forEach(dUser -> UserManager.getDBUserFromID(dUser.getLongID()).addXP(xp, guild));
+            dUsers.forEach(dUser -> UserManager.getDBUserFromID(dUser.getLongID())
+                    .getProgress().addXP(xp, guild));
             UserManager.saveDatabase();
         }
     }

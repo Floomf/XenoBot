@@ -43,13 +43,11 @@ public class ColorCommand extends AbstractCommand {
             builder.appendField("Default Colors",
                     "`" + Arrays.toString(ColorManager.getDefaultColors()) + "`", false);
             Unlockable[] unlockedColors = ColorManager.getUnlockedColorsForUser(user);
-            builder.appendField("Unlocked Colors [" + unlockedColors.length + "/36]", //hardcoded 36
+            builder.appendField("Unlocked Colors [" + unlockedColors.length + "/36]", //TODO hardcoded 36
                     "`" + Arrays.toString(unlockedColors) + "`", false);
-            if (unlockedColors.length == 36) {
-                builder.withFooterText("Holy frick, you've unlocked every color. Congratufuckinglations!");
-            } else {
-                builder.withFooterText("You can keep leveling to unlock more colors.");
-            }
+            builder.withFooterText((unlockedColors.length == 36) 
+                    ? "Holy frick, you've unlocked every color. Congratufuckinglations!" 
+                    : "You can keep leveling to unlock more colors.");
             BotUtils.sendEmbedMessage(channel, builder.build());
             return;
         } else if (name.equals("none")) {
@@ -86,7 +84,7 @@ public class ColorCommand extends AbstractCommand {
         //set their roles, the same as before (minus last color role(s)) plus new color role
         BotUtils.setUserRoles(guild, dUser, roles);
         BotUtils.sendInfoMessage(channel,
-                String.format("Your name is now the color %s!", color));      
+                String.format("Painted your name with the color %s.", color));      
     }
     
     private List<IRole> getUserRolesNoColors(IUser user, IGuild guild) {

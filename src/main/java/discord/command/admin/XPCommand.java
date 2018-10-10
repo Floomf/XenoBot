@@ -20,7 +20,7 @@ public class XPCommand extends AbstractCommand {
         User user;
         int xp;
         
-        if (!(type.equals("give") || type.equals("set"))) {
+        if (!type.equals("give")) {
             BotUtils.sendErrorMessage(channel, "Could not identify an XP operation.");
             return;
         }
@@ -47,20 +47,15 @@ public class XPCommand extends AbstractCommand {
             return; 
         }
         
-        //all data is valid, so perform action based on type
-        if (type.equals("give")) {
-            user.addXP(xp, message.getGuild());
-            BotUtils.sendInfoMessage(channel, "Gave " + user.getName() + " **" + xp + "**XP");
-        } else if (type.equals("set")) { //TODO FIX
-            //user.setXP(xp); //TODO handle this more safely?
-            //LevelManager.checkXPOfUser(message.getGuild(), user);
-            //BotUtils.sendInfoMessage(channel, "Set " + user.getName() + "'s XP to **" + xp + "**");
-        }        
+        //all data is valid, so perform action
+        if (xp > 10000) xp = 10000; 
+        user.getProgress().addXP(xp, message.getGuild());
+        BotUtils.sendInfoMessage(channel, "Gave " + user.getName() + " **" + xp + "**XP");
         UserManager.saveDatabase();
     }
     
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[give/set] [userID] [amount]", 
+        return BotUtils.buildUsage(alias, "[give] [userID] [amount]", 
                 "Give or set a user's XP in the database."
                 + "\n\nuserID - The user's long ID.");
     }

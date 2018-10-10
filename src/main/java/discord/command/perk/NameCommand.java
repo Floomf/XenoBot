@@ -2,7 +2,6 @@ package discord.command.perk;
 
 import discord.BotUtils;
 import discord.CommandHandler;
-import discord.NameManager;
 import discord.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
@@ -13,14 +12,15 @@ import sx.blah.discord.handle.obj.IMessage;
 public class NameCommand extends AbstractCommand {
     
     public NameCommand() {
-        super(new String[] {"name", "nick"}, 1, CommandCategory.PERK);
+        super(new String[] {"name", "nick", "nickname"}, 1, CommandCategory.PERK);
     }
     
     public void execute(IMessage message, String[] args) {
         User user = UserManager.getDBUserFromMessage(message);
         IChannel channel = message.getChannel();
         if (!(user.getProgress().getTotalLevels() > 60)) {
-            BotUtils.sendErrorMessage(channel, "You must be at least level **60** to change your name!"
+            BotUtils.sendErrorMessage(channel, 
+                    "You must be at least level **60** to change your nickname!"
                     + " You can view your progress with `!lvl`.");
             return;
         }
@@ -29,19 +29,18 @@ public class NameCommand extends AbstractCommand {
             name = name.substring(0, 16);
         }
         
-        if (!name.matches("[ -~]+")) { //regex for char codes between 32-126
-            BotUtils.sendErrorMessage(channel, "Your name can only contain letters, "
-                    + "numbers, and default keyboard symbols.");
+        if (!name.matches("[\u0020-\u00FF]+")) { //regex for charcodes 32-255
+            BotUtils.sendErrorMessage(channel, "Your nickname can only contain basic letters and symbols.");
             return;
         }
 
-        if (!UserManager.databaseContainsName(name)) {
-            NameManager.setNameOfUser(message.getGuild(), user, name);
-            BotUtils.sendInfoMessage(channel, "Your name is now " + name + "!");
+       if (!UserManager.databaseContainsName(name)) {
+            user.getName().setNick(name, message.getGuild());
+            BotUtils.sendInfoMessage(channel, "Nickname updated. Pleasure to meet ya, " + name + ".");
             UserManager.saveDatabase();
         } else {
-            BotUtils.sendErrorMessage(channel, "Sorry, but that name is already taken.");    
-        }
+            BotUtils.sendErrorMessage(channel, "Sorry, but that nickname is already taken.");    
+        } 
     }
     
     public String getUsage(String alias) {

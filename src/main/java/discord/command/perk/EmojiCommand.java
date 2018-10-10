@@ -2,10 +2,10 @@ package discord.command.perk;
 
 import com.vdurmont.emoji.EmojiManager;
 import discord.BotUtils;
-import discord.NameManager;
 import discord.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.object.Name;
 import discord.object.User;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
@@ -27,24 +27,25 @@ public class EmojiCommand extends AbstractCommand{
             return;
         }
         
+        Name name = user.getName();
         //EmojiManager makes it easy to check for emoji
         if (EmojiManager.isEmoji(emoji)) {
             //some emojis take up 2 characters
             if (emoji.length() == 2) {
-                user.setEmoji(Character.toCodePoint(emoji.charAt(0), emoji.charAt(1)));
+                name.setEmoji(Character.toCodePoint(emoji.charAt(0), emoji.charAt(1)), message.getGuild());
             } else {
-                user.setEmoji(emoji.codePointAt(0));
+                name.setEmoji(emoji.codePointAt(0), message.getGuild());
             }
-            BotUtils.sendInfoMessage(channel, "Set your name emoji to " + emoji);
+            BotUtils.sendInfoMessage(channel, "Splendid choice. Updated your name emoji to " + emoji);
+            UserManager.saveDatabase();
         } else if (emoji.toLowerCase().equals("none")) {
-            user.setEmoji(0);
+            name.setEmoji(0, message.getGuild());
             BotUtils.sendInfoMessage(channel, "Your name emoji has been removed.");
+            UserManager.saveDatabase();
         } else {
-            BotUtils.sendErrorMessage(channel, "Could not parse an emoji from input.");
+            BotUtils.sendErrorMessage(channel, "Could not parse a unicode emoji from input.");
             return;
-        }
-        NameManager.formatNameOfUser(message.getGuild(), user);
-        UserManager.saveDatabase();
+        }      
     }
     
     public String getUsage(String alias) {

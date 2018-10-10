@@ -1,15 +1,19 @@
 package discord.object;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import discord.BotUtils;
 import discord.ColorManager;
-import discord.NameManager;
 import discord.RankManager;
 import sx.blah.discord.handle.obj.IGuild;
 import java.awt.Color;
 import sx.blah.discord.handle.obj.IChannel;
 
 public class Progress {
+    
+    @JsonIgnore
+    private User user;
     
     private int level;
     private int xp;
@@ -19,11 +23,16 @@ public class Progress {
     
     public final static int MAX_LEVEL = 80;
     
-    public Progress(int level, int xp, int xpTotalForLevelUp, int prestige, Rank rank) {
+    @JsonCreator
+    protected Progress(@JsonProperty("level") int level, 
+            @JsonProperty("xp") int xp, 
+            @JsonProperty("xpTotalForLevelUp") int xpTotalForLevelUp, 
+            @JsonProperty("prestige") Prestige prestige, 
+            @JsonProperty("rank") Rank rank) {
         this.level = level;
         this.xp = xp;
         this.xpTotalForLevelUp = xpTotalForLevelUp;
-        this.prestige = new Prestige(prestige);
+        this.prestige = prestige;
         this.rank = rank;
     }
     
@@ -58,6 +67,12 @@ public class Progress {
     }
     
     //TEMPORARY
+    
+    @JsonIgnore
+    public void setUser(User user) {
+        this.user = user;
+    }   
+    
     public void setRank(Rank rank) {
         this.rank = rank;
     }
@@ -72,28 +87,28 @@ public class Progress {
         return level == MAX_LEVEL;
     }
     
-    protected void addXP(int xp, IGuild guild, User user) {
+    public void addXP(int xp, IGuild guild) {
         if (level < MAX_LEVEL) {
             this.xp += xp;
-            checkXP(guild, user);
+            checkXP(guild);
         }
     }
     
-    private void checkXP(IGuild guild, User user) {
+    private void checkXP(IGuild guild) {
         if (xp >= xpTotalForLevelUp) {
-            levelUp(guild, user);
-            checkUnlocksForUser(guild, user);
+            levelUp(guild);
+            checkUnlocksForUser(guild);
             RankManager.setRankOfUser(guild, user);
-            if (level < MAX_LEVEL) checkXP(guild, user);
+            if (level < MAX_LEVEL) checkXP(guild);
         } else if (xp < 0) {
-            levelDown(guild, user);
+            levelDown(guild);
             RankManager.setRankOfUser(guild, user);
-            if (level < MAX_LEVEL) checkXP(guild, user);
+            if (level < MAX_LEVEL) checkXP(guild);
         }
     }
     
     //Only handles leveling up, logic and xp handling handled elsewhere
-    private void levelUp(IGuild guild, User user) {
+    private void levelUp(IGuild guild) {
         xp -= xpTotalForLevelUp; //carry over xp to next level by subtracting from level xp
         level++;
         genXPTotalForLevelUp();
@@ -103,7 +118,7 @@ public class Progress {
     }
     
     //same as leveling up method
-    private void levelDown(IGuild guild, User user) {
+    private void levelDown(IGuild guild) {
         level--;
         genXPTotalForLevelUp();
         xp += xpTotalForLevelUp; //add negative xp to new level xp
@@ -112,15 +127,15 @@ public class Progress {
                         level, level - 1), guild.getUserByID(user.getID()).getColorForGuild(guild));
     }
     
-    private void checkUnlocksForUser(IGuild guild, User user) {
+    private void checkUnlocksForUser(IGuild guild) {
         IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID()));      
         if (level == MAX_LEVEL)
-            maxOutUser(pmChannel, user);
+            maxOutUser(pmChannel);
         if (level % 20 == 0) 
             notifyUnlocksForUser(pmChannel, guild);
     }
     
-    private void maxOutUser(IChannel channel, User user) {
+    private void maxOutUser(IChannel channel) {
         xp = 0;
         xpTotalForLevelUp = 0;
         BotUtils.sendMessage(channel, "Congratulations!", "You have reached the max level. "
@@ -130,13 +145,13 @@ public class Progress {
     }
     
     //BAD
-    protected void prestige(IGuild guild, User user) {
+    public void prestige(IGuild guild) {
         prestige = prestige.prestige();
         level = 1;
         xp = 0;
         genXPTotalForLevelUp();
         RankManager.setRankOfUser(guild, user);
-        NameManager.formatNameOfUser(guild, user);
+        user.getName().verify(guild);
         BotUtils.sendMessage(guild.getChannelsByName("log").get(0), BotUtils.getMention(user), "PRESTIGE UP!", 
                 String.format("**%d → %d**", prestige.getNumber() - 1, prestige.getNumber()), Color.BLACK);
         
@@ -171,7 +186,7 @@ public class Progress {
     }
     
     private void genXPTotalForLevelUp() {
-        xpTotalForLevelUp = level * 10 + 50;       
+        xpTotalForLevelUp = level * 10 + 50;
     } 
     
 }

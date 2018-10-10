@@ -47,6 +47,7 @@ public class ProfileCommand extends AbstractCommand {
             builder.addTotalLevel();
             builder.addBadgeCase();
         }
+        builder.addBarProgressToMaxLevel();
         return builder.build();
     }
     

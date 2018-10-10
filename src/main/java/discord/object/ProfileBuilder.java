@@ -22,7 +22,7 @@ public class ProfileBuilder {
     
     private void setupBase(IGuild guild) {
         IUser dUser = guild.getUserByID(user.getID());
-        builder.withAuthorName(user.getName());
+        builder.withAuthorName(user.getName().toString());
         builder.withDesc(progress.getRank().getName());
         builder.withColor(dUser.getColorForGuild(guild));
         builder.withThumbnail(dUser.getAvatarURL());      

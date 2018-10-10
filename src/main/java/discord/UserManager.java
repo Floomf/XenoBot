@@ -66,8 +66,8 @@ public class UserManager {
     public static void validateUsers(IGuild guild) {
         for (User user : users) {
             if (guild.getUserByID(user.getID()) != null) {
-                NameManager.formatNameOfUser(guild, user);
                 RankManager.setRankOfUser(guild, user);
+                user.getName().verify(guild);
             }
         }
     }
@@ -79,8 +79,7 @@ public class UserManager {
         for (User user : new ArrayList<>(users)) {
             //if id is null then they cant be found on the guild
             //but only remove them if they are low enough level
-            if (user.getProgress().getLevel() < 10 && user.getProgress().getPrestige().getNumber() < 1 
-                    && guild.getUserByID(user.getID()) == null) {
+            if (user.getProgress().getTotalLevels() < 10 && guild.getUserByID(user.getID()) == null) {
                 users.remove(user);
                 System.out.println("Removed " + user.getName() + " from the database.");
             }
@@ -110,7 +109,6 @@ public class UserManager {
         User user = new User(dUser.getLongID(), dUser.getDisplayName(guild));
         users.add(user);
         RankManager.setRankOfUser(guild, user);
-        NameManager.formatNameOfUser(guild, user);
         System.out.println("Added " + user.getName() + " to the database.");
         saveDatabase();
     }
@@ -126,7 +124,7 @@ public class UserManager {
     
     public static boolean databaseContainsName(String name) {
         for (User user : users) {
-            if (user.getName().toLowerCase().equals(name.toLowerCase()))
+            if (user.getName().getNick().toLowerCase().equals(name.toLowerCase()))
                 return true;
         }
          return false;
@@ -144,7 +142,7 @@ public class UserManager {
     
     public static long getDBUserIDFromName(String name) {
         for (User user : users) {
-            if (user.getName().toLowerCase().equals(name.toLowerCase())) {
+            if (user.getName().getNick().toLowerCase().equals(name.toLowerCase())) {
                 return user.getID();
             }
         }

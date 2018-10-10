@@ -1,11 +1,10 @@
 package discord.object;
 
-//Immutable class
-
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
+//Immutable
 public class Prestige {
     
     private static final int MAX_PRESTIGE = 10;
@@ -13,6 +12,7 @@ public class Prestige {
     
     private final int number;  
     
+    @JsonCreator
     public Prestige(@JsonProperty("number") int number) {
         this.number = number;
     }
