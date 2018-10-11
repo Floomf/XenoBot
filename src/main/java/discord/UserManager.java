@@ -138,7 +138,11 @@ public class UserManager {
                 return user;
         }
         return null;
-    }    
+    }
+    
+    public static User getDBUserFromDUser(IUser user) {
+        return getDBUserFromID(user.getLongID());
+    }
     
     public static long getDBUserIDFromName(String name) {
         for (User user : users) {

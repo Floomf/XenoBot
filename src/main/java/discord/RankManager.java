@@ -1,6 +1,5 @@
 package discord;
 
-import com.vdurmont.emoji.EmojiManager;
 import discord.object.Rank;
 import discord.object.User;
 import java.util.List;

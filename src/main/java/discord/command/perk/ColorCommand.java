@@ -83,8 +83,8 @@ public class ColorCommand extends AbstractCommand {
         
         //set their roles, the same as before (minus last color role(s)) plus new color role
         BotUtils.setUserRoles(guild, dUser, roles);
-        BotUtils.sendInfoMessage(channel,
-                String.format("Painted your name with the color %s.", color));      
+        BotUtils.sendMessage(channel, "Info", "Painted your name in the color " + color + ".",
+                colorRole.get(0).getColor()); 
     }
     
     private List<IRole> getUserRolesNoColors(IUser user, IGuild guild) {

@@ -7,9 +7,11 @@ import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.object.ProfileBuilder;
 import discord.object.User;
+import java.util.List;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 public class ProfileCommand extends AbstractCommand {
     
@@ -21,8 +23,13 @@ public class ProfileCommand extends AbstractCommand {
     public void execute(IMessage message, String[] args) {
         long id;
         if (args.length > 0) {
-            String name = CommandHandler.combineArgs(0, args);
-            id = UserManager.getDBUserIDFromName(name);
+            List<IUser> mentions = message.getMentions();
+            if (!mentions.isEmpty()) {
+                id = mentions.get(0).getLongID();
+            } else { 
+                String name = CommandHandler.combineArgs(0, args);
+                id = UserManager.getDBUserIDFromName(name);
+            }
             if (id == -1L) {
                 BotUtils.sendErrorMessage(message.getChannel(), 
                         "Specified user was not found in the database.");
@@ -52,7 +59,7 @@ public class ProfileCommand extends AbstractCommand {
     }
     
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[name]", 
+        return BotUtils.buildUsage(alias, "[nickname/@mention]", 
                 "View you or another user's detailed profile.");
     }
     
