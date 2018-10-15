@@ -10,42 +10,40 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class NameCommand extends AbstractCommand {
-    
+
     public NameCommand() {
-        super(new String[] {"name", "nick", "nickname"}, 1, CommandCategory.PERK);
+        super(new String[]{"name", "nick", "nickname"}, 1, CommandCategory.PERK);
     }
-    
+
     public void execute(IMessage message, String[] args) {
         User user = UserManager.getDBUserFromMessage(message);
         IChannel channel = message.getChannel();
         if (!(user.getProgress().getTotalLevels() > 60)) {
-            BotUtils.sendErrorMessage(channel, 
+            BotUtils.sendErrorMessage(channel,
                     "You must be at least level **60** to change your nickname!"
                     + " You can view your progress with `!lvl`.");
             return;
         }
-        String name = CommandHandler.combineArgs(0, args);
-        if (name.length() > 17) { //name can't be too long
-            name = name.substring(0, 16);
-        }
-        
-        if (!name.matches("[\u0020-\u00FF]+")) { //regex for charcodes 32-255
+
+        String nick = BotUtils.validateName(CommandHandler.combineArgs(0, args));
+        if (nick.isEmpty()) {
             BotUtils.sendErrorMessage(channel, "Your nickname can only contain basic letters and symbols.");
             return;
         }
 
-       if (!UserManager.databaseContainsName(name)) {
-            user.getName().setNick(name, message.getGuild());
-            BotUtils.sendInfoMessage(channel, "Nickname updated. Pleasure to meet ya, " + name + ".");
-            UserManager.saveDatabase();
-        } else {
-            BotUtils.sendErrorMessage(channel, "Sorry, but that nickname is already taken.");    
-        } 
+        if (!UserManager.databaseContainsName(nick)) {
+            BotUtils.sendErrorMessage(channel, "Sorry, but that nickname is already taken.");
+            return;
+        }
+        
+        user.getName().setNick(nick, message.getGuild());
+        BotUtils.sendInfoMessage(channel, "Nickname updated. Pleasure to meet ya, " + nick + ".");
+        UserManager.saveDatabase();
     }
-    
+
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[new name]", "Change your nickname on this guild."
                 + "\n*(Level 60+ or Prestiged)*");
     }
-    
+
 }

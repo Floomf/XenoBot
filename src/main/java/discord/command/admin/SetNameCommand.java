@@ -14,7 +14,7 @@ import sx.blah.discord.handle.obj.IUser;
 public class SetNameCommand extends AbstractCommand {
 
     public SetNameCommand() {
-        super(new String[]{"setname", "changename", "setnick"}, 2, CommandCategory.ADMIN);
+        super(new String[]{"setname", "changename", "setnick", "sn"}, 2, CommandCategory.ADMIN);
     }
 
     public void execute(IMessage message, String[] args) {
@@ -28,13 +28,19 @@ public class SetNameCommand extends AbstractCommand {
             BotUtils.sendErrorMessage(channel, "Specified user was not found in the database.");
             return;
         }
-        String nick = CommandHandler.combineArgs(1, args); //TODO validate nickname
+        String nick = BotUtils.validateName(CommandHandler.combineArgs(0, args));
+        if (nick.isEmpty()) {
+            BotUtils.sendErrorMessage(channel, "The nickname can only contain basic letters and symbols.");
+            return;
+        }
+        
         if (UserManager.databaseContainsName(nick)) {
             BotUtils.sendErrorMessage(channel, "Sorry, but that nickname is already taken.");
             return;
         }
+        
         userToChange.getName().setNick(nick, message.getGuild());
-        BotUtils.sendInfoMessage(channel, "Nickname set to " + args[1]);
+        BotUtils.sendInfoMessage(channel, "Nickname upodated to " + nick);
         UserManager.saveDatabase();
     }
 

@@ -51,8 +51,7 @@ public class UserManager {
     }
     
     public static void saveDatabase() {
-        ObjectMapper mapper = new ObjectMapper();
-        
+        ObjectMapper mapper = new ObjectMapper();        
         System.out.println("Attempting to save database...");
         try {
             mapper.writerWithDefaultPrettyPrinter().writeValue(new File("users.json"), users);
@@ -66,7 +65,7 @@ public class UserManager {
     public static void validateUsers(IGuild guild) {
         for (User user : users) {
             if (guild.getUserByID(user.getID()) != null) {
-                RankManager.setRankOfUser(guild, user);
+                RankManager.verifyRankOnGuild(guild, user);
                 user.getName().verify(guild);
             }
         }
@@ -74,15 +73,9 @@ public class UserManager {
     
     //Check possible users that have left the guild, if so, remove them from the database
     public static void checkRemovedUsersInGuild(IGuild guild) {
-        System.out.println("Checking possible new users to remove from the database...");   
-        
+        System.out.println("Checking possible new users to remove from the database...");          
         for (User user : new ArrayList<>(users)) {
-            //if id is null then they cant be found on the guild
-            //but only remove them if they are low enough level
-            if (user.getProgress().getTotalLevels() < 10 && guild.getUserByID(user.getID()) == null) {
-                users.remove(user);
-                System.out.println("Removed " + user.getName() + " from the database.");
-            }
+           removeUserIfInvalid(user, guild);
         }
         System.out.println("Finished checking possible users to remove.");
     }
@@ -95,8 +88,8 @@ public class UserManager {
         System.out.println("Checking possible new users to add to the database...");
         
         for (IUser dUser : guildUsers) {
-            if (!dUser.isBot() && !databaseContainsUser(dUser)) {
-                addUserToDatabase(dUser, guild);
+            if (!dUser.isBot() && !databaseContainsDUser(dUser)) {
+                handleUserJoin(dUser, guild);
                 foundNewUser = true;
             }
         }
@@ -105,15 +98,50 @@ public class UserManager {
             saveDatabase();
     }
     
-    public static void addUserToDatabase(IUser dUser, IGuild guild) {
-        User user = new User(dUser.getLongID(), dUser.getDisplayName(guild));
+    public static void handleUserJoin(IUser dUser, IGuild guild) {
+        if (databaseContainsDUser(dUser)) {
+            User existingUser = getDBUserFromDUser(dUser);
+            RankManager.verifyRankOnGuild(guild, existingUser);
+            existingUser.getName().verify(guild);
+            System.out.println("Already found " + existingUser.getName().getNick() + " in the database.");
+            return;
+        }
+        String name = BotUtils.validateName(dUser.getDisplayName(guild));
+        //if the name validator returns an empty name, we need a placeholder
+        if (name.isEmpty())  {
+            name = "User";
+        }
+        if (databaseContainsName(name)) {
+            name = getNextAvailableName(name);
+        }
+        User user = new User(dUser.getLongID(), name);
         users.add(user);
-        RankManager.setRankOfUser(guild, user);
-        System.out.println("Added " + user.getName() + " to the database.");
+        RankManager.verifyRankOnGuild(guild, user);
+        user.getName().verify(guild);
+        System.out.println("Added " + name + " to the database.");
         saveDatabase();
     }
     
-    private static boolean databaseContainsUser(IUser dUser) {
+    private static String getNextAvailableName(String name) {
+        int i = 2;
+        while (databaseContainsName(name + i)) i++;
+        return name + i;
+    }
+    
+    public static void handleUserLeave(IUser dUser, IGuild guild) {
+        //here we are assuming the dUser is in the DB, seems like a bad idea
+        removeUserIfInvalid(getDBUserFromDUser(dUser), guild);
+    }
+    
+    private static void removeUserIfInvalid(User user, IGuild guild) {
+        //we keep users that are level 10 and up for now
+        if (user.getProgress().getTotalLevels() < 10 && guild.getUserByID(user.getID()) == null) {
+            users.remove(user);
+            System.out.println("Removed " + user.getName() + " from the database.");
+        }
+    }
+    
+    private static boolean databaseContainsDUser(IUser dUser) {
         long ID = dUser.getLongID();
         for (User user : users) {
             if (ID == user.getID())
@@ -130,7 +158,7 @@ public class UserManager {
          return false;
     }
            
-    //Methods for viewing/modifying user data
+    //Methods for fetching users and ids
     
     public static User getDBUserFromID(long id) {
         for (User user : users) {
@@ -140,20 +168,21 @@ public class UserManager {
         return null;
     }
     
-    public static User getDBUserFromDUser(IUser user) {
-        return getDBUserFromID(user.getLongID());
+    public static User getDBUserFromDUser(IUser dUser) {
+        return getDBUserFromID(dUser.getLongID());
+    }
+    
+    public static User getDBUserFromMessage(IMessage message) {
+        return getDBUserFromID(message.getAuthor().getLongID());
     }
     
     public static long getDBUserIDFromName(String name) {
         for (User user : users) {
-            if (user.getName().getNick().toLowerCase().equals(name.toLowerCase())) {
+            if (user.getName().getNick().equalsIgnoreCase(name)) {
                 return user.getID();
             }
         }
         return -1;
     }
     
-    public static User getDBUserFromMessage(IMessage message) {
-        return getDBUserFromID(message.getAuthor().getLongID());
-    }
 }

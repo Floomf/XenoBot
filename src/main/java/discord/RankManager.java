@@ -22,39 +22,45 @@ public class RankManager {
         new Rank("Pineapple", 80)
     };
     
-    public static Rank getRankForLevel(int level) {
-        for (Rank rank : RANKS) {
-            if (level - rank.getLevelRequired() <= 9)
-                return rank;
+    public static Rank getRankForLevel(int level) {       
+        for (int i = 0; i < RANKS.length; i++) {
+            if (level < RANKS[i].getLevelRequired()) {
+                return RANKS[i-1];
+            } 
         }
-        return RANKS[RANKS.length - 1]; //last rank
+        return RANKS[RANKS.length - 1]; //has to be last rank
     }
     
     public static void setRankOfUser(IGuild guild, User user) {
         Rank rankNeeded = getRankForLevel(user.getProgress().getLevel());
-        IRole rankRole = guild.getRolesByName(rankNeeded.getName()).get(0);
-        IUser dUser = guild.getUserByID(user.getID());
-        List<IRole> guildRoles = dUser.getRolesForGuild(guild);
-        //if rank isnt what it should be, set it correctly so
-        if (!rankNeeded.equals(user.getProgress().getRank()) || !guildRoles.contains(rankRole)) {
+        
+        if (!rankNeeded.equals(user.getProgress().getRank())) {
             user.getProgress().setRank(rankNeeded);
+            verifyRankOnGuild(guild, user);
+            if (!rankNeeded.equals(RANKS[0])) {
+                BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
+                        BotUtils.getMention(user), "Rank up!",
+                        "You are now a **" + rankNeeded.getName() + "**.",
+                        guild.getRolesByName(rankNeeded.getName()).get(0).getColor());
+            }
+        }
+    }
+    
+    public static void verifyRankOnGuild(IGuild guild, User user) {
+         IRole rankRole = guild.getRolesByName(user.getProgress().getRank().getName()).get(0);
+         IUser dUser = guild.getUserByID(user.getID());
+         List<IRole> guildRoles = dUser.getRolesForGuild(guild);
+         if (!guildRoles.contains(rankRole)) {
             for (Rank rank : RANKS) { //remove all existing rank roles
                 IRole role = guild.getRolesByName(rank.getName()).get(0);
                 if (guildRoles.contains(role)) {
                     guildRoles.remove(role);
-                    break;
                 }
             }
             guildRoles.add(rankRole);
             BotUtils.setUserRoles(guild, dUser, guildRoles);
             System.out.println("Set role of " + user.getName() + " to " + 
                     user.getProgress().getRank().getName());
-            if (!rankNeeded.equals(RANKS[0])) {
-                BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                        BotUtils.getMention(user), "Rank up!",
-                        "You are now a **" + rankNeeded.getName() + "**.",
-                        rankRole.getColor());
-            }
         }
     }
     

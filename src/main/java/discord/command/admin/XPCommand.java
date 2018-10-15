@@ -13,7 +13,7 @@ import sx.blah.discord.handle.obj.IUser;
 public class XPCommand extends AbstractCommand {
     
     public XPCommand() {
-        super(new String[] {"givexp", "giveexp", "gxp"}, 3, CommandCategory.ADMIN); 
+        super(new String[] {"givexp", "giveexp", "gxp"}, 2, CommandCategory.ADMIN); 
     }
     
     public void execute(IMessage message, String[] args) {

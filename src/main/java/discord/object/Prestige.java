@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Prestige {
     
     private static final int MAX_PRESTIGE = 10;
-    public static final char[] BADGES = {0, '★','✷','⁂','❖','❃','✠','✪','☭','☬','♆'};
+    public static final char[] BADGES = {0, '★','✷','⁂','❖','❃','✠','✪','֎','☯','♆'};
     
     private final int number;  
     
@@ -26,7 +26,7 @@ public class Prestige {
         return number;
     }
    
-    public Prestige prestige() {
+    protected Prestige prestige() {
         return new Prestige(number + 1);
     }
     

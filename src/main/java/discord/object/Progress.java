@@ -66,7 +66,7 @@ public class Progress {
         return rank;
     }
     
-    //TEMPORARY
+    //TEMPORARY?
     
     @JsonIgnore
     public void setUser(User user) {
@@ -101,9 +101,13 @@ public class Progress {
             RankManager.setRankOfUser(guild, user);
             if (level < MAX_LEVEL) checkXP(guild);
         } else if (xp < 0) {
-            levelDown(guild);
-            RankManager.setRankOfUser(guild, user);
-            if (level < MAX_LEVEL) checkXP(guild);
+            if (level > 1) { //prevent negative levels
+                levelDown(guild);
+                RankManager.setRankOfUser(guild, user);
+                if (level < MAX_LEVEL) checkXP(guild);
+            } else {
+                xp = 0;
+            }
         }
     }
     
@@ -141,7 +145,7 @@ public class Progress {
         BotUtils.sendMessage(channel, "Congratulations!", "You have reached the max level. "
                 + "\n\nYou can now prestige and carry over back to level one with `!prestige`"
                 + "\n\nYou will keep all perks, and gain additional unlocks as you level again."
-                + "\n\nPrestiging is **permanent.** Only do so if you are ready.", Color.CYAN);
+                + "\nPrestiging is **permanent.** Only do so if you are ready.", Color.CYAN);
     }
     
     //BAD

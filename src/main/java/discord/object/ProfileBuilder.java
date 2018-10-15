@@ -21,7 +21,7 @@ public class ProfileBuilder {
     }
     
     private void setupBase(IGuild guild) {
-        IUser dUser = guild.getUserByID(user.getID());
+        IUser dUser = guild.getClient().fetchUser(user.getID()); //temporary?
         builder.withAuthorName(user.getName().toString());
         builder.withDesc(progress.getRank().getName());
         builder.withColor(dUser.getColorForGuild(guild));
@@ -70,13 +70,12 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addTotalXP() {
-        builder.appendField("Total XP :clock4:", 
-                "`" + getTotalXP(progress) + "`", true);
+        builder.appendField("Total XP :clock4:", "`" + getTotalXP() + "`", true);
         return this;
     }
     
     public ProfileBuilder addBadgeCase() {
-        builder.appendField("Badge Case :beginner: ", "`" + getUserBadges(progress) + "`", true);
+        builder.appendField("Badge Case :beginner: ", getUserBadges(), true);
         return this;
     }
     
@@ -84,7 +83,7 @@ public class ProfileBuilder {
         return builder.build();
     }   
     
-    private String getUserBadges(Progress progress) {
+    private String getUserBadges() {
         String badges = "";
         for (int i = 1; i <= progress.getPrestige().getNumber(); i++) {
             badges += Prestige.BADGES[i];
@@ -92,7 +91,7 @@ public class ProfileBuilder {
         return badges;
     } 
     
-    private int getTotalXP(Progress progress) {
+    private int getTotalXP() {
         int xp = 0;      
         for (int i = 0; i < progress.getPrestige().getNumber(); i++) {
             xp += getTotalXPToLevel(Progress.MAX_LEVEL);

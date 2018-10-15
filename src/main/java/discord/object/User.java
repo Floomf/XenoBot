@@ -7,8 +7,8 @@ public class User {
     
     @JsonProperty("discordID")
     private final long discordID;
-    private Name name;
-    private Progress progress;  
+    private final Name name;
+    private final Progress progress;  
     
     @JsonCreator
     public User(@JsonProperty("discordID") long discordID, 
@@ -19,7 +19,7 @@ public class User {
         name.setUser(this);
         this.progress = progress;
         progress.setUser(this);
-;    }
+    }
           
     public User(long discordID, String name) {
         this.discordID = discordID;

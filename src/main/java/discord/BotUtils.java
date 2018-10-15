@@ -3,6 +3,8 @@ package discord;
 import discord.object.User;
 import java.awt.Color;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IChannel;
@@ -101,6 +103,18 @@ public class BotUtils {
     
     public static String buildUsage(String alias, String args, String desc) {
         return (String.format("%s%s %s \n\n%s", CommandManager.CMD_PREFIX, alias, args, desc));
+    }
+    
+    public static String validateName(String name) { //regex for charcodes 32-255, basic letters and symbols
+        Matcher m = Pattern.compile("([\u0020-\u00FF]+)").matcher(name);
+        String result = "";
+        while (m.find()) {
+            result += m.group(1);
+        }
+        if (result.length() > 20) { //we dont want the nick too long
+            result = result.substring(0, 19);
+        }
+        return result;
     }
     
 }
