@@ -49,16 +49,18 @@ public class XPChecker implements Runnable {
                 || user.getVoiceStateForGuild(guild).isMuted());
         if (dUsers.size() >= 2) {
             List<String> names = new ArrayList<>();
-            int xp = 1 * dUsers.size() + 13; // min 450/hr
-            dUsers.removeIf(user -> UserManager.getDBUserFromID(
-                    user.getLongID()).getProgress().isMaxLevel());
-            if (dUsers.isEmpty()) return; //if all are max level
+            int xp = dUsers.size() + 13; // min 450/hr
+            dUsers.removeIf(dUser -> { 
+                Progress prog = UserManager.getDBUserFromDUser(dUser).getProgress();
+                return (prog.isMaxLevel() && !prog.getPrestige().isMax());
+            });
+            if (dUsers.isEmpty()) return; //if all are max level but not max prestige
             dUsers.forEach(dUser -> names.add(UserManager.getDBUserFromID(dUser.getLongID()).getName().getNick()));
             EmbedBuilder builder = BotUtils.getBuilder(guild.getClient(), "+" + xp + "XP", 
                     "`" + names.toString() + "`"); 
             builder.withFooterText(channel.getName());
             builder.withTimestamp(Instant.now());
-            BotUtils.sendEmbedMessage(guild.getChannelsByName("log").get(0), builder.build());
+            BotUtils.sendEmbedMessage(guild.getChannelsByName("securitycam").get(0), builder.build());
             dUsers.forEach(dUser -> UserManager.getDBUserFromID(dUser.getLongID())
                     .getProgress().addXP(xp, guild));
             UserManager.saveDatabase();

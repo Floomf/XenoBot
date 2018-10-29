@@ -1,4 +1,4 @@
-package discord.object;
+ package discord.object;
 
 import discord.BotUtils;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
@@ -8,15 +8,14 @@ import sx.blah.discord.util.EmbedBuilder;
 
 public class ProfileBuilder {
     
-    EmbedBuilder builder; 
+    EmbedBuilder builder;
     User user;
     Progress progress;
     
     public ProfileBuilder(IGuild guild, User user) {
         this.user = user;
         this.builder = BotUtils.getBaseBuilder(guild.getClient());
-        this.progress = user.getProgress();
-        
+        this.progress = user.getProgress();        
         setupBase(guild);
     }
     
@@ -40,9 +39,9 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addPrestige() {
-        builder.appendField("Prestige :trophy:", "`"
-                    + progress.getPrestige().getNumber() 
-                    + progress.getPrestige().getBadge() + "`", true);
+        builder.appendField("Prestige :trophy:", "`" + progress.getPrestige().getNumber() 
+                + "`" + progress.getPrestige().getBadge()
+                + (progress.getPrestige().isMax() ? " `(MAX)`" : ""), true);
         return this;
     }
     
@@ -55,7 +54,7 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addBarProgressToMaxLevel() {
-        int currentTotalXP = getTotalXPToLevel(progress.getLevel()) + progress.getXP();
+        int currentTotalXP = getTotalXPToLevel(progress.getLevel() - 1) + progress.getXP();
         int maxXP = getTotalXPToLevel(Progress.MAX_LEVEL);
         int percentage = (int) Math.round((double) currentTotalXP / maxXP * 100);
         builder.appendField(percentage + "% to Max Level :checkered_flag:", 
@@ -110,16 +109,16 @@ public class ProfileBuilder {
     }
      
     private String drawBarProgress(int percentage) {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         //generate an int 1-10 depicting progress based on percentage
-        int prog = percentage / 10;       
+        int prog = percentage / 10;
         for (int i = 1; i <= 10; i++) {
             if (i <= prog)
-                builder.append(":white_large_square: ");
+                sb.append(":white_large_square: ");
             else //different emojis handled by discord
-                builder.append(":white_square_button: ");
+                sb.append(":white_square_button: ");
         }
-        return builder.toString();
+        return sb.toString();
     }
     
 }

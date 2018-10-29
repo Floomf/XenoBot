@@ -1,8 +1,6 @@
 package discord;
 
-import com.vdurmont.emoji.EmojiManager;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;

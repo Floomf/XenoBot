@@ -31,7 +31,7 @@ public class NameCommand extends AbstractCommand {
             return;
         }
 
-        if (!UserManager.databaseContainsName(nick)) {
+        if (UserManager.databaseContainsName(nick)) {
             BotUtils.sendErrorMessage(channel, "Sorry, but that nickname is already taken.");
             return;
         }

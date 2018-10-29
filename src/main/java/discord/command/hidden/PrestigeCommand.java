@@ -22,11 +22,13 @@ public class PrestigeCommand extends AbstractCommand {
                             + " You can view your progress with `!lvl`.");
         } else {
             user.getProgress().prestige(message.getGuild());
+            BotUtils.sendMessage(message.getChannel(), "Movin' on up", "Welcome to Prestige " 
+                    + user.getProgress().getPrestige().getNumber() + ".");
         }
     }
     
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "", "Prestige and carry over back to level one."
-                + "\n*(Level 80)*");
+                + "\n*(Level " + Progress.MAX_LEVEL + ")*");
     }
 }

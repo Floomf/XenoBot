@@ -80,7 +80,7 @@ public class BotUtils {
                 e.printStackTrace();
             }
         });
-    }   
+    }
     
     public static EmbedBuilder getBuilder(IDiscordClient client, String title, String desc, Color color) {    
         return getBaseBuilder(client)
@@ -111,8 +111,8 @@ public class BotUtils {
         while (m.find()) {
             result += m.group(1);
         }
-        if (result.length() > 20) { //we dont want the nick too long
-            result = result.substring(0, 19);
+        if (result.length() > 22) { //we dont want the nick too long
+            result = result.substring(0, 21);
         }
         return result;
     }

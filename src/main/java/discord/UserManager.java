@@ -64,7 +64,7 @@ public class UserManager {
     
     public static void validateUsers(IGuild guild) {
         for (User user : users) {
-            if (guild.getUserByID(user.getID()) != null) {
+            if (guild.getUserByID(user.getID()) != null) {             
                 RankManager.verifyRankOnGuild(guild, user);
                 user.getName().verify(guild);
             }
@@ -164,6 +164,15 @@ public class UserManager {
         for (User user : users) {
             if (user.getID() == id) 
                 return user;
+        }
+        return null;
+    }
+    
+    public static User getDBUserFromName(String name) {
+        for (User user : users) {
+            if (user.getName().getNick().equalsIgnoreCase(name)) {
+                return user;
+            }
         }
         return null;
     }

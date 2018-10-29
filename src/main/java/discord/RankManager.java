@@ -11,15 +11,15 @@ public class RankManager {
     
     //hardcoded ranks
     private final static Rank[] RANKS = {
-        new Rank("Coconut", 0),
-        new Rank("Apple", 10),
-        new Rank("Grape", 20),
-        new Rank("Lemon", 30),
-        new Rank("Strawberry", 40),
-        new Rank("Peach", 50),
-        new Rank("Kiwi", 60),
-        new Rank("Watermelon", 70),
-        new Rank("Pineapple", 80)
+        new Rank("Skeleton", "Spooky Skeletons", 0),
+        new Rank("Goblin", "The Goblin Gang", 10),
+        new Rank("Witch", "The Witch Coven", 20),
+        new Rank("Zombie", "The Zombie Horde", 30),
+        new Rank("Pirate", "The Pirate Crew", 40),
+        new Rank("Vampire", "The Vampire Bloodline", 50),
+        new Rank("Werewolf", "The Werewolf Pack", 60),
+        new Rank("Demon", "The Demon Legion", 70),
+        new Rank("Death", "Death", 80)
     };
     
     public static Rank getRankForLevel(int level) {       
@@ -38,7 +38,7 @@ public class RankManager {
             user.getProgress().setRank(rankNeeded);
             verifyRankOnGuild(guild, user);
             if (!rankNeeded.equals(RANKS[0])) {
-                BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
+                BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0),
                         BotUtils.getMention(user), "Rank up!",
                         "You are now a **" + rankNeeded.getName() + "**.",
                         guild.getRolesByName(rankNeeded.getName()).get(0).getColor());
@@ -47,12 +47,12 @@ public class RankManager {
     }
     
     public static void verifyRankOnGuild(IGuild guild, User user) {
-         IRole rankRole = guild.getRolesByName(user.getProgress().getRank().getName()).get(0);
+         IRole rankRole = guild.getRolesByName(user.getProgress().getRank().getRoleName()).get(0);
          IUser dUser = guild.getUserByID(user.getID());
          List<IRole> guildRoles = dUser.getRolesForGuild(guild);
          if (!guildRoles.contains(rankRole)) {
             for (Rank rank : RANKS) { //remove all existing rank roles
-                IRole role = guild.getRolesByName(rank.getName()).get(0);
+                IRole role = guild.getRolesByName(rank.getRoleName()).get(0);
                 if (guildRoles.contains(role)) {
                     guildRoles.remove(role);
                 }
@@ -60,7 +60,7 @@ public class RankManager {
             guildRoles.add(rankRole);
             BotUtils.setUserRoles(guild, dUser, guildRoles);
             System.out.println("Set role of " + user.getName() + " to " + 
-                    user.getProgress().getRank().getName());
+                    user.getProgress().getRank().getRoleName());
         }
     }
     

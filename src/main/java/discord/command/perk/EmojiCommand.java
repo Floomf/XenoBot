@@ -44,7 +44,6 @@ public class EmojiCommand extends AbstractCommand{
             UserManager.saveDatabase();
         } else {
             BotUtils.sendErrorMessage(channel, "Could not parse a unicode emoji from input.");
-            return;
         }      
     }
     

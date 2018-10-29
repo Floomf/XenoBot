@@ -5,6 +5,7 @@ import discord.CommandHandler;
 import discord.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.object.Prestige;
 import discord.object.ProfileBuilder;
 import discord.object.User;
 import java.util.List;
@@ -16,45 +17,48 @@ import sx.blah.discord.handle.obj.IUser;
 public class ProfileCommand extends AbstractCommand {
     
     public ProfileCommand() {
-        super(new String[] {"profile", "info", "stats"}, 0, CommandCategory.INFO);
+        super(new String[] {"profile", "prof", "info", "stats"}, 0, CommandCategory.INFO);
     }
     
     //code copy and paste
     public void execute(IMessage message, String[] args) {
-        long id;
+        User user;
         if (args.length > 0) {
             List<IUser> mentions = message.getMentions();
             if (!mentions.isEmpty()) {
-                id = mentions.get(0).getLongID();
-            } else { 
+                user = UserManager.getDBUserFromDUser(mentions.get(0));
+            } else {
                 String name = CommandHandler.combineArgs(0, args);
-                id = UserManager.getDBUserIDFromName(name);
-            }
-            if (id == -1L) {
-                BotUtils.sendErrorMessage(message.getChannel(), 
-                        "Specified user was not found in the database.");
-                return;
+                user = UserManager.getDBUserFromName(name);
             }
         } else {
-            id = message.getAuthor().getLongID();
+            user = UserManager.getDBUserFromMessage(message);
         }
-        BotUtils.sendEmbedMessage(message.getChannel(), buildProfileInfo(message.getGuild(), 
-                            UserManager.getDBUserFromID(id)));
+        if (user == null) {
+            BotUtils.sendErrorMessage(message.getChannel(),
+                    "Specified user was not found in the database.");
+            return;
+        }
+        BotUtils.sendEmbedMessage(message.getChannel(), buildProfileInfo(message.getGuild(), user));
     }
     
     public EmbedObject buildProfileInfo(IGuild guild, User user) {
         ProfileBuilder builder = new ProfileBuilder(guild, user);
-        boolean prestiged = (user.getProgress().getPrestige().getNumber() > 0);
+        Prestige prestige = user.getProgress().getPrestige();
         
         builder.addLevel();
-        if (prestiged) builder.addPrestige();
+        if (prestige.getNumber() > 0) {
+            builder.addPrestige();
+        }
         builder.addXPProgress();
         builder.addTotalXP();
-        if (prestiged) {
+        if (prestige.getNumber() > 0) {
             builder.addTotalLevel();
             builder.addBadgeCase();
         }
-        builder.addBarProgressToMaxLevel();
+        if (!prestige.isMax()) { 
+            builder.addBarProgressToMaxLevel();
+        }
         return builder.build();
     }
     

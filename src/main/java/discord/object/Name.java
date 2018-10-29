@@ -52,9 +52,9 @@ public class Name {
     public void verify(IGuild guild) {
         String name = this.toString();
         IUser dUser = guild.getUserByID(user.getID());
-        String nick = dUser.getNicknameForGuild(guild);
-        if ((nick == null && !dUser.getName().equals(name)) 
-                || (nick != null && !nick.equals(name))) {
+        String dNick = dUser.getNicknameForGuild(guild);
+        if ((dNick == null && !dUser.getName().equals(name)) 
+                || (dNick != null && !dNick.equals(name))) {
             if (guild.getOwner().getLongID() == user.getID()) {
                 System.out.println("Need to set owner's name to " + name);
                 return;

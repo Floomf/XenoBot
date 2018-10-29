@@ -27,7 +27,7 @@ public class Progress {
     protected Progress(@JsonProperty("level") int level, 
             @JsonProperty("xp") int xp, 
             @JsonProperty("xpTotalForLevelUp") int xpTotalForLevelUp, 
-            @JsonProperty("prestige") Prestige prestige, 
+            @JsonProperty("prestige") Prestige prestige,
             @JsonProperty("rank") Rank rank) {
         this.level = level;
         this.xp = xp;
@@ -79,7 +79,7 @@ public class Progress {
     
     @JsonIgnore
     public int getTotalLevels() {
-        return prestige.getNumber() * 80 + level;
+        return prestige.getNumber() * MAX_LEVEL + level;
     }
     
     @JsonIgnore
@@ -95,18 +95,22 @@ public class Progress {
     }
     
     private void checkXP(IGuild guild) {
-        if (xp >= xpTotalForLevelUp) {
-            levelUp(guild);
-            checkUnlocksForUser(guild);
-            RankManager.setRankOfUser(guild, user);
-            if (level < MAX_LEVEL) checkXP(guild);
-        } else if (xp < 0) {
-            if (level > 1) { //prevent negative levels
-                levelDown(guild);
+        if (xp >= xpTotalForLevelUp || xp < 0) {
+            if (xp >= xpTotalForLevelUp) {
+                levelUp(guild);
+                checkUnlocksForUser(guild);              
+            } else if (xp < 0) {
+                if (level > 1) { //prevent negative levels
+                    levelDown(guild);
+                } else {
+                    xp = 0;
+                }
+            }
+            if (prestige.getNumber() < Prestige.MAX_PRESTIGE) {
                 RankManager.setRankOfUser(guild, user);
-                if (level < MAX_LEVEL) checkXP(guild);
-            } else {
-                xp = 0;
+                if (level < MAX_LEVEL) {
+                    checkXP(guild);
+                }
             }
         }
     }
@@ -116,7 +120,7 @@ public class Progress {
         xp -= xpTotalForLevelUp; //carry over xp to next level by subtracting from level xp
         level++;
         genXPTotalForLevelUp();
-        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), "Level up!",
+        BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0), "Level up!",
                 String.format("%s\n**%d → %d**", BotUtils.getMention(user), 
                         level - 1, level), guild.getUserByID(user.getID()).getColorForGuild(guild));
     }
@@ -126,14 +130,14 @@ public class Progress {
         level--;
         genXPTotalForLevelUp();
         xp += xpTotalForLevelUp; //add negative xp to new level xp
-        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), "Level down!",
+        BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0), "Level down!",
                 String.format("%s\n**%d → %d**", BotUtils.getMention(user), 
                         level, level - 1), guild.getUserByID(user.getID()).getColorForGuild(guild));
     }
     
     private void checkUnlocksForUser(IGuild guild) {
         IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID()));      
-        if (level == MAX_LEVEL)
+        if (level == MAX_LEVEL && prestige.getNumber() < Prestige.MAX_PRESTIGE)
             maxOutUser(pmChannel);
         if (level % 20 == 0) 
             notifyUnlocksForUser(pmChannel, guild);
@@ -154,15 +158,24 @@ public class Progress {
         level = 1;
         xp = 0;
         genXPTotalForLevelUp();
-        RankManager.setRankOfUser(guild, user);
+        if (prestige.getNumber() < Prestige.MAX_PRESTIGE) RankManager.setRankOfUser(guild, user); //keep top rank when max prestige
         user.getName().verify(guild);
-        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), BotUtils.getMention(user), "PRESTIGE UP!", 
+        BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0), BotUtils.getMention(user), "PRESTIGE UP!", 
                 String.format("**%d → %d**", prestige.getNumber() - 1, prestige.getNumber()), Color.BLACK);
         
-        if (prestige.getNumber() == 1) //messy to put this here
+        if (prestige.getNumber() == 1) { //messy to put these here?
             BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID())), 
                     "Congratulations!", "You have unlocked the ability to **change your name color** on " + guild.getName() + "!"
                     + "\n\n*You can type* `!color` *on the server get started.*", Color.PINK);
+        } else if (prestige.isMax()) {
+            BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID())), 
+                    "Well done.", "**You have reached the maximum prestige.**" 
+                    + "\n\nYour everlasting hard work has earned you the final badge, the trident."
+                    + "\nThis is the end of the road. "
+                    + "However, you can now level **infinitely** for fun, but won't earn any new unlocks or ranks."
+                    + "\n\nIt's an incredibly long journey to have gotten here, and I "
+                    + "thank you for your dedication to The Realm.", Color.BLACK);
+        }
     }
     
     //Moved here until theres a solution/ unlock manager?

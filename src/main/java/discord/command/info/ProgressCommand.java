@@ -5,6 +5,7 @@ import discord.CommandHandler;
 import discord.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.object.Prestige;
 import discord.object.ProfileBuilder;
 import discord.object.Progress;
 import discord.object.User;
@@ -21,36 +22,39 @@ public class ProgressCommand extends AbstractCommand{
     }
     
     public void execute(IMessage message, String[] args) {
-        long id;
+        User user;
         if (args.length > 0) {
             List<IUser> mentions = message.getMentions();
             if (!mentions.isEmpty()) {
-                id = mentions.get(0).getLongID();
-            } else { 
+                user = UserManager.getDBUserFromDUser(mentions.get(0));
+            } else {
                 String name = CommandHandler.combineArgs(0, args);
-                id = UserManager.getDBUserIDFromName(name);
-            }
-            if (id == -1L) {
-                BotUtils.sendErrorMessage(message.getChannel(), 
-                        "Specified user was not found in the database.");
-                return;
+                user = UserManager.getDBUserFromName(name);
             }
         } else {
-            id = message.getAuthor().getLongID();
+            user = UserManager.getDBUserFromMessage(message);
         }
-        BotUtils.sendEmbedMessage(message.getChannel(), 
-                    buildProgressInfo(message.getGuild(), UserManager.getDBUserFromID(id)));
+        if (user == null) {
+            BotUtils.sendErrorMessage(message.getChannel(),
+                    "Specified user was not found in the database.");
+            return;
+        }
+        BotUtils.sendEmbedMessage(message.getChannel(),
+                buildProgressInfo(message.getGuild(), user));
     }
     
     private EmbedObject buildProgressInfo(IGuild guild, User user) {
         ProfileBuilder builder = new ProfileBuilder(guild, user);
+        Prestige prestige = user.getProgress().getPrestige();
         builder.addLevel();
         if (user.getProgress().getPrestige().getNumber() > 0) {
             builder.addPrestige();
         }
         builder.addXPProgress();
-        if (user.getProgress().getLevel() < Progress.MAX_LEVEL) {
+        if (prestige.isMax() || user.getProgress().getLevel() < Progress.MAX_LEVEL) {
             builder.addBarProgressToNextLevel();
+        }
+        if (!prestige.isMax()) {
             builder.addBarProgressToMaxLevel();
         }
         return builder.build();

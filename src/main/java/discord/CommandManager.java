@@ -10,7 +10,7 @@ public class CommandManager {
 
     public static final String CMD_PREFIX = "!";
     
-    private static HashMap<String, AbstractCommand> commands = new HashMap<>();
+    private static final HashMap<String, AbstractCommand> commands = new HashMap<>();
     
     public static void createCommands() {       
         Reflections reflections = new Reflections("discord.command");
