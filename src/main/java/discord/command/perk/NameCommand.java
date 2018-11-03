@@ -18,10 +18,10 @@ public class NameCommand extends AbstractCommand {
     public void execute(IMessage message, String[] args) {
         User user = UserManager.getDBUserFromMessage(message);
         IChannel channel = message.getChannel();
-        if (!(user.getProgress().getTotalLevels() > 60)) {
+        if (!(user.getProgress().getTotalLevels() >= 60)) {
             BotUtils.sendErrorMessage(channel,
                     "You must be at least level **60** to change your nickname!"
-                    + " You can view your progress with `!lvl`.");
+                    + " You can view your progress with `!prog`.");
             return;
         }
 

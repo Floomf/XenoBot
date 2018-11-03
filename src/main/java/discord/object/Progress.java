@@ -122,7 +122,7 @@ public class Progress {
         genXPTotalForLevelUp();
         BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0), "Level up!",
                 String.format("%s\n**%d → %d**", BotUtils.getMention(user), 
-                        level - 1, level), guild.getUserByID(user.getID()).getColorForGuild(guild));
+                        level - 1, level), guild.getUserByID(user.getDiscordID()).getColorForGuild(guild));
     }
     
     //same as leveling up method
@@ -132,11 +132,11 @@ public class Progress {
         xp += xpTotalForLevelUp; //add negative xp to new level xp
         BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0), "Level down!",
                 String.format("%s\n**%d → %d**", BotUtils.getMention(user), 
-                        level, level - 1), guild.getUserByID(user.getID()).getColorForGuild(guild));
+                        level, level - 1), guild.getUserByID(user.getDiscordID()).getColorForGuild(guild));
     }
     
     private void checkUnlocksForUser(IGuild guild) {
-        IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID()));      
+        IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID()));      
         if (level == MAX_LEVEL && prestige.getNumber() < Prestige.MAX_PRESTIGE)
             maxOutUser(pmChannel);
         if (level % 20 == 0) 
@@ -162,19 +162,18 @@ public class Progress {
         user.getName().verify(guild);
         BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0), BotUtils.getMention(user), "PRESTIGE UP!", 
                 String.format("**%d → %d**", prestige.getNumber() - 1, prestige.getNumber()), Color.BLACK);
-        
         if (prestige.getNumber() == 1) { //messy to put these here?
-            BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID())), 
+            BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())), 
                     "Congratulations!", "You have unlocked the ability to **change your name color** on " + guild.getName() + "!"
                     + "\n\n*You can type* `!color` *on the server get started.*", Color.PINK);
         } else if (prestige.isMax()) {
-            BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getID())), 
-                    "Well done.", "**You have reached the maximum prestige.**" 
+            BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())), 
+                    "At last.", "**You have reached the maximum prestige.**" 
                     + "\n\nYour everlasting hard work has earned you the final badge, the trident."
                     + "\nThis is the end of the road. "
-                    + "However, you can now level **infinitely** for fun, but won't earn any new unlocks or ranks."
+                    + "Although you can now level **infinitely** for fun, you won't earn any new unlocks or ranks."
                     + "\n\nIt's an incredibly long journey to have gotten here, and I "
-                    + "thank you for your dedication to The Realm.", Color.BLACK);
+                    + "thank you for your dedication to **The Realm**.", Color.BLACK);
         }
     }
     
@@ -184,12 +183,15 @@ public class Progress {
         String message = "";
         int totalLevels = getTotalLevels();
         Color colorToUse = Color.ORANGE;
-        if (totalLevels == 40) {
+        if (totalLevels == 20) {
+            message = "You have unlocked the ability to **set tags** for yourself on " + guild.getName() + "!"
+                    + "\n\n*You can type* `!tag` *on the server to get started.*";
+        } else if (totalLevels == 40) {
             message = "You have unlocked the ability to **set an emoji** in your name on " + guild.getName() + "!"
                     + "\n\n*You can type* `!emoji` *on the server to get started.*";
         } else if (totalLevels == 60) {
             message = "You have unlocked the ability to **change your nickname** on " + guild.getName() + "!"
-                    + "\n\n*You can type* `!name` *on the server to get started.*";
+                    + "\n\n*You can type* `!nick` *on the server to get started.*";
         } else if (totalLevels > 80 && totalLevels % 20 == 0) { //already prestiged, unlock color every 20 levels
             Unlockable color = ColorManager.getUnlockedColor(totalLevels);
             System.out.println(color);

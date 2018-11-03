@@ -26,6 +26,7 @@ public class Prestige {
         return number;
     }
     
+    @JsonIgnore
     public boolean isMax() {
         return number == MAX_PRESTIGE;
     }

@@ -31,7 +31,7 @@ public class ColorCommand extends AbstractCommand {
         
         if (!(user.getProgress().getPrestige().getNumber() > 0)) {
             BotUtils.sendErrorMessage(channel, "You must be prestiged to change your name color!"
-                    + " You can view your level progress with `!lvl`.");
+                    + " You can view your progress with `!prog`.");
             return;
         }
         

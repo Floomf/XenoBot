@@ -98,11 +98,11 @@ public class BotUtils {
     }
     
     public static String getMention(User user) {
-        return "<@!" + user.getID() + ">";
+        return "<@!" + user.getDiscordID() + ">";
     }
     
     public static String buildUsage(String alias, String args, String desc) {
-        return (String.format("%s%s %s \n\n%s", CommandManager.CMD_PREFIX, alias, args, desc));
+        return (String.format("`%s%s %s` \n\n%s", CommandManager.CMD_PREFIX, alias, args, desc));
     }
     
     public static String validateName(String name) { //regex for charcodes 32-255, basic letters and symbols

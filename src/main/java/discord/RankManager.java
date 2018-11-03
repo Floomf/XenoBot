@@ -41,14 +41,14 @@ public class RankManager {
                 BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0),
                         BotUtils.getMention(user), "Rank up!",
                         "You are now a **" + rankNeeded.getName() + "**.",
-                        guild.getRolesByName(rankNeeded.getName()).get(0).getColor());
+                        guild.getRolesByName(rankNeeded.getRoleName()).get(0).getColor());
             }
         }
     }
     
     public static void verifyRankOnGuild(IGuild guild, User user) {
          IRole rankRole = guild.getRolesByName(user.getProgress().getRank().getRoleName()).get(0);
-         IUser dUser = guild.getUserByID(user.getID());
+         IUser dUser = guild.getUserByID(user.getDiscordID());
          List<IRole> guildRoles = dUser.getRolesForGuild(guild);
          if (!guildRoles.contains(rankRole)) {
             for (Rank rank : RANKS) { //remove all existing rank roles

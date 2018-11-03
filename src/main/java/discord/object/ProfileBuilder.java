@@ -20,7 +20,7 @@ public class ProfileBuilder {
     }
     
     private void setupBase(IGuild guild) {
-        IUser dUser = guild.getClient().fetchUser(user.getID()); //temporary?
+        IUser dUser = guild.getClient().fetchUser(user.getDiscordID()); //temporary?
         builder.withAuthorName(user.getName().toString());
         builder.withDesc(progress.getRank().getName());
         builder.withColor(dUser.getColorForGuild(guild));
@@ -28,7 +28,8 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addLevel() {
-        builder.appendField("Level :gem:", "`" + progress.getLevel() + "`", true);
+        builder.appendField("Level :gem:", "`" + progress.getLevel() 
+                + (progress.getLevel() == Progress.MAX_LEVEL ? "` (Max)" : "`"), true);
         return this;
     }
     
@@ -39,14 +40,14 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addPrestige() {
-        builder.appendField("Prestige :trophy:", "`" + progress.getPrestige().getNumber() 
-                + "`" + progress.getPrestige().getBadge()
-                + (progress.getPrestige().isMax() ? " `(MAX)`" : ""), true);
+        builder.appendField("Prestige :trophy:", "`" + progress.getPrestige().getNumber() + "`"
+                + progress.getPrestige().getBadge()
+                + (progress.getPrestige().isMax() ? " (Max)" : ""), true);
         return this;
     }
     
     public ProfileBuilder addBarProgressToNextLevel() {
-        int percentage = (int) Math.round((double) progress.getXP() 
+        int percentage = (int) Math.floor((double) progress.getXP() 
                 / progress.getXpTotalForLevelUp() * 100); //percentage calc
         builder.appendField(percentage + "% to Level " + (progress.getLevel() + 1) 
                 + " :chart_with_upwards_trend:", drawBarProgress(percentage), false);
@@ -56,7 +57,7 @@ public class ProfileBuilder {
     public ProfileBuilder addBarProgressToMaxLevel() {
         int currentTotalXP = getTotalXPToLevel(progress.getLevel() - 1) + progress.getXP();
         int maxXP = getTotalXPToLevel(Progress.MAX_LEVEL);
-        int percentage = (int) Math.round((double) currentTotalXP / maxXP * 100);
+        int percentage = (int) Math.floor((double) currentTotalXP / maxXP * 100);
         builder.appendField(percentage + "% to Max Level :checkered_flag:", 
                 drawBarProgress(percentage), false);
         return this;

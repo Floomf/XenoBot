@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class User {
     
-    @JsonProperty("discordID")
     private final long discordID;
     private final Name name;
     private final Progress progress;  
@@ -30,7 +29,7 @@ public class User {
     }
     
     //Accessors   
-    public long getID() {
+    public long getDiscordID() {
         return discordID;
     }
     

@@ -64,7 +64,7 @@ public class UserManager {
     
     public static void validateUsers(IGuild guild) {
         for (User user : users) {
-            if (guild.getUserByID(user.getID()) != null) {             
+            if (guild.getUserByID(user.getDiscordID()) != null) {             
                 RankManager.verifyRankOnGuild(guild, user);
                 user.getName().verify(guild);
             }
@@ -135,7 +135,7 @@ public class UserManager {
     
     private static void removeUserIfInvalid(User user, IGuild guild) {
         //we keep users that are level 10 and up for now
-        if (user.getProgress().getTotalLevels() < 10 && guild.getUserByID(user.getID()) == null) {
+        if (user.getProgress().getTotalLevels() < 10 && guild.getUserByID(user.getDiscordID()) == null) {
             users.remove(user);
             System.out.println("Removed " + user.getName() + " from the database.");
         }
@@ -144,7 +144,7 @@ public class UserManager {
     private static boolean databaseContainsDUser(IUser dUser) {
         long ID = dUser.getLongID();
         for (User user : users) {
-            if (ID == user.getID())
+            if (ID == user.getDiscordID())
                 return true;
         }
         return false;
@@ -162,7 +162,7 @@ public class UserManager {
     
     public static User getDBUserFromID(long id) {
         for (User user : users) {
-            if (user.getID() == id) 
+            if (user.getDiscordID() == id) 
                 return user;
         }
         return null;
@@ -188,7 +188,7 @@ public class UserManager {
     public static long getDBUserIDFromName(String name) {
         for (User user : users) {
             if (user.getName().getNick().equalsIgnoreCase(name)) {
-                return user.getID();
+                return user.getDiscordID();
             }
         }
         return -1;

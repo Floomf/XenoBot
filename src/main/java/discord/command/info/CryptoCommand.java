@@ -25,12 +25,12 @@ public class CryptoCommand extends AbstractCommand {
         EmbedBuilder builder = new EmbedBuilder();
         try {
             URL url = new URL("https://api.coinmarketcap.com/v1/ticker/" + args[0]);
-            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-            String line;
-            while ((line = in.readLine()) != null) {
-                sb.append(line);
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
+                String line;
+                while ((line = in.readLine()) != null) {
+                    sb.append(line);
+                }
             }
-            in.close();
             sb.deleteCharAt(0).deleteCharAt(sb.length() - 1); //terrible way to do this id imagine
             String json = sb.toString().replace("null", "\"Unknown\""); //also bad but hey            
             JsonNode node = new ObjectMapper().readTree(json);

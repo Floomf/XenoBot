@@ -54,7 +54,7 @@ public class ProgressCommand extends AbstractCommand{
         if (prestige.isMax() || user.getProgress().getLevel() < Progress.MAX_LEVEL) {
             builder.addBarProgressToNextLevel();
         }
-        if (!prestige.isMax()) {
+        if (!prestige.isMax() && user.getProgress().getLevel() < Progress.MAX_LEVEL) {
             builder.addBarProgressToMaxLevel();
         }
         return builder.build();

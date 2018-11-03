@@ -7,6 +7,7 @@ import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.object.Prestige;
 import discord.object.ProfileBuilder;
+import discord.object.Progress;
 import discord.object.User;
 import java.util.List;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
@@ -56,7 +57,7 @@ public class ProfileCommand extends AbstractCommand {
             builder.addTotalLevel();
             builder.addBadgeCase();
         }
-        if (!prestige.isMax()) { 
+        if (!prestige.isMax() && user.getProgress().getLevel() < Progress.MAX_LEVEL) { 
             builder.addBarProgressToMaxLevel();
         }
         return builder.build();
