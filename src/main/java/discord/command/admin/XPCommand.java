@@ -19,7 +19,7 @@ public class XPCommand extends AbstractCommand {
     public void execute(IMessage message, String[] args) {
         IChannel channel = message.getChannel();
         List<IUser> users = message.getMentions();
-        int xp;
+        double xp;
         
         if (users.isEmpty()) {
             BotUtils.sendErrorMessage(channel, 
@@ -29,8 +29,8 @@ public class XPCommand extends AbstractCommand {
         
         //check xp amount
         try {
-            xp = Integer.parseInt(args[0]);
-            if (xp > 10000) xp = 10000; 
+            xp = Double.parseDouble(args[0]);
+            if (xp > 10000.0) xp = 10000.0; 
         } catch (NumberFormatException ex) {
             BotUtils.sendErrorMessage(channel, "Could not parse the specified XP amount.");
             return;

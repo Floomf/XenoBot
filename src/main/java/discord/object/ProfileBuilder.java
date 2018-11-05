@@ -1,6 +1,7 @@
  package discord.object;
 
 import discord.BotUtils;
+import java.text.DecimalFormat;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
@@ -34,8 +35,9 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addXPProgress() {
+        DecimalFormat formatter = new DecimalFormat("#.###");
         builder.appendField("XP :diamond_shape_with_a_dot_inside:", "`" 
-                + progress.getXP() + "/" + progress.getXpTotalForLevelUp() + "`", true); 
+                + formatter.format(progress.getXP()) + " / " + progress.getXpTotalForLevelUp() + "`", true); 
         return this;
     }
     
@@ -55,7 +57,7 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addBarProgressToMaxLevel() {
-        int currentTotalXP = getTotalXPToLevel(progress.getLevel() - 1) + progress.getXP();
+        int currentTotalXP = getTotalXPToLevel(progress.getLevel() - 1) + (int) progress.getXP();
         int maxXP = getTotalXPToLevel(Progress.MAX_LEVEL);
         int percentage = (int) Math.floor((double) currentTotalXP / maxXP * 100);
         builder.appendField(percentage + "% to Max Level :checkered_flag:", 

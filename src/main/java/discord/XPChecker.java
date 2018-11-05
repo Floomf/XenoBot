@@ -1,6 +1,7 @@
 package discord;
 
 import discord.object.Progress;
+import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,8 @@ public class XPChecker implements Runnable {
 
     private final IDiscordClient client;
 
+    private static final double XP_MULTIPLIER = 1.0;
+    
     public XPChecker(IDiscordClient client) {
          this.client = client;
     }
@@ -49,14 +52,15 @@ public class XPChecker implements Runnable {
                 || user.getVoiceStateForGuild(guild).isMuted());
         if (dUsers.size() >= 2) {
             List<String> names = new ArrayList<>();
-            int xp = dUsers.size() + 13; // min 450/hr
-            dUsers.removeIf(dUser -> { 
+            double xp = XP_MULTIPLIER * (dUsers.size() + 13); // min 450/hr
+            dUsers.removeIf(dUser -> {
                 Progress prog = UserManager.getDBUserFromDUser(dUser).getProgress();
                 return (prog.isMaxLevel() && !prog.getPrestige().isMax());
             });
             if (dUsers.isEmpty()) return; //if all are max level but not max prestige
             dUsers.forEach(dUser -> names.add(UserManager.getDBUserFromID(dUser.getLongID()).getName().getNick()));
-            EmbedBuilder builder = BotUtils.getBuilder(guild.getClient(), "+" + xp + "XP", 
+            DecimalFormat formatter = new DecimalFormat("#.###");
+            EmbedBuilder builder = BotUtils.getBuilder(guild.getClient(), "+" + formatter.format(xp) + " XP", 
                     "`" + names.toString() + "`"); 
             builder.withFooterText(channel.getName());
             builder.withTimestamp(Instant.now());

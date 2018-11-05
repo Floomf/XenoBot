@@ -52,10 +52,10 @@ public class Name {
     public void verify(IGuild guild) {
         String name = this.toString();
         IUser dUser = guild.getUserByID(user.getDiscordID());
-        String dNick = dUser.getNicknameForGuild(guild);
+        String dNick = dUser.getNicknameForGuild(guild);               
         if ((dNick == null && !dUser.getName().equals(name)) 
                 || (dNick != null && !dNick.equals(name))) {
-            if (guild.getOwner().getLongID() == user.getDiscordID()) {
+            if (guild.getOwner().equals(dUser)) {
                 System.out.println("Need to set owner's name to " + name);
                 return;
             }

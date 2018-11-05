@@ -71,7 +71,7 @@ public class CommandHandler {
         }
         
         //check if command requires owner (and if owner is executing it)
-        if (command.getCategory() == CommandCategory.ADMIN && !message.getAuthor().equals(guild.getOwner())) {
+        if (command.getCategory().equals(CommandCategory.ADMIN) && !message.getAuthor().equals(guild.getOwner())) {
             BotUtils.sendErrorMessage(channel, "You must be this guild's owner to use this command.");
             return;
         }

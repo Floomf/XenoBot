@@ -27,8 +27,7 @@ public class User {
         this.progress = new Progress();
         this.progress.setUser(this);
     }
-    
-    //Accessors   
+      
     public long getDiscordID() {
         return discordID;
     }

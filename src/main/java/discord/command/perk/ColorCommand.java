@@ -43,10 +43,11 @@ public class ColorCommand extends AbstractCommand {
             builder.appendField("Default Colors",
                     "`" + Arrays.toString(ColorManager.getDefaultColors()) + "`", false);
             Unlockable[] unlockedColors = ColorManager.getUnlockedColorsForUser(user);
-            builder.appendField("Unlocked Colors [" + unlockedColors.length + "/36]", //TODO hardcoded 36
+            builder.appendField("Unlocked Colors [" + unlockedColors.length + "/" 
+                    + ColorManager.COLORS_UNLOCKS.length + "]",
                     "`" + Arrays.toString(unlockedColors) + "`", false);
-            builder.withFooterText((unlockedColors.length == 36) 
-                    ? "Holy frick, you've unlocked every color. Congratufuckinglations!" 
+            builder.withFooterText((unlockedColors.length == ColorManager.COLORS_UNLOCKS.length) 
+                    ? "You've unlocked every color. Congratufuckinglations!" 
                     : "You can keep leveling to unlock more colors.");
             BotUtils.sendEmbedMessage(channel, builder.build());
             return;
@@ -95,7 +96,8 @@ public class ColorCommand extends AbstractCommand {
     }
     
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[name]", "Change the color of your name. Colors are unlocked by leveling."
+        return BotUtils.buildUsage(alias, "[name]", "Change the color of your name on this guild. "
+                + "New colors are unlocked by leveling."
                 + "\n*(Prestiged)*"
                 + "\n\n**Special Arguments**"
                 + "\n`!color list` - View your available colors."

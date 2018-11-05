@@ -16,7 +16,7 @@ public class Progress {
     private User user;
     
     private int level;
-    private int xp;
+    private double xp;
     private int xpTotalForLevelUp;
     private Prestige prestige;
     private Rank rank;
@@ -50,7 +50,7 @@ public class Progress {
         return level;
     }
     
-    public int getXP() {
+    public double getXP() {
         return xp;
     }
     
@@ -87,8 +87,8 @@ public class Progress {
         return level == MAX_LEVEL;
     }
     
-    public void addXP(int xp, IGuild guild) {
-        if (level < MAX_LEVEL) {
+    public void addXP(double xp, IGuild guild) {
+        if (!isMaxLevel() || prestige.isMax()) {
             this.xp += xp;
             checkXP(guild);
         }
@@ -106,7 +106,7 @@ public class Progress {
                     xp = 0;
                 }
             }
-            if (prestige.getNumber() < Prestige.MAX_PRESTIGE) {
+            if (!prestige.isMax()) {
                 RankManager.setRankOfUser(guild, user);
                 if (level < MAX_LEVEL) {
                     checkXP(guild);

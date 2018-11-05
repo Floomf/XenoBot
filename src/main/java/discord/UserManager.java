@@ -39,7 +39,7 @@ public class UserManager {
     
     private static void loadDatabase() {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        //mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             System.out.println("Loading database...");         
             users = new ArrayList<>(Arrays.asList(

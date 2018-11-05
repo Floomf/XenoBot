@@ -18,7 +18,7 @@ import sx.blah.discord.handle.obj.IUser;
 public class ProgressCommand extends AbstractCommand{
     
     public ProgressCommand() {
-        super(new String[] {"progress", "prog", "level", "lvl"}, 0, CommandCategory.INFO);
+        super(new String[] {"progress", "prog", "level", "lvl", "xp"}, 0, CommandCategory.INFO);
     }
     
     public void execute(IMessage message, String[] args) {
