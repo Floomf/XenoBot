@@ -28,7 +28,7 @@ public class SetNameCommand extends AbstractCommand {
             BotUtils.sendErrorMessage(channel, "Specified user was not found in the database.");
             return;
         }
-        String nick = BotUtils.validateName(CommandHandler.combineArgs(0, args));
+        String nick = BotUtils.validateName(CommandHandler.combineArgs(1, args));
         if (nick.isEmpty()) {
             BotUtils.sendErrorMessage(channel, "The nickname can only contain basic letters and symbols.");
             return;
@@ -40,7 +40,7 @@ public class SetNameCommand extends AbstractCommand {
         }
         
         userToChange.getName().setNick(nick, message.getGuild());
-        BotUtils.sendInfoMessage(channel, "Nickname upodated to " + nick);
+        BotUtils.sendInfoMessage(channel, "Nickname updated to " + nick);
         UserManager.saveDatabase();
     }
 

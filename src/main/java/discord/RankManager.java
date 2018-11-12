@@ -11,15 +11,15 @@ public class RankManager {
     
     //hardcoded ranks
     private final static Rank[] RANKS = {
-        new Rank("Skeleton", "Spooky Skeletons", 0),
-        new Rank("Goblin", "The Goblin Gang", 10),
-        new Rank("Witch", "The Witch Coven", 20),
-        new Rank("Zombie", "The Zombie Horde", 30),
-        new Rank("Pirate", "The Pirate Crew", 40),
-        new Rank("Vampire", "The Vampire Bloodline", 50),
-        new Rank("Werewolf", "The Werewolf Pack", 60),
-        new Rank("Demon", "The Demon Legion", 70),
-        new Rank("Death", "Death", 80)
+        new Rank("Fallen", "The Fallen", 0),
+        new Rank("Ordinary", "The Ordinary", 10),
+        new Rank("Peculiar", "The Peculiar", 20),
+        new Rank("Brave", "The Brave", 30),
+        new Rank("Honored", "The Honored", 40),
+        new Rank("Mighty", "The Mighty", 50),
+        new Rank("Resolute", "The Resolute", 60),
+        new Rank("Victorious", "The Victorious", 70),
+        new Rank("Divine", "The Divine", 80)
     };
     
     public static Rank getRankForLevel(int level) {       
@@ -38,9 +38,9 @@ public class RankManager {
             user.getProgress().setRank(rankNeeded);
             verifyRankOnGuild(guild, user);
             if (!rankNeeded.equals(RANKS[0])) {
-                BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0),
+               BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
                         BotUtils.getMention(user), "Rank up!",
-                        "You are now a **" + rankNeeded.getName() + "**.",
+                        "You are now **" + rankNeeded.getName() + "**.",
                         guild.getRolesByName(rankNeeded.getRoleName()).get(0).getColor());
             }
         }

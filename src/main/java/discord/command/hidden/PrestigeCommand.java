@@ -16,10 +16,12 @@ public class PrestigeCommand extends AbstractCommand {
     
     public void execute(IMessage message, String[] args) {
         User user = UserManager.getDBUserFromMessage(message);
-        if (!(user.getProgress().isMaxLevel())) {
-                    BotUtils.sendErrorMessage(message.getChannel(), "You must be level **"
-                            + Progress.MAX_LEVEL + "** to prestige."
-                            + " You can view your progress with `!lvl`.");
+        if (user.getProgress().getPrestige().isMax()) {
+            BotUtils.sendInfoMessage(message.getChannel(), "You have already reached the maximum prestige.");
+        } else if (!(user.getProgress().isMaxLevel())) {
+            BotUtils.sendErrorMessage(message.getChannel(), "You must be level **"
+                    + Progress.MAX_LEVEL + "** to prestige."
+                    + " You can view your progress with `!lvl`.");
         } else {
             user.getProgress().prestige(message.getGuild());
             BotUtils.sendMessage(message.getChannel(), "Movin' on up", "Welcome to Prestige " 

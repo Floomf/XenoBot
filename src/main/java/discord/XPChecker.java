@@ -64,7 +64,7 @@ public class XPChecker implements Runnable {
                     "`" + names.toString() + "`"); 
             builder.withFooterText(channel.getName());
             builder.withTimestamp(Instant.now());
-            BotUtils.sendEmbedMessage(guild.getChannelsByName("securitycam").get(0), builder.build());
+            BotUtils.sendEmbedMessage(guild.getChannelsByName("log").get(0), builder.build());
             dUsers.forEach(dUser -> UserManager.getDBUserFromID(dUser.getLongID())
                     .getProgress().addXP(xp, guild));
             UserManager.saveDatabase();

@@ -40,7 +40,7 @@ public class XPCommand extends AbstractCommand {
             User user = UserManager.getDBUserFromDUser(dUser);
             if (user == null) continue;
             user.getProgress().addXP(xp, message.getGuild());
-            BotUtils.sendInfoMessage(channel, "Gave " + user.getName() + " **" + xp + "**XP");         
+            BotUtils.sendInfoMessage(channel, "Gave " + user.getName().getNick() + " **" + xp + "**XP");         
         }   
         UserManager.saveDatabase(); //Will still save if no users were found, fix it sometime
     }

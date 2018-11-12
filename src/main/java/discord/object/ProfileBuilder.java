@@ -57,7 +57,7 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addBarProgressToMaxLevel() {
-        int currentTotalXP = getTotalXPToLevel(progress.getLevel() - 1) + (int) progress.getXP();
+        int currentTotalXP = getTotalXPToLevel(progress.getLevel()) + (int) progress.getXP();
         int maxXP = getTotalXPToLevel(Progress.MAX_LEVEL);
         int percentage = (int) Math.floor((double) currentTotalXP / maxXP * 100);
         builder.appendField(percentage + "% to Max Level :checkered_flag:", 

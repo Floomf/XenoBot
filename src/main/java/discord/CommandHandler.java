@@ -45,7 +45,7 @@ public class CommandHandler {
         }
 
         //make sure the guild has a commands channel
-        if (guild.getChannelsByName("ghost_services").isEmpty()) {
+        if (guild.getChannelsByName("commands").isEmpty()) {
             BotUtils.sendInfoMessage(channel,
                     "Please create a new text channel named `#commands`!"
                     + " I will only function properly there. Beep boop.");
@@ -53,9 +53,9 @@ public class CommandHandler {
         }
         
         //make sure command is in the commands channel
-        if (!channel.getName().equals("ghost_services")) {
+        if (!channel.getName().equals("commands")) {
             BotUtils.sendInfoMessage(channel,
-                    "I only respond to commands within the `#ghost_services` channel."
+                    "I will only respond to commands within the `#commands` channel."
                     + " Please type your command again there.");
             return;
         }
@@ -88,7 +88,7 @@ public class CommandHandler {
         String[] args = new String[contents.length - 1];
         for (int i = 0; i < contents.length - 1; i++) {
             args[i] = contents[i + 1];
-        }        
+        }
         command.execute(message, args);
     }        
     

@@ -120,7 +120,7 @@ public class Progress {
         xp -= xpTotalForLevelUp; //carry over xp to next level by subtracting from level xp
         level++;
         genXPTotalForLevelUp();
-        BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0), "Level up!",
+        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), "Level up!",
                 String.format("%s\n**%d → %d**", BotUtils.getMention(user), 
                         level - 1, level), guild.getUserByID(user.getDiscordID()).getColorForGuild(guild));
     }
@@ -130,37 +130,45 @@ public class Progress {
         level--;
         genXPTotalForLevelUp();
         xp += xpTotalForLevelUp; //add negative xp to new level xp
-        BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0), "Level down!",
+        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), "Level down!",
                 String.format("%s\n**%d → %d**", BotUtils.getMention(user), 
                         level, level - 1), guild.getUserByID(user.getDiscordID()).getColorForGuild(guild));
     }
     
     private void checkUnlocksForUser(IGuild guild) {
         IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID()));      
-        if (level == MAX_LEVEL && prestige.getNumber() < Prestige.MAX_PRESTIGE)
-            maxOutUser(pmChannel);
-        if (level % 20 == 0) 
-            notifyUnlocksForUser(pmChannel, guild);
+        if (isMaxLevel() && !prestige.isMax()) {
+            maxOut(pmChannel);
+        }
+        notifyUnlocks(pmChannel, guild);
     }
     
-    private void maxOutUser(IChannel channel) {
+    private void maxOut(IChannel channel) {
         xp = 0;
         xpTotalForLevelUp = 0;
-        BotUtils.sendMessage(channel, "Congratulations!", "You have reached the max level. "
+        if (getTotalLevels() == 800) {
+            BotUtils.sendMessage(channel, "Incredible!", "You have reached the max level for the final time. "
+                + "\n\nYou may now move onto the maximum prestige with `!prestige`"
+                + "\nPrestiging is **permanent.** Only do so if you are ready.", Color.RED);
+        } else {
+            BotUtils.sendMessage(channel, "Congratulations!", "You have reached the max level. "
                 + "\n\nYou can now prestige and carry over back to level one with `!prestige`"
                 + "\n\nYou will keep all perks, and gain additional unlocks as you level again."
                 + "\nPrestiging is **permanent.** Only do so if you are ready.", Color.CYAN);
+        }
     }
     
-    //BAD
+    //BAD?
     public void prestige(IGuild guild) {
         prestige = prestige.prestige();
         level = 1;
         xp = 0;
         genXPTotalForLevelUp();
-        if (prestige.getNumber() < Prestige.MAX_PRESTIGE) RankManager.setRankOfUser(guild, user); //keep top rank when max prestige
+        if (!prestige.isMax()) { //keep top rank when max prestige
+            RankManager.setRankOfUser(guild, user);
+        }
         user.getName().verify(guild);
-        BotUtils.sendMessage(guild.getChannelsByName("securitycam").get(0), BotUtils.getMention(user), "PRESTIGE UP!", 
+        BotUtils.sendMessage(guild.getChannelsByName("log").get(0), BotUtils.getMention(user), "PRESTIGE UP!", 
                 String.format("**%d → %d**", prestige.getNumber() - 1, prestige.getNumber()), Color.BLACK);
         if (prestige.getNumber() == 1) { //messy to put these here?
             BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())), 
@@ -179,29 +187,31 @@ public class Progress {
     
     //Moved here until theres a solution/ unlock manager?
     //All of this is hardcoded, clean it up eventually
-    private void notifyUnlocksForUser(IChannel pmChannel, IGuild guild) {
-        String message = "";
+    private void notifyUnlocks(IChannel pmChannel, IGuild guild) {
         int totalLevels = getTotalLevels();
-        Color colorToUse = Color.ORANGE;
-        if (totalLevels == 20) {
-            message = "You have unlocked the ability to **set tags** for yourself on " + guild.getName() + "!"
-                    + "\n\n*You can type* `!tag` *on the server to get started.*";
-        } else if (totalLevels == 40) {
-            message = "You have unlocked the ability to **set an emoji** in your name on " + guild.getName() + "!"
-                    + "\n\n*You can type* `!emoji` *on the server to get started.*";
-        } else if (totalLevels == 60) {
-            message = "You have unlocked the ability to **change your nickname** on " + guild.getName() + "!"
-                    + "\n\n*You can type* `!nick` *on the server to get started.*";
-        } else if (totalLevels > 80 && totalLevels % 20 == 0) { //already prestiged, unlock color every 20 levels
-            Unlockable color = ColorManager.getUnlockedColor(totalLevels);
-            System.out.println(color);
-            if (color != null) {
-                message = "You have unlocked the name color **" + color.toString() + "** on " + guild.getName() + "!"
-                        + "\n\n*You can type* `!color list` *on the server to view your unlocked colors.*";
-                colorToUse = guild.getRolesByName(color.toString()).get(0).getColor();
+        if (getTotalLevels() % 20 == 0 && !prestige.isMax()) {
+            String message = "";
+            Color colorToUse = Color.ORANGE;
+            if (totalLevels == 20) {
+                message = "You have unlocked the ability to **set tags** for yourself on " + guild.getName() + "!"
+                        + "\n\n*You can type* `!tag` *on the server to get started.*";
+            } else if (totalLevels == 40) {
+                message = "You have unlocked the ability to **set an emoji** in your name on " + guild.getName() + "!"
+                        + "\n\n*You can type* `!emoji` *on the server to get started.*";
+            } else if (totalLevels == 60) {
+                message = "You have unlocked the ability to **change your nickname** on " + guild.getName() + "!"
+                        + "\n\n*You can type* `!nick` *on the server to get started.*";
+            } else if (totalLevels > 80) { //already prestiged, unlock color every 20 levels
+                Unlockable color = ColorManager.getUnlockedColor(totalLevels);
+                System.out.println(color);
+                if (color != null) {
+                    message = "You have unlocked the name color **" + color.toString() + "** on " + guild.getName() + "!"
+                            + "\n\n*You can type* `!color list` *on the server to view your unlocked colors.*";
+                    colorToUse = guild.getRolesByName(color.toString()).get(0).getColor();
+                }
             }
+            BotUtils.sendMessage(pmChannel, "Congratulations!", message, colorToUse);
         }
-        BotUtils.sendMessage(pmChannel, "Congratulations!", message, colorToUse);
     }
     
     private void genXPTotalForLevelUp() {
