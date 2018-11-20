@@ -5,6 +5,9 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.events.EventSubscriber;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommandHandler {
     /* to be reimplemented in raffle command
@@ -28,19 +31,24 @@ public class CommandHandler {
 
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
+        
         IMessage message = event.getMessage();
+        
+        if (!message.getContent().startsWith(CommandManager.CMD_PREFIX)) {
+            return;
+        }
+        
         IGuild guild = message.getGuild();
         IChannel channel = message.getChannel();     
 
-        //seperate the contents of the message into an array of strings
-        String[] contents = message.getContent().trim().replaceAll("\\s\\s+", " ").split("\\s");        
-
-        if (contents.length == 0) {
-            return;
+        //seperate the contents of the message into a list of strings
+        ArrayList<String> contents = new ArrayList<>();
+        Matcher m = Pattern.compile("([“\"][^\"”“]+[”\"]|\\S+)").matcher(message.getContent().trim());
+        while (m.find()) {
+            contents.add(m.group(1).replaceAll("[“\"”]", "")); //remove any quote characters
         }
-
-        //make sure the message has the command prefix
-        if (!contents[0].startsWith(CommandManager.CMD_PREFIX)) {
+        
+        if (contents.isEmpty()) {
             return;
         }
 
@@ -61,7 +69,7 @@ public class CommandHandler {
         }
 
         //get command from name
-        String name = contents[0].substring(1).toLowerCase();
+        String name = contents.get(0).substring(1).toLowerCase();
         AbstractCommand command = CommandManager.getCommand(name);
         
         //make sure command exists
@@ -76,21 +84,19 @@ public class CommandHandler {
             return;
         }
         
+        //leave only the args in the arraylist
+        contents.remove(0);
+        
         //check if command needs args (and if those args exist)
-        int argsNeeded = command.getArgsNeeded();
-        if (argsNeeded > 0 && !(contents.length > argsNeeded)) {
+        if (command.getArgsNeeded() > 0 && contents.size() < command.getArgsNeeded()) {
             BotUtils.sendUsageMessage(channel, command.getUsage(name));
             return;
         }
         
         //create new array with only args (no args = empty array);
-        //args array can have more args than needed, perhaps fix it sometime
-        String[] args = new String[contents.length - 1];
-        for (int i = 0; i < contents.length - 1; i++) {
-            args[i] = contents[i + 1];
-        }
+        String[] args = contents.toArray(new String[contents.size()]);
         command.execute(message, args);
-    }        
+    }
     
     public static String combineArgs(int index, String[] args) {       
         for (int i = index + 1; i < args.length; i++) {
