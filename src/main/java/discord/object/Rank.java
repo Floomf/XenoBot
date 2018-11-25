@@ -30,8 +30,4 @@ public class Rank {
         return levelRequired;
     }
     
-    public boolean equals(Rank other) {
-        return (other.getName().equals(this.getName()) 
-                && other.getLevelRequired() == this.levelRequired);
-    }
 }

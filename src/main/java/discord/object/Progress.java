@@ -12,6 +12,8 @@ import sx.blah.discord.handle.obj.IChannel;
 
 public class Progress {
     
+    public final static int MAX_LEVEL = 80;
+    
     @JsonIgnore
     private User user;
     
@@ -19,21 +21,22 @@ public class Progress {
     private double xp;
     private int xpTotalForLevelUp;
     private Prestige prestige;
+    @JsonIgnore
     private Rank rank;
-    
-    public final static int MAX_LEVEL = 80;
     
     @JsonCreator
     protected Progress(@JsonProperty("level") int level, 
             @JsonProperty("xp") int xp, 
             @JsonProperty("xpTotalForLevelUp") int xpTotalForLevelUp, 
-            @JsonProperty("prestige") Prestige prestige,
-            @JsonProperty("rank") Rank rank) {
+            @JsonProperty("prestige") Prestige prestige) {
+            //@JsonProperty("rank") Rank rank) {
         this.level = level;
         this.xp = xp;
         this.xpTotalForLevelUp = xpTotalForLevelUp;
         this.prestige = prestige;
-        this.rank = rank;
+        this.rank = prestige.isMax() 
+                ? RankManager.getRankForLevel(MAX_LEVEL) 
+                : RankManager.getRankForLevel(level);
     }
     
     protected Progress() {
@@ -43,9 +46,7 @@ public class Progress {
         prestige = new Prestige(0);
         rank = RankManager.getRankForLevel(level);
     }
-    
-    //getters
-    
+      
     public int getLevel() {
         return level;
     }
@@ -107,8 +108,8 @@ public class Progress {
                 }
             }
             if (!prestige.isMax()) {
-                RankManager.setRankOfUser(guild, user);
-                if (level < MAX_LEVEL) {
+                RankManager.verifyRankOfUser(guild, user);
+                if (level < MAX_LEVEL) { //still allows max prestige to level infinitely
                     checkXP(guild);
                 }
             }
@@ -149,7 +150,7 @@ public class Progress {
         if (getTotalLevels() == 800) {
             BotUtils.sendMessage(channel, "Incredible!", "You have reached the max level for the final time. "
                 + "\n\nYou may now move onto the maximum prestige with `!prestige`"
-                + "\nPrestiging is **permanent.** Only do so if you are ready.", Color.RED);
+                + "\nAs always, prestiging is **permanent.** Only do so if you are ready.", Color.RED);
         } else {
             BotUtils.sendMessage(channel, "Congratulations!", "You have reached the max level. "
                 + "\n\nYou can now prestige and carry over back to level one with `!prestige`"
@@ -164,8 +165,8 @@ public class Progress {
         level = 1;
         xp = 0;
         genXPTotalForLevelUp();
-        if (!prestige.isMax()) { //keep top rank when max prestige
-            RankManager.setRankOfUser(guild, user);
+        if (!prestige.isMax()) {
+            RankManager.verifyRankOfUser(guild, user);
         }
         user.getName().verify(guild);
         BotUtils.sendMessage(guild.getChannelsByName("log").get(0), BotUtils.getMention(user), "PRESTIGE UP!", 

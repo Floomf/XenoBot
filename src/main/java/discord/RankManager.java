@@ -1,26 +1,28 @@
 package discord;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.object.Rank;
 import discord.object.User;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
-public class RankManager {
+public class RankManager {   
     
-    //hardcoded ranks
-    private final static Rank[] RANKS = {
-        new Rank("Fallen", "The Fallen", 0),
-        new Rank("Ordinary", "The Ordinary", 10),
-        new Rank("Peculiar", "The Peculiar", 20),
-        new Rank("Brave", "The Brave", 30),
-        new Rank("Honored", "The Honored", 40),
-        new Rank("Mighty", "The Mighty", 50),
-        new Rank("Resolute", "The Resolute", 60),
-        new Rank("Victorious", "The Victorious", 70),
-        new Rank("Divine", "The Divine", 80)
-    };
+    private static Rank[] RANKS;
+    
+    static {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            RANKS = mapper.readValue(new File("ranks.json"), Rank[].class);
+            System.out.println(RANKS.length + " ranks loaded.");
+        } catch (IOException e) {
+            System.out.print("Could not load ranks with error: " + e);
+        }
+    }
     
     public static Rank getRankForLevel(int level) {       
         for (int i = 0; i < RANKS.length; i++) {
@@ -31,12 +33,11 @@ public class RankManager {
         return RANKS[RANKS.length - 1]; //has to be last rank
     }
     
-    public static void setRankOfUser(IGuild guild, User user) {
-        Rank rankNeeded = getRankForLevel(user.getProgress().getLevel());
-        
+    public static void verifyRankOfUser(IGuild guild, User user) {
+        Rank rankNeeded = getRankForLevel(user.getProgress().getLevel());        
         if (!rankNeeded.equals(user.getProgress().getRank())) {
             user.getProgress().setRank(rankNeeded);
-            verifyRankOnGuild(guild, user);
+            verifyRoleOnGuild(guild, user);
             if (!rankNeeded.equals(RANKS[0])) {
                BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
                         BotUtils.getMention(user), "Rank up!",
@@ -46,7 +47,7 @@ public class RankManager {
         }
     }
     
-    public static void verifyRankOnGuild(IGuild guild, User user) {
+    public static void verifyRoleOnGuild(IGuild guild, User user) {
          IRole rankRole = guild.getRolesByName(user.getProgress().getRank().getRoleName()).get(0);
          IUser dUser = guild.getUserByID(user.getDiscordID());
          List<IRole> guildRoles = dUser.getRolesForGuild(guild);

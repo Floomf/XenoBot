@@ -36,9 +36,8 @@ public class EventsHandler {
         IGuild guild = client.getGuilds().get(0);
         final Properties properties = new Properties();
         properties.load(this.getClass().getClassLoader().getResourceAsStream("project.properties"));
-        client.changePresence(StatusType.ONLINE, ActivityType.WATCHING, 
+        client.changePresence(StatusType.ONLINE, ActivityType.LISTENING, 
                 properties.getProperty("version"));
-  
         UserManager.createDatabase(guild);
         CommandManager.createCommands();
         

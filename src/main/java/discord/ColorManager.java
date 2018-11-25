@@ -9,8 +9,8 @@ import java.util.List;
 public class ColorManager {
 
     //Hardcoded names/level unlocks
-    //guild is responsible for creating roles for each color name
-    //User objects actually don't store a Unlockable object
+    //GUILD is responsible for creating roles for each color name
+    //User objects actually don't store Unlockable objects
     public static final Unlockable COLORS_DEFAULT[] = {
         new Unlockable("Red", 1, 0),
         new Unlockable("Orange", 1, 0),

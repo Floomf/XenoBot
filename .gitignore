@@ -1,5 +1,6 @@
 /manifest.mf
 /users.json
+/ranks.json
 /token.txt
 /nbactions.xml
 /dependency-reduced-pom.xml
