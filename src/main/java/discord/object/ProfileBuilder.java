@@ -48,6 +48,12 @@ public class ProfileBuilder {
         return this;
     }
     
+    public ProfileBuilder addReincarnation() {
+        builder.appendField("Reincarnation :white_flower:", "`" + progress.getReincarnation().getKanji()
+                + " (" + progress.getReincarnation().getEnglish() + ")`", true);
+        return this;
+    }
+    
     public ProfileBuilder addBarProgressToNextLevel() {
         int percentage = (int) Math.floor((double) progress.getXP() 
                 / progress.getXpTotalForLevelUp() * 100); //percentage calc
@@ -67,7 +73,7 @@ public class ProfileBuilder {
     
     public ProfileBuilder addTotalLevel() {
         builder.appendField("Total Level :arrows_counterclockwise:", 
-                "`" + progress.getTotalLevels() + "`", true);
+                "`" + progress.getTotalLevel() + "`", true);
         return this;
     }
     
@@ -78,6 +84,12 @@ public class ProfileBuilder {
     
     public ProfileBuilder addBadgeCase() {
         builder.appendField("Badge Case :beginner: ", getUserBadges(), true);
+        return this;
+    }
+    
+    public ProfileBuilder addXPBoost() {
+        builder.appendField("XP Boost :rocket:", "`" + (int)((progress.getXPMultiplier() - 1) * 100) 
+                + "%`", true); //multiplier to percent
         return this;
     }
     

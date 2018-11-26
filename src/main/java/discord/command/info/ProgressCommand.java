@@ -46,8 +46,11 @@ public class ProgressCommand extends AbstractCommand{
         ProfileBuilder builder = new ProfileBuilder(guild, user);
         Prestige prestige = user.getProgress().getPrestige();
         builder.addLevel();
-        if (user.getProgress().getPrestige().getNumber() > 0) {
+        if (user.getProgress().getPrestige().isPrestiged()) {
             builder.addPrestige();
+        }
+        if (user.getProgress().getReincarnation().isReincarnated()) {
+            builder.addReincarnation();
         }
         builder.addXPProgress();
         if (prestige.isMax() || !user.getProgress().isMaxLevel()) {

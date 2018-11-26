@@ -21,7 +21,7 @@ public class EmojiCommand extends AbstractCommand{
         IChannel channel = message.getChannel();
         String emoji = args[0];
         
-        if (!(user.getProgress().getTotalLevels() >= 40)) {
+        if (!(user.getProgress().getTotalLevel() >= 40)) {
             BotUtils.sendErrorMessage(channel, "You must be at least level **40** to set your name emoji!"
                     + " You can view your progress with `!prog`.");
             return;

@@ -33,7 +33,7 @@ public class TagCommand extends AbstractCommand {
     }
     
     public void execute(IMessage message, String[] args) {
-        if (!(UserManager.getDBUserFromDUser(message.getAuthor()).getProgress().getTotalLevels() >= 20)) {
+        if (!(UserManager.getDBUserFromDUser(message.getAuthor()).getProgress().getTotalLevel() >= 20)) {
             BotUtils.sendErrorMessage(message.getChannel(),
                     "You must be at least level **20** to change your tags!"
                     + " You can view your progress with '!prog'.");

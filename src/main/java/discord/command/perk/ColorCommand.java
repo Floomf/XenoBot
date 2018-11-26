@@ -29,7 +29,7 @@ public class ColorCommand extends AbstractCommand {
         IChannel channel = message.getChannel();
         IGuild guild = message.getGuild();
         
-        if (!(user.getProgress().getPrestige().getNumber() > 0)) {
+        if (!(user.getProgress().getPrestige().isPrestiged())) {
             BotUtils.sendErrorMessage(channel, "You must be prestiged to change your name color!"
                     + " You can view your progress with `!prog`.");
             return;
@@ -39,15 +39,15 @@ public class ColorCommand extends AbstractCommand {
         
         //handle special arguments
         if (name.equals("list") || name.equals("choices")) {
-            EmbedBuilder builder = BotUtils.getBuilder(message.getClient(), "Available Choices", "");
-            builder.appendField("Default Colors",
+            EmbedBuilder builder = BotUtils.getBuilder(message.getClient(), "Available Colors", "");
+            builder.appendField("Default",
                     "`" + Arrays.toString(ColorManager.getDefaultColors()) + "`", false);
             Unlockable[] unlockedColors = ColorManager.getUnlockedColorsForUser(user);
-            builder.appendField("Unlocked Colors [" + unlockedColors.length + "/" 
+            builder.appendField("Unlocked [" + unlockedColors.length + "/" 
                     + ColorManager.COLORS_UNLOCKS.length + "]",
                     "`" + Arrays.toString(unlockedColors) + "`", false);
             builder.withFooterText((unlockedColors.length == ColorManager.COLORS_UNLOCKS.length) 
-                    ? "You've unlocked every color. Congratufuckinglations!" 
+                    ? "You've unlocked every color. Astounding." 
                     : "You can keep leveling to unlock more colors.");
             BotUtils.sendEmbedMessage(channel, builder.build());
             return;
@@ -88,7 +88,7 @@ public class ColorCommand extends AbstractCommand {
                 colorRole.get(0).getColor()); 
     }
     
-    private List<IRole> getUserRolesNoColors(IUser user, IGuild guild) {
+    public static List<IRole> getUserRolesNoColors(IUser user, IGuild guild) {
         List<IRole> roles = user.getRolesForGuild(guild);      
         //remove any color role(s) they may have
         roles.removeIf(role -> ColorManager.getColor(role.getName()) != null);

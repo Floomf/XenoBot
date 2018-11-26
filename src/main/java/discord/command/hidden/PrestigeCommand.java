@@ -21,7 +21,7 @@ public class PrestigeCommand extends AbstractCommand {
         } else if (!(user.getProgress().isMaxLevel())) {
             BotUtils.sendErrorMessage(message.getChannel(), "You must be level **"
                     + Progress.MAX_LEVEL + "** to prestige."
-                    + " You can view your progress with `!lvl`.");
+                    + " You can view your progress with `!prog`.");
         } else {
             user.getProgress().prestige(message.getGuild());
             BotUtils.sendMessage(message.getChannel(), "Movin' on up", "Welcome to Prestige " 

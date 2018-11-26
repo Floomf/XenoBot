@@ -34,6 +34,7 @@ public class UserManager {
             saveDatabase();
         }
         validateUsers(guild);
+        saveDatabase();
     }
 
     private static void loadDatabase() {
@@ -103,13 +104,14 @@ public class UserManager {
             User existingUser = getDBUserFromDUser(dUser);
             RankManager.verifyRoleOnGuild(guild, existingUser);
             existingUser.getName().verify(guild);
-            System.out.println("Already found " + existingUser.getName().getNick() + " in the database.");
+            System.out.println("User joined. Already found " + existingUser.getName().getNick() 
+                    + " in the database.");
             return;
         }
         String name = BotUtils.validateName(dUser.getDisplayName(guild));
         //if the name validator returns an empty name, we need a placeholder
         if (name.isEmpty()) {
-            name = "User";
+            name = "Realmer";
         }
         if (databaseContainsName(name)) {
             name = getNextAvailableName(name);
@@ -118,7 +120,7 @@ public class UserManager {
         users.add(user);
         RankManager.verifyRoleOnGuild(guild, user);
         user.getName().verify(guild);
-        System.out.println("Added " + name + " to the database.");
+        System.out.println("User joined. Added " + name + " to the database.");
         saveDatabase();
     }
 
@@ -137,7 +139,7 @@ public class UserManager {
 
     private static void removeUserIfInvalid(User user, IGuild guild) {
         //we keep users that are level 10 and up for now
-        if (user.getProgress().getTotalLevels() < 10 && guild.getUserByID(user.getDiscordID()) == null) {
+        if (user.getProgress().getTotalLevel() < 10 && guild.getUserByID(user.getDiscordID()) == null) {
             users.remove(user);
             System.out.println("Removed " + user.getName() + " from the database.");
         }
