@@ -45,6 +45,8 @@ public class ProgressCommand extends AbstractCommand{
     private EmbedObject buildProgressInfo(IGuild guild, User user) {
         ProfileBuilder builder = new ProfileBuilder(guild, user);
         Prestige prestige = user.getProgress().getPrestige();
+        
+        builder.addRank();
         builder.addLevel();
         if (user.getProgress().getPrestige().isPrestiged()) {
             builder.addPrestige();

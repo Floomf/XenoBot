@@ -45,7 +45,11 @@ public class ProfileCommand extends AbstractCommand {
     public EmbedObject buildProfileInfo(IGuild guild, User user) {
         ProfileBuilder builder = new ProfileBuilder(guild, user);
         Prestige prestige = user.getProgress().getPrestige();
-        
+        if (!user.getDesc().isEmpty()) {
+            builder.addDesc();
+        }
+      
+        builder.addRank();
         builder.addLevel();
         if (prestige.isPrestiged()) {
             builder.addPrestige();

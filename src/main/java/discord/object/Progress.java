@@ -39,7 +39,6 @@ public class Progress {
         this.xpTotalForLevelUp = xpTotalForLevelUp;
         this.prestige = prestige;
         this.reincarnation = reincarnation;
-        //this.reincarnation = new Reincarnation(0);
         this.rank = prestige.isMax()
                 ? RankManager.getRankForLevel(MAX_LEVEL)
                 : RankManager.getRankForLevel(level);
@@ -208,7 +207,8 @@ public class Progress {
         RequestBuffer.request(() -> guild.editUserRoles(guild.getUserByID(user.getDiscordID()),
                 new IRole[0])).get(); //remove all roles (color/tags/rank)
         RankManager.verifyRoleOnGuild(guild, user);
-        user.getName().setEmoji(0, guild);
+        user.setDesc(""); //remove desc
+        user.getName().setEmoji(0, guild); //remove emoji
         BotUtils.sendMessage(guild.getChannelsByName("log").get(0), BotUtils.getMention(user), "REINCARNATION",
                 "**" + reincarnation.getEnglish() + "**", Color.PINK);
     }

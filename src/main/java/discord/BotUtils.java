@@ -105,12 +105,17 @@ public class BotUtils {
         return (String.format("`%s%s %s` \n\n%s", CommandManager.CMD_PREFIX, alias, args, desc));
     }
     
-    public static String validateName(String name) { //regex for charcodes 32-255, basic letters and symbols
-        Matcher m = Pattern.compile("([\u0020-\u00FF]+)").matcher(name);
+    public static String validateString(String string) {
+        Matcher m = Pattern.compile("([\u0020-\u00FF]+)").matcher(string);
         String result = "";
         while (m.find()) {
             result += m.group(1);
         }
+        return result;
+    }
+    
+    public static String validateName(String name) { //regex for charcodes 32-255, basic letters and symbols
+        String result = validateString(name);
         if (result.length() > 22) { //we dont want the nick too long
             result = result.substring(0, 21);
         }

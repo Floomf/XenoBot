@@ -23,9 +23,18 @@ public class ProfileBuilder {
     private void setupBase(IGuild guild) {
         IUser dUser = guild.getClient().fetchUser(user.getDiscordID()); //temporary?
         builder.withAuthorName(user.getName().toString());
-        builder.withDesc(progress.getRank().getName());
         builder.withColor(dUser.getColorForGuild(guild));
         builder.withThumbnail(dUser.getAvatarURL());      
+    }
+    
+    public ProfileBuilder addDesc() {
+        builder.withDesc("*`" + user.getDesc() + "`*");
+        return this;
+    }
+    
+    public ProfileBuilder addRank() {
+        builder.appendField("Rank :trident:", "`" + progress.getRank().getName() + "`", true);
+        return this;
     }
     
     public ProfileBuilder addLevel() {
@@ -129,9 +138,9 @@ public class ProfileBuilder {
         int prog = percentage / 10;
         for (int i = 1; i <= 10; i++) {
             if (i <= prog)
-                sb.append(":white_large_square: ");
-            else //different emojis handled by discord
-                sb.append(":white_square_button: ");
+                sb.append("\u2B1C"); //white square emoji
+            else
+                sb.append("\u2B1B"); //black square emoji
         }
         return sb.toString();
     }

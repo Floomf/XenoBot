@@ -48,7 +48,14 @@ public class RankManager {
     }
     
     public static void verifyRoleOnGuild(IGuild guild, User user) {
-         IRole rankRole = guild.getRolesByName(user.getProgress().getRank().getRoleName()).get(0);
+         List<IRole> roles = guild.getRolesByName(user.getProgress().getRank().getRoleName());
+         if (roles.isEmpty()) {
+             System.out.println("COULD NOT FIND ROLE `" + user.getProgress().getRank().getRoleName()
+                     + "` FOR RANK `" + user.getProgress().getRank().getName() + "` ON GUILD! PLEASE CREATE ONE.");
+             return;
+         }
+         
+         IRole rankRole = roles.get(0);
          IUser dUser = guild.getUserByID(user.getDiscordID());
          List<IRole> guildRoles = dUser.getRolesForGuild(guild);
          if (!guildRoles.contains(rankRole)) {
