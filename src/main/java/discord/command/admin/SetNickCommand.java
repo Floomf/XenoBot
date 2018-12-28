@@ -11,10 +11,10 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
-public class SetNameCommand extends AbstractCommand {
+public class SetNickCommand extends AbstractCommand {
 
-    public SetNameCommand() {
-        super(new String[]{"setname", "changename", "setnick", "sn"}, 2, CommandCategory.ADMIN);
+    public SetNickCommand() {
+        super(new String[]{"setnick", "changenick", "setname", "sn"}, 2, CommandCategory.ADMIN);
     }
 
     public void execute(IMessage message, String[] args) {
@@ -28,7 +28,7 @@ public class SetNameCommand extends AbstractCommand {
             BotUtils.sendErrorMessage(channel, "Specified user was not found in the database.");
             return;
         }
-        String nick = BotUtils.validateName(CommandHandler.combineArgs(1, args));
+        String nick = BotUtils.validateNick(CommandHandler.combineArgs(1, args));
         if (nick.isEmpty()) {
             BotUtils.sendErrorMessage(channel, "The nickname can only contain basic letters and symbols.");
             return;

@@ -16,10 +16,12 @@ import sx.blah.discord.handle.obj.IUser;
 
 public class TagCommand extends AbstractCommand {
     
-    ArrayList<String> tags = new ArrayList<>();
+    private static final int LEVEL_REQUIRED = 20;
+    
+    private ArrayList<String> tags = new ArrayList<>();
     
     public TagCommand() {
-        super(new String[] {"tag", "label"}, 1, CommandCategory.PERK);
+        super(new String[] {"tag", "label"}, 1, LEVEL_REQUIRED, CommandCategory.PERK);
         try {
             Files.lines(Paths.get("tags.txt")).forEachOrdered(line -> {
                 if (!line.trim().isEmpty()) {
@@ -33,15 +35,9 @@ public class TagCommand extends AbstractCommand {
     }
     
     public void execute(IMessage message, String[] args) {
-        if (!(UserManager.getDBUserFromDUser(message.getAuthor()).getProgress().getTotalLevel() >= 20)) {
-            BotUtils.sendErrorMessage(message.getChannel(),
-                    "You must be at least level **20** to change your tags!"
-                    + " You can view your progress with '!prog'.");
-            return;
-        }
-
         String operation = args[0].toLowerCase();
         String tag;
+        
         if (operation.equals("list")) {
             BotUtils.sendMessage(message.getChannel(), "Available Tags", "`" + tags.toString() + "`");
             return;
@@ -75,7 +71,7 @@ public class TagCommand extends AbstractCommand {
         tag = CommandHandler.combineArgs(0, args);
         
         if (!tagsContainsIgnoreCase(tag)) {
-            BotUtils.sendErrorMessage(message.getChannel(), "Tag doesn't exist. Use `!tag list` to view all tags.");
+            BotUtils.sendErrorMessage(message.getChannel(), "That tag doesn't exist. Use `!tag list` to view all tags.");
             return;
         }
         for (String currentTag : tags) { //get the proper case sensitive tag

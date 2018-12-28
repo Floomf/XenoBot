@@ -3,6 +3,7 @@ package discord.object;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+//Immutable
 public class Rank {
     
     private final String name;

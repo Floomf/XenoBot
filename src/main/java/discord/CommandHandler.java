@@ -5,6 +5,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.events.EventSubscriber;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.object.Progress;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,8 +31,7 @@ public class CommandHandler {
     }*/
 
     @EventSubscriber
-    public void onMessageEvent(MessageReceivedEvent event) {
-        
+    public void onMessageEvent(MessageReceivedEvent event) {       
         IMessage message = event.getMessage();
         
         if (!message.getContent().startsWith(CommandManager.CMD_PREFIX)) {
@@ -42,10 +42,11 @@ public class CommandHandler {
         IChannel channel = message.getChannel();     
 
         //seperate the contents of the message into a list of strings
+        //seperate by space characters, and group quoted sections into their own element
         ArrayList<String> contents = new ArrayList<>();
         Matcher m = Pattern.compile("([“\"][^\"”“]+[”\"]|\\S+)").matcher(message.getContent().trim());
         while (m.find()) {
-            contents.add(m.group(1).replaceAll("[“\"”]", "")); //remove any quote characters
+            contents.add(m.group(1).replaceAll("[“\"”]", "").trim()); //remove any quote characters
         }
         
         if (contents.isEmpty()) {
@@ -81,6 +82,15 @@ public class CommandHandler {
         //check if command requires owner (and if owner is executing it)
         if (command.getCategory().equals(CommandCategory.ADMIN) && !message.getAuthor().equals(guild.getOwner())) {
             BotUtils.sendErrorMessage(channel, "You must be this guild's owner to use this command.");
+            return;
+        }
+        
+        //check if command requires certain level
+        Progress progress = UserManager.getDBUserFromMessage(message).getProgress();
+        if (command.getLevelRequired() > progress.getTotalLevel()) {
+            BotUtils.sendErrorMessage(channel, "You must be " + (command.getLevelRequired() > Progress.MAX_LEVEL
+                    ? "**prestiged" : "level **" + command.getLevelRequired())
+                    + "** to use this command! You can use `!prog` to view your progress.");
             return;
         }
         

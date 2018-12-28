@@ -108,7 +108,7 @@ public class UserManager {
                     + " in the database.");
             return;
         }
-        String name = BotUtils.validateName(dUser.getDisplayName(guild));
+        String name = BotUtils.validateNick(dUser.getDisplayName(guild));
         //if the name validator returns an empty name, we need a placeholder
         if (name.isEmpty()) {
             name = "Realmer";

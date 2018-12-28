@@ -18,11 +18,13 @@ public class XPChecker implements Runnable {
     private final IDiscordClient client;
 
     private static final double GLOBAL_XP_MULTIPLIER = 1.0;
-    
+
+    private int saveCounter = 1;
+
     public XPChecker(IDiscordClient client) {
-         this.client = client;
+        this.client = client;
     }
-    
+
     public void run() {
         if (client.isReady()) {
             System.out.println("Checking all guild users to add xp");
@@ -37,41 +39,50 @@ public class XPChecker implements Runnable {
             checkVoiceChannels(guild);
         }
     }
-    
+
     private void checkVoiceChannels(IGuild guild) {
         List<IVoiceChannel> channels = guild.getVoiceChannels();
         channels.removeIf(channel -> channel.equals(guild.getAFKChannel()));
         for (IVoiceChannel channel : channels) {
             checkUsers(channel.getConnectedUsers(), channel, guild);
         }
+        if (saveCounter == 10) {
+            UserManager.saveDatabase();
+            saveCounter = 1;
+        } else {
+            saveCounter++;
+        }
     }
-    
+
     private void checkUsers(List<IUser> dUsers, IChannel channel, IGuild guild) {
         dUsers.removeIf(user -> user.isBot() //only count real people that are "talking"
                 || user.getVoiceStateForGuild(guild).isSelfDeafened()
                 || user.getVoiceStateForGuild(guild).isSelfMuted()
                 || user.getVoiceStateForGuild(guild).isMuted());
         if (dUsers.size() >= 2) {
+            int amount = dUsers.size();
             dUsers.removeIf(dUser -> {
                 Progress prog = UserManager.getDBUserFromDUser(dUser).getProgress();
                 return (prog.isMaxLevel() && !prog.getPrestige().isMax());
-            });    
-            if (dUsers.isEmpty()) return; //if all are max level but not max prestige
+            });
+            if (dUsers.isEmpty()) {
+                return; //if all are max level but not max prestige
+            }
             List<String> names = new ArrayList<>();
             dUsers.forEach(dUser -> names.add(UserManager.getDBUserFromID(dUser.getLongID()).getName().getNick()));
             //DecimalFormat formatter = new DecimalFormat("#.###");
-            EmbedBuilder builder = BotUtils.getBuilder(guild.getClient(), "XP Given", 
-                    "`" + names.toString() + "`"); 
+            EmbedBuilder builder = BotUtils.getBuilder(guild.getClient(), "+"
+                    + (0.5 * GLOBAL_XP_MULTIPLIER * (amount + 13)) + "XP",
+                    "`" + names.toString() + "`");
             builder.withFooterText(channel.getName());
             builder.withTimestamp(Instant.now());
             BotUtils.sendEmbedMessage(guild.getChannelsByName("log").get(0), builder.build());
             dUsers.forEach(dUser -> {
                 Progress userProg = UserManager.getDBUserFromID(dUser.getLongID()).getProgress();
-                userProg.addXP((GLOBAL_XP_MULTIPLIER + userProg.getXPMultiplier() - 1) 
-                        * (dUsers.size() + 13), guild);
+                userProg.addXP(0.5 * (GLOBAL_XP_MULTIPLIER + userProg.getXPMultiplier() - 1)
+                        * (amount + 13), guild);
             });
-            UserManager.saveDatabase();
         }
     }
-    
+
 }

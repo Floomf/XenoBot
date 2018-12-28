@@ -2,6 +2,7 @@ package discord.command.hidden;
 
 import discord.BotUtils;
 import discord.CommandManager;
+import discord.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import java.util.HashSet;
@@ -27,13 +28,19 @@ public class HelpCommand extends AbstractCommand {
             }
         } else {
             EmbedBuilder builder = BotUtils.getBuilder(message.getClient(), "Available Commands", 
-                    "*For info on a command, use:* **!help [command]**");
+                    "*For info on a command, use* **`!help [command]`**");
             
-            HashSet<AbstractCommand> commands = CommandManager.getAllCommands();
-            commands.removeIf(command -> command.getCategory() == CommandCategory.HIDDEN);
+            HashSet<AbstractCommand> commands = CommandManager.getAllCommands();          
+            commands.removeIf(command -> command.getCategory() == CommandCategory.HIDDEN //Take out hidden
+                    || (command.getCategory() == CommandCategory.PERK //take out not unlocked
+                    && command.getLevelRequired() > UserManager.getDBUserFromMessage(message).getProgress().getTotalLevel())
+                    || (command.getCategory() == CommandCategory.ADMIN //take out admin if not owner
+                    && !message.getAuthor().equals(message.getGuild().getOwner())));
+            
             if (!message.getAuthor().equals(message.getGuild().getOwner())) {
                 commands.removeIf(command -> command.getCategory() == CommandCategory.ADMIN);
             }
+            
             for (CommandCategory c : CommandCategory.values()) {
                 StringBuilder sb = new StringBuilder();
                 commands.stream().filter(cmd -> cmd.getCategory() == c)

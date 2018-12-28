@@ -81,8 +81,14 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addTotalLevel() {
+        int level = 0;
+        for (int i = 0; i < progress.getReincarnation().getNumber(); i++) {
+            level += Progress.MAX_LEVEL * Prestige.MAX_PRESTIGE;
+        }
+        level += progress.getTotalLevel();
+        
         builder.appendField("Total Level :arrows_counterclockwise:", 
-                "`" + progress.getTotalLevel() + "`", true);
+                "`" + level + "`", true);
         return this;
     }
     
@@ -115,12 +121,21 @@ public class ProfileBuilder {
     } 
     
     private int getTotalXP() {
-        int xp = 0;      
-        for (int i = 0; i < progress.getPrestige().getNumber(); i++) {
-            xp += getTotalXPToLevel(Progress.MAX_LEVEL);
+        int xp = 0;
+        for (int i = 0; i < progress.getReincarnation().getNumber(); i++) {
+            xp += getTotalXPToPrestige(Prestige.MAX_PRESTIGE);
         }
+        xp += getTotalXPToPrestige(progress.getPrestige().getNumber());
         xp += getTotalXPToLevel(progress.getLevel());
         xp += progress.getXP();
+        return xp;
+    }
+    
+    private int getTotalXPToPrestige(int prestige) {
+        int xp = 0;
+        for (int i = 0; i < prestige; i++) {
+            xp += getTotalXPToLevel(Progress.MAX_LEVEL);
+        }
         return xp;
     }
        

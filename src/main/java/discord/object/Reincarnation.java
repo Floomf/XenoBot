@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+//Immutable
 public class Reincarnation {
     
     private static final String[] KANJI = {"", "安心", "莫大", "超越", "道理"};

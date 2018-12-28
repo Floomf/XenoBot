@@ -18,10 +18,9 @@ public class ReincarnateCommand extends AbstractCommand {
     public void execute(IMessage message, String[] args) {
         User user = UserManager.getDBUserFromMessage(message);
         if (!user.getProgress().getPrestige().isMax()) {
-            BotUtils.sendErrorMessage(message.getChannel(), "You must be **maximum prestige** to reincarnate! "
-                    + "You can view your progress with `!prog`");
+            BotUtils.sendMessage(message.getChannel(), "Not yet..", "*I still have this life to live.*");
             return;
-        }              
+        }
         
         if (args.length == 0) {
             BotUtils.sendInfoMessage(message.getChannel(), "Are you **absolutely sure** you want to reincarnate?"
@@ -43,7 +42,7 @@ public class ReincarnateCommand extends AbstractCommand {
     }
     
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "", "Reincarnate and reset **completely** back to level one, "
+        return BotUtils.buildUsage(alias, "", "Reincarnate into a new life and reset **completely** back to level one, "
                 + "losing all unlocks, badges, and your prestige, but gain a permanent XP boost.");
     }
              

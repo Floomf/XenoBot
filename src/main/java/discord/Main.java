@@ -8,9 +8,9 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 
-public class Main { 
-    
-    public static void main(String[] args) {
+public class Main {
+
+    public static void main(String[] args) throws DiscordException {
         File tokenFile = new File("token.txt");
         if (!tokenFile.exists()) {
             try {
@@ -24,26 +24,22 @@ public class Main {
                 e.printStackTrace();
             }
         }
-        try {
-            IDiscordClient client = new ClientBuilder()
-                    .withToken(getTextFromFile(tokenFile))
-                    .login();
-            client.getDispatcher().registerListeners(
-                    new CommandHandler(), new EventsHandler());
-        } catch (DiscordException e) {
-             e.printStackTrace();
-        }  
-    }      
-    
+        IDiscordClient client = new ClientBuilder()
+                .withToken(getTextFromFile(tokenFile))
+                .login();
+        client.getDispatcher().registerListeners(
+                new CommandHandler(), new EventsHandler());
+
+    }
+
     public static String getTextFromFile(File file) {
         try {
             Scanner sc = new Scanner(file);
             return sc.nextLine();
         } catch (FileNotFoundException e) {
-             e.printStackTrace();
+            e.printStackTrace();
         }
         return null;
     }
-    
-    
+
 }

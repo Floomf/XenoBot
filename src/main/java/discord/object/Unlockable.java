@@ -1,5 +1,6 @@
 package discord.object;
 
+//Immutable
 public class Unlockable {
     
     private final String name;

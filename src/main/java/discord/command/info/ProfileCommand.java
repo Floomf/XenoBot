@@ -7,6 +7,7 @@ import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.object.Prestige;
 import discord.object.ProfileBuilder;
+import discord.object.Reincarnation;
 import discord.object.User;
 import java.util.List;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
@@ -45,6 +46,7 @@ public class ProfileCommand extends AbstractCommand {
     public EmbedObject buildProfileInfo(IGuild guild, User user) {
         ProfileBuilder builder = new ProfileBuilder(guild, user);
         Prestige prestige = user.getProgress().getPrestige();
+        Reincarnation reincarnation = user.getProgress().getReincarnation();
         if (!user.getDesc().isEmpty()) {
             builder.addDesc();
         }
@@ -54,17 +56,19 @@ public class ProfileCommand extends AbstractCommand {
         if (prestige.isPrestiged()) {
             builder.addPrestige();
         }
-        if (user.getProgress().getReincarnation().isReincarnated()) {
+        if (reincarnation.isReincarnated()) {
             builder.addReincarnation();
         }
         builder.addXPProgress();
-        if (user.getProgress().getReincarnation().isReincarnated()) {
+        if (reincarnation.isReincarnated()) {
             builder.addXPBoost();
         }
         builder.addTotalXP();
-        if (prestige.isPrestiged()) {
+        if (prestige.isPrestiged() || reincarnation.isReincarnated()) {
             builder.addTotalLevel();
-            builder.addBadgeCase();
+            if (prestige.isPrestiged()) {
+                builder.addBadgeCase();
+            }
         }
         if (!prestige.isMax() && !user.getProgress().isMaxLevel()) { 
             builder.addBarProgressToMaxLevel();

@@ -25,7 +25,7 @@ import sx.blah.discord.handle.obj.StatusType;
 
 public class EventsHandler {
     
-    private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final static ScheduledExecutorService XP_SCHEDULER = Executors.newScheduledThreadPool(1);
     private static ScheduledFuture<?> future;
     
     //TODO seperate into different classes?
@@ -43,7 +43,7 @@ public class EventsHandler {
         
         if (anyChannelHasEnoughUsers(guild)) {
             System.out.println("Found a voice channel with users > 1, starting xp checker");
-            future = scheduler.scheduleAtFixedRate(new XPChecker(client), 2, 2, TimeUnit.MINUTES);
+            future = XP_SCHEDULER.scheduleAtFixedRate(new XPChecker(client), 1, 1, TimeUnit.MINUTES);
         }
     }
     
@@ -79,7 +79,7 @@ public class EventsHandler {
         users.removeIf(IUser::isBot);
         if ((future == null || future.isDone()) && users.size() > 1) {
             System.out.println("Voice channel users > 1, starting xp checker");
-            future = scheduler.scheduleAtFixedRate(new XPChecker(event.getClient()), 2, 2, TimeUnit.MINUTES);
+            future = XP_SCHEDULER.scheduleAtFixedRate(new XPChecker(event.getClient()), 1, 1, TimeUnit.MINUTES);
         }
     }
     
@@ -106,9 +106,10 @@ public class EventsHandler {
         if ((future != null && !future.isDone()) && !hasEnough) {
             System.out.println("All guild voice channel users <= 1, stopping xp checker");
             future.cancel(true);
+            UserManager.saveDatabase();
         } else if ((future == null || future.isDone()) && hasEnough) {
             System.out.println("Voice channel users > 1, starting xp checker");
-            future = scheduler.scheduleAtFixedRate(new XPChecker(guild.getClient()), 2, 2, TimeUnit.MINUTES);
+            future = XP_SCHEDULER.scheduleAtFixedRate(new XPChecker(guild.getClient()), 1, 1, TimeUnit.MINUTES);
         }
     }
     

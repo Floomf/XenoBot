@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord.BotUtils;
 import discord.ColorManager;
 import discord.RankManager;
-import discord.command.perk.ColorCommand;
 import sx.blah.discord.handle.obj.IGuild;
 import java.awt.Color;
 import sx.blah.discord.handle.obj.IChannel;
@@ -152,13 +151,13 @@ public class Progress {
         if (isMaxLevel() && !prestige.isMax()) {
             maxOut(pmChannel);
         }
-        notifyUnlocks(pmChannel, guild);
+        notifyPossibleUnlocks(pmChannel, guild);
     }
 
     private void maxOut(IChannel channel) {
         xp = 0;
         xpTotalForLevelUp = 0;
-        if (getTotalLevel() == 800) {
+        if (getTotalLevel() == MAX_LEVEL * Prestige.MAX_PRESTIGE) {
             BotUtils.sendMessage(channel, "Incredible!", "You have reached the max level for the final time. "
                     + "\n\nYou may now move onto the maximum prestige with `!prestige`"
                     + "\nAs always, prestiging is **permanent.** Only do so if you are ready.", Color.RED);
@@ -194,10 +193,10 @@ public class Progress {
                     Color.BLACK);
             BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())), 
                     "Closing words", "At max prestige, you now level *infinitely* for fun, but you won't earn any new unlocks or ranks."
-                    + "\n\nHowever, you may now reincarnate. Reincarnation grants you a permanent 50% XP boost, "
+                    + "\n\nHowever, you have now been granted the powers of **reincarnation**. Reincarnating begins your new life with a permanent 50% XP boost, "
                     + "but your level and prestige is reset completely, and you will have to unlock all badges, perks, and colors once again. "
-                    + "\n\nIf you willing to begin your new life, you may do so with `!reincarnate`."
-                    + "\n\nThe choice is **yours**.", Color.BLACK);
+                    + "\n\nIf your soul is willing to begin again, you may do so with `!reincarnate`."
+                    + "\n\nThe choice is ultimately **yours**.", Color.BLACK);
         }
     }
 
@@ -215,14 +214,14 @@ public class Progress {
 
     //Moved here until theres a solution/ unlock manager?
     //All of this is hardcoded, clean it up eventually
-    private void notifyUnlocks(IChannel pmChannel, IGuild guild) {
+    private void notifyPossibleUnlocks(IChannel pmChannel, IGuild guild) {
         int totalLevels = getTotalLevel();
         if (getTotalLevel() % 20 == 0 && !prestige.isMax()) {
             String message = "";
             Color colorToUse = Color.ORANGE;
             if (totalLevels == 20) {
-                message = "You have unlocked the ability to **set tags** for yourself on " + guild.getName() + "!"
-                        + "\n\n*You can type* `!tag` *on the server to get started.*";
+                message = "You have unlocked the ability to **set tags and a description** for yourself on " 
+                        + guild.getName() + "!" + "\n\n*You can type* `!tag` *and* `!desc` *on the server to get started.*";
             } else if (totalLevels == 40) {
                 message = "You have unlocked the ability to **set an emoji** in your name on " + guild.getName() + "!"
                         + "\n\n*You can type* `!emoji` *on the server to get started.*";

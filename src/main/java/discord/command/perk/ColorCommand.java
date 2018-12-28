@@ -19,8 +19,10 @@ import sx.blah.discord.util.EmbedBuilder;
 
 public class ColorCommand extends AbstractCommand {
     
+    private final static int LEVEL_REQUIRED = 81;
+    
     public ColorCommand() {
-        super(new String[] {"color"}, 1, CommandCategory.PERK);
+        super(new String[] {"color"}, 1, LEVEL_REQUIRED, CommandCategory.PERK);
     }
     
     public void execute(IMessage message, String[] args) {
@@ -28,12 +30,6 @@ public class ColorCommand extends AbstractCommand {
         User user = UserManager.getDBUserFromID(dUser.getLongID());
         IChannel channel = message.getChannel();
         IGuild guild = message.getGuild();
-        
-        if (!(user.getProgress().getPrestige().isPrestiged())) {
-            BotUtils.sendErrorMessage(channel, "You must be prestiged to change your name color!"
-                    + " You can view your progress with `!prog`.");
-            return;
-        }
         
         String name = CommandHandler.combineArgs(0, args).toLowerCase();
         
@@ -76,7 +72,8 @@ public class ColorCommand extends AbstractCommand {
         
         //make sure color role exists on the guild
         if (colorRole.isEmpty()) {
-            BotUtils.sendErrorMessage(channel, "A role by that color name does not exist on this guild.");
+            BotUtils.sendErrorMessage(channel, "A role by that color name does not exist on this guild. "
+                    + "Please create one with the appropriate color.");
             return;
         }
         

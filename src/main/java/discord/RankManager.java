@@ -34,14 +34,15 @@ public class RankManager {
     }
     
     public static void verifyRankOfUser(IGuild guild, User user) {
+        Rank rankBefore = user.getProgress().getRank();
         Rank rankNeeded = getRankForLevel(user.getProgress().getLevel());        
-        if (!rankNeeded.equals(user.getProgress().getRank())) {
+        if (!rankNeeded.equals(rankBefore)) {
             user.getProgress().setRank(rankNeeded);
             verifyRoleOnGuild(guild, user);
             if (!rankNeeded.equals(RANKS[0])) {
                BotUtils.sendMessage(guild.getChannelsByName("log").get(0),
-                        BotUtils.getMention(user), "Rank up!",
-                        "You are now **" + rankNeeded.getName() + "**.",
+                        BotUtils.getMention(user), "Rank up!", "**" +
+                        rankBefore.getName() + " → " + rankNeeded.getName() + "**",
                         guild.getRolesByName(rankNeeded.getRoleName()).get(0).getColor());
             }
         }
@@ -50,8 +51,8 @@ public class RankManager {
     public static void verifyRoleOnGuild(IGuild guild, User user) {
          List<IRole> roles = guild.getRolesByName(user.getProgress().getRank().getRoleName());
          if (roles.isEmpty()) {
-             System.out.println("COULD NOT FIND ROLE `" + user.getProgress().getRank().getRoleName()
-                     + "` FOR RANK `" + user.getProgress().getRank().getName() + "` ON GUILD! PLEASE CREATE ONE.");
+             System.out.println("Could not find role `" + user.getProgress().getRank().getRoleName()
+                     + "`for rank `" + user.getProgress().getRank().getName() + "` on guild! Please create one.");
              return;
          }
          

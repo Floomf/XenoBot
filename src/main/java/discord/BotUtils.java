@@ -105,6 +105,7 @@ public class BotUtils {
         return (String.format("`%s%s %s` \n\n%s", CommandManager.CMD_PREFIX, alias, args, desc));
     }
     
+    //Takes a string a strips it of any non-basic characters and symbols
     public static String validateString(String string) {
         Matcher m = Pattern.compile("([\u0020-\u00FF]+)").matcher(string);
         String result = "";
@@ -114,12 +115,12 @@ public class BotUtils {
         return result;
     }
     
-    public static String validateName(String name) { //regex for charcodes 32-255, basic letters and symbols
-        String result = validateString(name);
+    public static String validateNick(String nick) {
+        String result = validateString(nick);
         if (result.length() > 22) { //we dont want the nick too long
             result = result.substring(0, 21);
         }
-        return result;
+        return result.trim(); //trim in case the string is cut off and the last char is a space
     }
     
 }
