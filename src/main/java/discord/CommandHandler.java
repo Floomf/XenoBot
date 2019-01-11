@@ -7,6 +7,7 @@ import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.object.Progress;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,7 +55,8 @@ public class CommandHandler {
         }
 
         //make sure the guild has a commands channel
-        if (guild.getChannelsByName("commands").isEmpty()) {
+        List<IChannel> commandChannels = guild.getChannelsByName("commands");
+        if (commandChannels.isEmpty()) {
             BotUtils.sendInfoMessage(channel,
                     "Please create a new text channel named `#commands`!"
                     + " I will only function properly there. Beep boop.");
@@ -62,9 +64,9 @@ public class CommandHandler {
         }
         
         //make sure command is in the commands channel
-        if (!channel.getName().equals("commands")) {
+        if (!channel.equals(commandChannels.get(0))) {
             BotUtils.sendInfoMessage(channel,
-                    "I will only respond to commands within the `#commands` channel."
+                    "I will only respond to commands within the <#" + commandChannels.get(0).getLongID() + "> chat."
                     + " Please type your command again there.");
             return;
         }
