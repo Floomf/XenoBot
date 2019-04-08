@@ -1,6 +1,6 @@
 package discord.command.fun;
 
-import discord.BotUtils;
+import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import java.io.BufferedReader;
@@ -16,6 +16,7 @@ public class DadJokeCommand extends AbstractCommand {
         super(new String[] {"dadjoke", "dj"}, 0, CommandCategory.FUN);
     }
     
+    @Override
     public void execute(IMessage message, String[] args) {
         try {
             URL url = new URL("https://icanhazdadjoke.com/");
@@ -30,6 +31,7 @@ public class DadJokeCommand extends AbstractCommand {
         }
     }
     
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "", "View a random dad joke.");
     }

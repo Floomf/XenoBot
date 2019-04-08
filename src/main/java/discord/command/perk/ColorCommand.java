@@ -1,13 +1,13 @@
 package discord.command.perk;
 
-import discord.BotUtils;
-import discord.ColorManager;
-import discord.CommandHandler;
-import discord.UserManager;
+import discord.util.BotUtils;
+import discord.data.ColorManager;
+import discord.core.command.CommandHandler;
+import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.object.User;
-import discord.object.Unlockable;
+import discord.data.object.User;
+import discord.data.object.Unlockable;
 import java.util.Arrays;
 import java.util.List;
 import sx.blah.discord.handle.obj.IChannel;
@@ -25,6 +25,7 @@ public class ColorCommand extends AbstractCommand {
         super(new String[] {"color"}, 1, LEVEL_REQUIRED, CommandCategory.PERK);
     }
     
+    @Override
     public void execute(IMessage message, String[] args) {
         IUser dUser = message.getAuthor();
         User user = UserManager.getDBUserFromID(dUser.getLongID());
@@ -48,7 +49,7 @@ public class ColorCommand extends AbstractCommand {
             BotUtils.sendEmbedMessage(channel, builder.build());
             return;
         } else if (name.equals("none")) {
-            BotUtils.setUserRoles(guild, dUser, getUserRolesNoColors(dUser, guild));
+            BotUtils.setUserRoles(guild, dUser, ColorManager.getUserRolesNoColors(dUser, guild));
             BotUtils.sendInfoMessage(channel, "Any current saved color has been removed.");
             return;
         }
@@ -67,7 +68,7 @@ public class ColorCommand extends AbstractCommand {
             return;
         }
         
-        List<IRole> roles = getUserRolesNoColors(dUser, guild);    
+        List<IRole> roles = ColorManager.getUserRolesNoColors(dUser, guild);    
         List<IRole> colorRole = guild.getRolesByName(color.toString());
         
         //make sure color role exists on the guild
@@ -84,18 +85,11 @@ public class ColorCommand extends AbstractCommand {
         BotUtils.sendMessage(channel, "Info", "Painted your name in the color " + color + ".",
                 colorRole.get(0).getColor()); 
     }
-    
-    public static List<IRole> getUserRolesNoColors(IUser user, IGuild guild) {
-        List<IRole> roles = user.getRolesForGuild(guild);      
-        //remove any color role(s) they may have
-        roles.removeIf(role -> ColorManager.getColor(role.getName()) != null);
-        return roles;
-    }
-    
+  
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[name]", "Change the color of your name on this guild. "
                 + "New colors are unlocked by leveling."
-                + "\n*(Prestiged)*"
                 + "\n\n**Special Arguments**"
                 + "\n`!color list` - View your available colors."
                 + "\n`!color none` - Remove your current color.");

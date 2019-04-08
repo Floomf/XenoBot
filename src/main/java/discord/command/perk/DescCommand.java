@@ -1,11 +1,11 @@
 package discord.command.perk;
 
-import discord.BotUtils;
-import discord.CommandHandler;
-import discord.UserManager;
+import discord.util.BotUtils;
+import discord.core.command.CommandHandler;
+import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.object.User;
+import discord.data.object.User;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class DescCommand extends AbstractCommand {
@@ -35,8 +35,7 @@ public class DescCommand extends AbstractCommand {
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[text]", 
-                "Change or create your description on your profile."
-                + "\n*(Level 20+ or Prestiged)*");
+                "Change or create your description on your profile.");
     }
     
 }

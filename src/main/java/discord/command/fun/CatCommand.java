@@ -1,6 +1,6 @@
 package discord.command.fun;
 
-import discord.BotUtils;
+import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import java.io.File;
@@ -15,6 +15,7 @@ public class CatCommand extends AbstractCommand {
         super(new String[] {"cat", "kitty"}, 1, CommandCategory.FUN);
     }
     
+    @Override
     public void execute(IMessage message, String[] args) {
         args[0] = args[0].toLowerCase();
         if (args[0].equals("pic") || args[0].equals("gif")) {
@@ -36,6 +37,7 @@ public class CatCommand extends AbstractCommand {
         }
     }
     
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[pic/gif]", "View a random cat picture/gif");
     }

@@ -1,6 +1,6 @@
 package discord.command.utility;
 
-import discord.BotUtils;
+import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import sx.blah.discord.handle.obj.IMessage;
@@ -11,6 +11,7 @@ public class RngCommand extends AbstractCommand {
         super(new String[] {"rng", "number", "num"}, 1, CommandCategory.UTILITY);
     }
     
+    @Override
     public void execute(IMessage message, String[] args) {
         try {
             int limit = Integer.parseInt(args[0]);
@@ -24,6 +25,7 @@ public class RngCommand extends AbstractCommand {
         }
     }
     
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[max]", 
                 "Generate an integer from 1 to the max.\n*Max must be greater than 0.*");

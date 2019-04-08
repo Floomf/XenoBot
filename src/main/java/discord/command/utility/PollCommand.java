@@ -1,6 +1,6 @@
 package discord.command.utility;
 
-import discord.BotUtils;
+import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import java.awt.Color;
@@ -12,9 +12,7 @@ import sx.blah.discord.util.RequestBuffer;
 
 public class PollCommand extends AbstractCommand {
     
-    private final static String[] EMOJI_LETTERS = {"\uD83C\uDDE6", "\uD83C\uDDE7", "\uD83C\uDDE8", "\uD83C\uDDE9", 
-                        "\uD83C\uDDEA", "\uD83C\uDDEB", "\uD83C\uDDEC", "\uD83C\uDDED",
-                        "\uD83C\uDDEE", "\uD83C\uDDEF", "\uD83C\uDDF0", "\uD83C\uDDF1"};
+    private final static String[] EMOJI_LETTERS = {"🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯", "🇰", "🇱", "🇲", "🇳", "🇴"}; 
     
     public PollCommand() {
         super(new String[] {"poll"}, 2, CommandCategory.UTILITY);
@@ -24,7 +22,9 @@ public class PollCommand extends AbstractCommand {
     public void execute(IMessage message, String[] args) {     
         StringBuilder sb = new StringBuilder();
         int options = args.length - 1;
-        if (options > EMOJI_LETTERS.length) options = EMOJI_LETTERS.length;
+        if (options > EMOJI_LETTERS.length) {
+            options = EMOJI_LETTERS.length;
+        }
         for (int i = 0; i < options; i++) {
             sb.append(EMOJI_LETTERS[i]).append("  ").append(args[i + 1]).append("\n");
         }

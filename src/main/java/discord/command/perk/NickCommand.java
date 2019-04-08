@@ -1,11 +1,11 @@
 package discord.command.perk;
 
-import discord.BotUtils;
-import discord.CommandHandler;
-import discord.UserManager;
+import discord.util.BotUtils;
+import discord.core.command.CommandHandler;
+import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.object.User;
+import discord.data.object.User;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
@@ -17,6 +17,7 @@ public class NickCommand extends AbstractCommand {
         super(new String[]{"nick", "name", "nickname"}, 1, LEVEL_REQUIRED, CommandCategory.PERK);
     }
 
+    @Override
     public void execute(IMessage message, String[] args) {
         User user = UserManager.getDBUserFromMessage(message);
         IChannel channel = message.getChannel();
@@ -37,9 +38,9 @@ public class NickCommand extends AbstractCommand {
         UserManager.saveDatabase();
     }
 
+    @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[new name]", "Change your nickname on this guild."
-                + "\n*(Level 60+ or Prestiged)*");
+        return BotUtils.buildUsage(alias, "[new name]", "Change your nickname on this guild.");
     }
 
 }

@@ -1,11 +1,11 @@
 package discord.command.hidden;
 
-import discord.BotUtils;
-import discord.CommandHandler;
-import discord.UserManager;
+import discord.util.BotUtils;
+import discord.core.command.CommandHandler;
+import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.object.User;
+import discord.data.object.User;
 import java.awt.Color;
 import sx.blah.discord.handle.obj.IMessage;
 
@@ -15,6 +15,7 @@ public class ReincarnateCommand extends AbstractCommand {
         super(new String[] {"reincarnate"}, 0, CommandCategory.HIDDEN);
     }
     
+    @Override
     public void execute(IMessage message, String[] args) {
         User user = UserManager.getDBUserFromMessage(message);
         if (!user.getProgress().getPrestige().isMax()) {
@@ -41,6 +42,7 @@ public class ReincarnateCommand extends AbstractCommand {
             + user.getProgress().getReincarnation().getEnglish()+ "**.", Color.CYAN);       
     }
     
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "", "Reincarnate into a new life and reset **completely** back to level one, "
                 + "losing all unlocks, badges, and your prestige, but gain a permanent XP boost.");

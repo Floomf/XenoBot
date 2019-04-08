@@ -1,17 +1,12 @@
-package discord;
+package discord.data;
 
-import discord.object.Progress;
-import discord.object.User;
-import java.text.DecimalFormat;
-import java.time.Instant;
-import java.util.ArrayList;
+import discord.data.object.Progress;
 import java.util.List;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
-import sx.blah.discord.util.EmbedBuilder;
 
 public class XPChecker implements Runnable {
 
@@ -25,6 +20,7 @@ public class XPChecker implements Runnable {
         this.client = client;
     }
 
+    @Override
     public void run() {
         if (client.isReady()) {
             System.out.println("Checking all guild users to add xp");
@@ -61,22 +57,20 @@ public class XPChecker implements Runnable {
                 || user.getVoiceStateForGuild(guild).isMuted());
         if (dUsers.size() >= 2) {
             int amount = dUsers.size();
-            dUsers.removeIf(dUser -> {
-                Progress prog = UserManager.getDBUserFromDUser(dUser).getProgress();
-                return (prog.isMaxLevel() && !prog.getPrestige().isMax());
-            });
+            dUsers.removeIf(dUser -> UserManager.getDBUserFromDUser(dUser).getProgress().isMaxLevel());
             if (dUsers.isEmpty()) {
-                return; //if all are max level but not max prestige
+                return; //if all are max level
             }
-            List<String> names = new ArrayList<>();
-            dUsers.forEach(dUser -> names.add(UserManager.getDBUserFromID(dUser.getLongID()).getName().getNick()));
-            //DecimalFormat formatter = new DecimalFormat("#.###");
+            //List<String> names = new ArrayList<>();
+            //dUsers.forEach(dUser -> names.add(UserManager.getDBUserFromID(dUser.getLongID()).getName().getNick()));
+            /*DecimalFormat formatter = new DecimalFormat("#.###");
             EmbedBuilder builder = BotUtils.getBuilder(guild.getClient(), "+"
                     + (0.5 * GLOBAL_XP_MULTIPLIER * (amount + 13)) + "XP",
                     "`" + names.toString() + "`");
             builder.withFooterText(channel.getName());
             builder.withTimestamp(Instant.now());
             BotUtils.sendEmbedMessage(guild.getChannelsByName("log").get(0), builder.build());
+            */
             dUsers.forEach(dUser -> {
                 Progress userProg = UserManager.getDBUserFromID(dUser.getLongID()).getProgress();
                 userProg.addXP(0.5 * (GLOBAL_XP_MULTIPLIER + userProg.getXPMultiplier() - 1)

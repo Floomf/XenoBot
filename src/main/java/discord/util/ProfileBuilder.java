@@ -1,6 +1,8 @@
- package discord.object;
+ package discord.util;
 
-import discord.BotUtils;
+import discord.data.object.Prestige;
+import discord.data.object.Progress;
+import discord.data.object.User;
 import java.text.DecimalFormat;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IGuild;
@@ -9,9 +11,9 @@ import sx.blah.discord.util.EmbedBuilder;
 
 public class ProfileBuilder {
     
-    EmbedBuilder builder;
-    User user;
-    Progress progress;
+    private final EmbedBuilder builder;
+    private final User user;
+    private final Progress progress;
     
     public ProfileBuilder(IGuild guild, User user) {
         this.user = user;
@@ -39,7 +41,7 @@ public class ProfileBuilder {
     
     public ProfileBuilder addLevel() {
         builder.appendField("Level :gem:", "`" + progress.getLevel() 
-                + (progress.getLevel() == Progress.MAX_LEVEL ? "` (Max)" : "`"), true);
+                + (progress.isMaxLevel() ? "` (Max)" : "`"), true);
         return this;
     }
     
@@ -72,8 +74,8 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addBarProgressToMaxLevel() {
-        int currentTotalXP = getTotalXPToLevel(progress.getLevel()) + (int) progress.getXP();
-        int maxXP = getTotalXPToLevel(Progress.MAX_LEVEL);
+        int currentTotalXP = Progress.getTotalXPToLevel(progress.getLevel()) + (int) progress.getXP();
+        int maxXP = Progress.getTotalXPToLevel(Progress.MAX_LEVEL);
         int percentage = (int) Math.floor((double) currentTotalXP / maxXP * 100);
         builder.appendField(percentage + "% to Max Level :checkered_flag:", 
                 drawBarProgress(percentage), false);
@@ -81,19 +83,13 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addTotalLevel() {
-        int level = 0;
-        for (int i = 0; i < progress.getReincarnation().getNumber(); i++) {
-            level += Progress.MAX_LEVEL * Prestige.MAX_PRESTIGE;
-        }
-        level += progress.getTotalLevel();
-        
         builder.appendField("Total Level :arrows_counterclockwise:", 
-                "`" + level + "`", true);
+                "`" + progress.getTotalLevel() + "`", true);
         return this;
     }
     
     public ProfileBuilder addTotalXP() {
-        builder.appendField("Total XP :clock4:", "`" + getTotalXP() + "`", true);
+        builder.appendField("Total XP :clock4:", "`" + progress.getTotalXP() + "`", true);
         return this;
     }
     
@@ -119,33 +115,6 @@ public class ProfileBuilder {
         }
         return badges;
     } 
-    
-    private int getTotalXP() {
-        int xp = 0;
-        for (int i = 0; i < progress.getReincarnation().getNumber(); i++) {
-            xp += getTotalXPToPrestige(Prestige.MAX_PRESTIGE);
-        }
-        xp += getTotalXPToPrestige(progress.getPrestige().getNumber());
-        xp += getTotalXPToLevel(progress.getLevel());
-        xp += progress.getXP();
-        return xp;
-    }
-    
-    private int getTotalXPToPrestige(int prestige) {
-        int xp = 0;
-        for (int i = 0; i < prestige; i++) {
-            xp += getTotalXPToLevel(Progress.MAX_LEVEL);
-        }
-        return xp;
-    }
-       
-    private int getTotalXPToLevel(int level) {
-        int xp = 0;
-        for (int i = 1; i < level; i++) {
-            xp += i * 10 + 50; //hardcoded
-        }
-        return xp;
-    }
      
     private String drawBarProgress(int percentage) {
         StringBuilder sb = new StringBuilder();

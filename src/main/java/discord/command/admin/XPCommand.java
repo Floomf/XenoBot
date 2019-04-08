@@ -1,10 +1,10 @@
 package discord.command.admin;
 
-import discord.BotUtils;
-import discord.UserManager;
+import discord.util.BotUtils;
+import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.object.User;
+import discord.data.object.User;
 import java.util.List;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
@@ -16,6 +16,7 @@ public class XPCommand extends AbstractCommand {
         super(new String[] {"givexp", "giveexp", "gxp"}, 2, CommandCategory.ADMIN); 
     }
     
+    @Override
     public void execute(IMessage message, String[] args) {
         IChannel channel = message.getChannel();
         List<IUser> users = message.getMentions();
@@ -45,6 +46,7 @@ public class XPCommand extends AbstractCommand {
         UserManager.saveDatabase(); //Will still save if no users were found, fix it sometime
     }
     
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[amount] [@mentions]", 
                 "Give users XP in the database.");

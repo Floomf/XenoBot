@@ -1,11 +1,11 @@
-package discord.object;
+package discord.data.object;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord.BotUtils;
-import discord.ColorManager;
-import discord.RankManager;
+import discord.util.BotUtils;
+import discord.data.ColorManager;
+import discord.data.RankManager;
 import sx.blah.discord.handle.obj.IGuild;
 import java.awt.Color;
 import sx.blah.discord.handle.obj.IChannel;
@@ -15,6 +15,8 @@ import sx.blah.discord.util.RequestBuffer;
 public class Progress {
 
     public final static int MAX_LEVEL = 80;
+    private final static int XP_SCALE = 10;
+    private final static int XP_FLAT = 50;
 
     @JsonIgnore
     private User user;
@@ -78,13 +80,51 @@ public class Progress {
     }
 
     @JsonIgnore
-    public int getTotalLevel() {
+    public int getTotalLevelThisLife() {
         return prestige.getNumber() * MAX_LEVEL + level;
+    }
+    
+    @JsonIgnore
+    public int getTotalLevel() {
+        return getTotalLevelThisLife() + reincarnation.getNumber() * (MAX_LEVEL * Prestige.MAX_PRESTIGE);
+    }
+    
+    @JsonIgnore
+    public int getTotalXP() {
+        int totalXP = 0;
+        totalXP += reincarnation.getNumber() * getTotalXPToPrestige(Prestige.MAX_PRESTIGE);
+        totalXP += getTotalXPToPrestige(prestige.getNumber());
+        totalXP += getTotalXPToLevel(level);
+        totalXP += xp;
+        return totalXP;
+    }
+    
+    @JsonIgnore
+    private static int getTotalXPToPrestige(int prestige) {
+        int totalXP = 0;
+        for (int i = 0; i < prestige; i++) {
+            totalXP += getTotalXPToLevel(Progress.MAX_LEVEL);
+        }
+        return totalXP;
+    }
+    
+    @JsonIgnore
+    public static int getTotalXPToLevel(int level) {
+        int totalXP = 0;
+        for (int i = 1; i < level; i++) {
+            totalXP += i * XP_SCALE + XP_FLAT; //hardcoded
+        }
+        return totalXP;
     }
 
     @JsonIgnore
     public boolean isMaxLevel() {
-        return level == MAX_LEVEL;
+        return (level == MAX_LEVEL && !prestige.isMax()); //Max prestige levels infinitely
+    }
+
+    @JsonIgnore
+    public boolean isNotMaxLevel() {
+        return !isMaxLevel();
     }
 
     //TEMPORARY?
@@ -99,7 +139,7 @@ public class Progress {
     }
 
     public void addXP(double xp, IGuild guild) {
-        if (!isMaxLevel() || prestige.isMax()) {
+        if (isNotMaxLevel()) {
             this.xp += xp;
             checkXP(guild);
         }
@@ -120,7 +160,7 @@ public class Progress {
             if (!prestige.isMax()) {//keep last rank at max prestige
                 RankManager.verifyRankOfUser(guild, user);
             }
-            if (level < MAX_LEVEL || prestige.isMax()) { //allow infinite leveling at max prestige
+            if (isNotMaxLevel()) {
                 checkXP(guild);
             }
         }
@@ -148,24 +188,30 @@ public class Progress {
 
     private void checkUnlocksForUser(IGuild guild) {
         IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID()));
-        if (isMaxLevel() && !prestige.isMax()) {
-            maxOut(pmChannel);
-        }
         notifyPossibleUnlocks(pmChannel, guild);
+        if (isMaxLevel()) {
+            maxOut(guild, pmChannel);
+        }
     }
 
-    private void maxOut(IChannel channel) {
+    private void maxOut(IGuild guild, IChannel pmChannel) {
         xp = 0;
         xpTotalForLevelUp = 0;
-        if (getTotalLevel() == MAX_LEVEL * Prestige.MAX_PRESTIGE) {
-            BotUtils.sendMessage(channel, "Incredible!", "You have reached the max level for the final time. "
-                    + "\n\nYou may now move onto the maximum prestige with `!prestige`"
-                    + "\nAs always, prestiging is **permanent.** Only do so if you are ready.", Color.RED);
+        
+        if (user.getPrefs().get(Pref.AUTO_PRESTIGE)) {
+            RankManager.verifyRankOfUser(guild, user); //have to put this here, this whole design is fucked
+            prestige(guild);
+            return;
+        }
+        
+        if (getTotalLevelThisLife() == MAX_LEVEL * Prestige.MAX_PRESTIGE) {
+            BotUtils.sendMessage(pmChannel, "Incredible!", "You have reached the max level for the final time, "
+                    + "and may now move onto the maximum prestige with `!prestige`."
+                    + "\n\nAs always, prestiging is **permanent.** Only do so if you are ready.", Color.RED);
         } else {
-            BotUtils.sendMessage(channel, "Congratulations!", "You have reached the max level. "
-                    + "\n\nYou can now prestige and carry over back to level one with `!prestige`"
+            BotUtils.sendMessage(pmChannel, "Max Level Reached!", "You may now prestige and carry over back to level one with `!prestige`."
                     + "\n\nYou will keep all perks, and gain additional unlocks as you level again."
-                    + "\nPrestiging is **permanent.** Only do so if you are ready.", Color.CYAN);
+                    + "\n\nPrestiging is **permanent.** Only do so if you are ready.", Color.CYAN);
         }
     }
 
@@ -183,30 +229,37 @@ public class Progress {
                 String.format("**%d → %d**", prestige.getNumber() - 1, prestige.getNumber()), Color.BLACK);
         if (prestige.getNumber() == 1) { //messy to put these here?
             BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
-                    "Congratulations!", "You have unlocked the ability to **change your name color** on " + guild.getName() + "!"
+                    "Perk Unlocked!", "You have unlocked the ability to change your **name color** on " + guild.getName() + "!"
                     + "\n\n*You can type* `!color` *on the server get started.*", Color.PINK);
         } else if (prestige.isMax()) {
-            BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
-                    "At last.", "**You have reached the maximum prestige.** "
-                    + "Your everlasting hard work has earned you the final badge, the **trident**."
-                    + "\n\nIt's an incredibly long journey to have gotten here, and I thank you for your dedication to **The Realm**.", 
-                    Color.BLACK);
-            BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())), 
-                    "Closing words", "At max prestige, you now level *infinitely* for fun, but you won't earn any new unlocks or ranks."
-                    + "\n\nHowever, you have now been granted the powers of **reincarnation**. Reincarnating begins your new life with a permanent 50% XP boost, "
-                    + "but your level and prestige is reset completely, and you will have to unlock all badges, perks, and colors once again. "
-                    + "\n\nIf your soul is willing to begin again, you may do so with `!reincarnate`."
-                    + "\n\nThe choice is ultimately **yours**.", Color.BLACK);
+            if (reincarnation.isReincarnated()) {
+                BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
+                        "Well well.", "**You have reached the maximum prestige once again.** The final badge, the **trident**, is all too familiar."
+                        + "Although this life may have gone by quicker, it was still quite the journey to have gotten here. "
+                        + "That said, if you are satisfied and ready to start over with an additional 50% XP boost, "
+                        + "you may reincarnate into your next life with `!reincarnate`. Again, the choice is ultimately yours.");
+            } else {
+                BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
+                        "At last.", "**You have reached the maximum prestige.** "
+                        + "Your everlasting hard work has earned you the final badge, the **trident**."
+                        + "\n\nIt's an incredibly long journey to have gotten here, and I thank you for your dedication to The Realm.",
+                        Color.BLACK);
+                BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
+                        "Final Words", "At max prestige, you may level *infinitely* for fun, but you won't unlock anything else."
+                        + "\n\nHowever, the path doesn't have to end here. If you are satisfied with the life you have lived, you may **reincarnate.** "
+                        + "Your next life will pass by faster with a 50% XP boost, but your level, prestige, badges, and unlocks "
+                        + "will be reset completely, and you will have to earn everything anew."
+                        + "\n\nIf you are willing to start again, you may do so with `!reincarnate`. The choice is ultimately yours.", Color.BLACK);
+            }
         }
     }
 
     public void reincarnate(IGuild guild) {
         genDefaultStats();
         reincarnation = reincarnation.reincarnate();
-        RequestBuffer.request(() -> guild.editUserRoles(guild.getUserByID(user.getDiscordID()),
-                new IRole[0])).get(); //remove all roles (color/tags/rank)
+        BotUtils.setUserRoles(guild, guild.getUserByID(user.getDiscordID()), ColorManager.getUserRolesNoColors(
+                guild.getUserByID(user.getDiscordID()), guild)); //remove color role
         RankManager.verifyRoleOnGuild(guild, user);
-        user.setDesc(""); //remove desc
         user.getName().setEmoji(0, guild); //remove emoji
         BotUtils.sendMessage(guild.getChannelsByName("log").get(0), BotUtils.getMention(user), "REINCARNATION",
                 "**" + reincarnation.getEnglish() + "**", Color.PINK);
@@ -215,29 +268,32 @@ public class Progress {
     //Moved here until theres a solution/ unlock manager?
     //All of this is hardcoded, clean it up eventually
     private void notifyPossibleUnlocks(IChannel pmChannel, IGuild guild) {
-        int totalLevels = getTotalLevel();
-        if (getTotalLevel() % 20 == 0 && !prestige.isMax()) {
-            String message = "";
+        int totalLevel = getTotalLevelThisLife();
+        if (totalLevel % 20 == 0 && !prestige.isMax()) {
+            String message = "", title = "";
             Color colorToUse = Color.ORANGE;
-            if (totalLevels == 20) {
-                message = "You have unlocked the ability to **set tags and a description** for yourself on " 
-                        + guild.getName() + "!" + "\n\n*You can type* `!tag` *and* `!desc` *on the server to get started.*";
-            } else if (totalLevels == 40) {
-                message = "You have unlocked the ability to **set an emoji** in your name on " + guild.getName() + "!"
+            if (totalLevel == 20) {
+                title = "Perks Unlocked!";
+                message = "You have unlocked the ability to set **tags** and a **description** for yourself on " + guild.getName() + "!"
+                        + "\n\n*You can type* `!tag` *and* `!desc` *on the server to get started.*";
+            } else if (totalLevel == 40) {
+                title = "Perk Unlocked!";
+                message = "You have unlocked the ability to set an **emoji** in your name on " + guild.getName() + "!"
                         + "\n\n*You can type* `!emoji` *on the server to get started.*";
-            } else if (totalLevels == 60) {
-                message = "You have unlocked the ability to **change your nickname** on " + guild.getName() + "!"
+            } else if (totalLevel == 60) {
+                title = "Perk Unlocked!";
+                message = "You have unlocked the ability to change your **nickname** on " + guild.getName() + "!"
                         + "\n\n*You can type* `!nick` *on the server to get started.*";
-            } else if (totalLevels > 80) { //already prestiged, unlock color every 20 levels
-                Unlockable color = ColorManager.getUnlockedColor(totalLevels);
-                System.out.println(color);
+            } else if (totalLevel > MAX_LEVEL) { //already prestiged, unlock color every 20 levels
+                Unlockable color = ColorManager.getUnlockedColor(totalLevel);
                 if (color != null) {
+                    title = "Color Unlocked!";
                     message = "You have unlocked the name color **" + color.toString() + "** on " + guild.getName() + "!"
                             + "\n\n*You can type* `!color list` *on the server to view your unlocked colors.*";
                     colorToUse = guild.getRolesByName(color.toString()).get(0).getColor();
                 }
             }
-            BotUtils.sendMessage(pmChannel, "Congratulations!", message, colorToUse);
+            BotUtils.sendMessage(pmChannel, title, message, colorToUse);
         }
     }
 
@@ -250,7 +306,7 @@ public class Progress {
     }
 
     private void genXPTotalForLevelUp() {
-        xpTotalForLevelUp = level * 10 + 50;
+        xpTotalForLevelUp = level * XP_SCALE + XP_FLAT;
     }
 
 }

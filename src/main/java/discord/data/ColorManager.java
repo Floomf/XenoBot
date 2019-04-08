@@ -1,10 +1,13 @@
-package discord;
+package discord.data;
 
-import discord.object.Unlockable;
-import discord.object.User;
+import discord.data.object.Unlockable;
+import discord.data.object.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.IUser;
 
 public class ColorManager {
 
@@ -79,16 +82,23 @@ public class ColorManager {
        }
        return null;
     }
-    
+
     public static Unlockable getColor(String name) {
         List<Unlockable> allColors = new ArrayList<>(Arrays.asList(COLORS_DEFAULT));
         allColors.addAll(Arrays.asList(COLORS_UNLOCKS));
         for (Unlockable color : allColors) { //Sue me again
-            if (color.toString().toLowerCase().equals(name.toLowerCase())) {
+            if (color.toString().equalsIgnoreCase(name)) {
                 return color;
             }
         }
         return null;
+    }
+    
+    public static List<IRole> getUserRolesNoColors(IUser user, IGuild guild) {
+        List<IRole> roles = user.getRolesForGuild(guild);      
+        //remove any color role(s) they may have
+        roles.removeIf(role -> ColorManager.getColor(role.getName()) != null);
+        return roles;
     }
     
 }

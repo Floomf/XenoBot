@@ -1,4 +1,4 @@
-package discord.object;
+package discord.data.object;
 
 //Immutable
 public class Unlockable {

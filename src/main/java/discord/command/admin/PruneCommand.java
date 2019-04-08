@@ -1,6 +1,6 @@
 package discord.command.admin;
 
-import discord.BotUtils;
+import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import sx.blah.discord.handle.obj.IMessage;

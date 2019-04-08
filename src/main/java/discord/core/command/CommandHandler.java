@@ -1,35 +1,19 @@
-package discord;
+package discord.core.command;
 
+import discord.util.BotUtils;
+import discord.data.UserManager;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.events.EventSubscriber;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.object.Progress;
+import discord.data.object.Progress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CommandHandler {
-    /* to be reimplemented in raffle command
-    public enum PoolType {
-        ALL, ONLINE, OFFLINE, VOICE
-    }
-
-    public List<IUser> getUsers(PoolType pool, IGuild guild, IMessage message) {
-        List<IUser> users = guild.getUsers();    
-        if (pool == PoolType.ONLINE) {
-            users.removeIf(user -> user.getPresence().getStatus().equals(StatusType.OFFLINE));
-        } else if (pool == PoolType.OFFLINE) {
-            //test this
-            users.removeIf(user -> !user.getPresence().getStatus().equals(StatusType.OFFLINE));
-        } else if (pool == PoolType.VOICE) {
-            users = message.getAuthor().getVoiceStateForGuild(guild).getChannel().getConnectedUsers();
-        }
-        users.removeIf(user -> user.isBot());
-        return users;
-    }*/
 
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {       
@@ -89,7 +73,7 @@ public class CommandHandler {
         
         //check if command requires certain level
         Progress progress = UserManager.getDBUserFromMessage(message).getProgress();
-        if (command.getLevelRequired() > progress.getTotalLevel()) {
+        if (command.getLevelRequired() > progress.getTotalLevelThisLife()) {
             BotUtils.sendErrorMessage(channel, "You must be " + (command.getLevelRequired() > Progress.MAX_LEVEL
                     ? "**prestiged" : "level **" + command.getLevelRequired())
                     + "** to use this command! You can use `!prog` to view your progress.");
@@ -117,48 +101,6 @@ public class CommandHandler {
         return args[index];
     }
 }
-        /*    
-            case "raffle":
-                if (!hasArgs) {
-                    BotUtils.sendUsageMessage(channel, 
-                            "!raffle [all/online/offline/voice]"
-                            + "\n\nChooses a random user from the selected pool."
-                            + "\nThis does not include yourself or any bots."
-                            + "\n\nall     - All server users."
-                            + "\nonline  - All online users on the server."
-                            + "\noffline - All offline users on the server."
-                            + "\nvoice   - All users in your connected voice channel.");
-                    return;
-                }
-
-                List<IUser> raffleUsers = new ArrayList<IUser>();
-                try {
-                    raffleUsers = getUsers(PoolType.valueOf(args[1].toUpperCase()), guild, message);
-                } catch (IllegalArgumentException ex) {
-                    BotUtils.sendErrorMessage(channel, 
-                            "Unknown pool type. Type \"!raffle\" for help.");
-                    return;
-                } catch (NullPointerException ex) {
-                    BotUtils.sendErrorMessage(channel, 
-                            "You are not currently connected to any voice channel on this server!");
-                    return;
-                }
-
-                raffleUsers.removeIf(vUser -> vUser.equals(message.getAuthor()));
-
-                //Check if the user is the only one in the list
-                if (raffleUsers.isEmpty()) {
-                    BotUtils.sendErrorMessage(channel, 
-                            "You are the only user in the selected pool!"
-                            + "\nYou can't win your own raffle silly.");
-                    return;
-                }
-
-                //Finally send the message
-                BotUtils.sendMessage(channel, "Winner", 
-                        raffleUsers.get((int) (Math.random() * raffleUsers.size())).getDisplayName(guild));
-                return;
-
             /*DOESNT WORK ANYMORE WITH NAMING SYSTEM
             case "setnames":
                 //Make sure the command can only be run by the server owner

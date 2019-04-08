@@ -1,4 +1,4 @@
-package discord;
+package discord.core.command;
 
 import discord.command.AbstractCommand;
 import java.util.HashMap;

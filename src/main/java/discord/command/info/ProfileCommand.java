@@ -1,14 +1,14 @@
 package discord.command.info;
 
-import discord.BotUtils;
-import discord.CommandHandler;
-import discord.UserManager;
+import discord.util.BotUtils;
+import discord.core.command.CommandHandler;
+import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.object.Prestige;
-import discord.object.ProfileBuilder;
-import discord.object.Reincarnation;
-import discord.object.User;
+import discord.data.object.Prestige;
+import discord.util.ProfileBuilder;
+import discord.data.object.Reincarnation;
+import discord.data.object.User;
 import java.util.List;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IGuild;
@@ -18,10 +18,11 @@ import sx.blah.discord.handle.obj.IUser;
 public class ProfileCommand extends AbstractCommand {
     
     public ProfileCommand() {
-        super(new String[] {"profile", "prof", "info", "stats"}, 0, CommandCategory.INFO);
+        super(new String[] {"profile", "prof"}, 0, CommandCategory.INFO);
     }
     
     //code copy and paste
+    @Override
     public void execute(IMessage message, String[] args) {
         User user;
         if (args.length > 0) {
@@ -59,7 +60,9 @@ public class ProfileCommand extends AbstractCommand {
         if (reincarnation.isReincarnated()) {
             builder.addReincarnation();
         }
-        builder.addXPProgress();
+        if (user.getProgress().isNotMaxLevel()) {
+            builder.addXPProgress();
+        }
         if (reincarnation.isReincarnated()) {
             builder.addXPBoost();
         }
@@ -70,12 +73,13 @@ public class ProfileCommand extends AbstractCommand {
                 builder.addBadgeCase();
             }
         }
-        if (!prestige.isMax() && !user.getProgress().isMaxLevel()) { 
+        if (user.getProgress().isNotMaxLevel() && !user.getProgress().getPrestige().isMax()) { 
             builder.addBarProgressToMaxLevel();
         }
         return builder.build();
     }
     
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[nickname/@mention]", 
                 "View you or another user's detailed profile.");

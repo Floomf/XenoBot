@@ -1,5 +1,8 @@
 package discord;
 
+import discord.listener.EventsHandler;
+import discord.listener.ReactionListener;
+import discord.core.command.CommandHandler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,7 +31,7 @@ public class Main {
                 .withToken(getTextFromFile(tokenFile))
                 .login();
         client.getDispatcher().registerListeners(
-                new CommandHandler(), new EventsHandler());
+                new CommandHandler(), new EventsHandler(), new ReactionListener());
 
     }
 

@@ -1,8 +1,7 @@
 package discord.command.perk;
 
-import discord.BotUtils;
-import discord.CommandHandler;
-import discord.UserManager;
+import discord.util.BotUtils;
+import discord.core.command.CommandHandler;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import java.io.IOException;
@@ -34,6 +33,7 @@ public class TagCommand extends AbstractCommand {
         }
     }
     
+    @Override
     public void execute(IMessage message, String[] args) {
         String operation = args[0].toLowerCase();
         String tag;
@@ -94,10 +94,10 @@ public class TagCommand extends AbstractCommand {
         BotUtils.sendInfoMessage(message.getChannel(), "Tag toggled.");
     }
     
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "(tag name)", "Toggle various tags for your profile." 
                 + "Tags are essentially just no-permission Discord roles that act as labels."
-                + "\n*(Level 20+ or Prestiged)*"
                 + "\n\n**Special Arguments**"
                 + "\n`!tag list` - View all available tags.");
     }

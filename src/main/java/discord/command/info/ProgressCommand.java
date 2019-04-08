@@ -1,13 +1,12 @@
 package discord.command.info;
 
-import discord.BotUtils;
-import discord.CommandHandler;
-import discord.UserManager;
+import discord.util.BotUtils;
+import discord.core.command.CommandHandler;
+import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.object.Prestige;
-import discord.object.ProfileBuilder;
-import discord.object.User;
+import discord.util.ProfileBuilder;
+import discord.data.object.User;
 import java.util.List;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IGuild;
@@ -17,9 +16,10 @@ import sx.blah.discord.handle.obj.IUser;
 public class ProgressCommand extends AbstractCommand{
     
     public ProgressCommand() {
-        super(new String[] {"progress", "prog", "level", "lvl", "xp"}, 0, CommandCategory.INFO);
+        super(new String[] {"progress", "prog", "level", "lvl", "rank", "xp"}, 0, CommandCategory.INFO);
     }
     
+    @Override
     public void execute(IMessage message, String[] args) {
         User user;
         if (args.length > 0) {
@@ -44,7 +44,6 @@ public class ProgressCommand extends AbstractCommand{
     
     private EmbedObject buildProgressInfo(IGuild guild, User user) {
         ProfileBuilder builder = new ProfileBuilder(guild, user);
-        Prestige prestige = user.getProgress().getPrestige();
         
         builder.addRank();
         builder.addLevel();
@@ -54,16 +53,17 @@ public class ProgressCommand extends AbstractCommand{
         if (user.getProgress().getReincarnation().isReincarnated()) {
             builder.addReincarnation();
         }
-        builder.addXPProgress();
-        if (prestige.isMax() || !user.getProgress().isMaxLevel()) {
-            builder.addBarProgressToNextLevel();
-        }
-        if (!prestige.isMax() && !user.getProgress().isMaxLevel()) {
-            builder.addBarProgressToMaxLevel();
+        if (user.getProgress().isNotMaxLevel()) {
+            builder.addXPProgress();
+            builder.addBarProgressToNextLevel();  
+            if (!user.getProgress().getPrestige().isMax()) {
+                builder.addBarProgressToMaxLevel();
+            }
         }
         return builder.build();
     }
     
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[nickname/@mention]", "View you or another user's level progress.");
     }

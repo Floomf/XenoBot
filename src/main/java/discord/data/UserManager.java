@@ -1,9 +1,11 @@
-package discord;
+package discord.data;
 
-import discord.object.User;
+import discord.data.object.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord.util.BotUtils;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import sx.blah.discord.handle.obj.IGuild;
@@ -13,6 +15,10 @@ import sx.blah.discord.handle.obj.IUser;
 public class UserManager {
 
     private static HashMap<Long, User> users;
+    
+    public static Collection<User> getUsers() {
+        return users.values();
+    }
 
     public static void createDatabase(IGuild guild) {
         users = new HashMap<>();
@@ -137,7 +143,7 @@ public class UserManager {
     }
 
     private static boolean userIsInvalid(User user, IGuild guild) {
-        return (user.getProgress().getTotalLevel() < 10 && guild.getUserByID(user.getDiscordID()) == null);
+        return (user.getProgress().getTotalLevelThisLife() < 10 && guild.getUserByID(user.getDiscordID()) == null);
     }
 
     //Methods for fetching users

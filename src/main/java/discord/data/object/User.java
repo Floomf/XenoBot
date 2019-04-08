@@ -1,34 +1,41 @@
-package discord.object;
+package discord.data.object;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashMap;
 
 public class User {
     
     private final long discordID;
     private final Name name;
     private String desc;
-    private final Progress progress;  
+    private final Progress progress;
+    private final HashMap<Pref, Boolean> prefs;
     
     @JsonCreator
     public User(@JsonProperty("discordID") long discordID, 
             @JsonProperty("name") Name name,
             @JsonProperty("desc") String desc,
-            @JsonProperty("progress") Progress progress) {
+            @JsonProperty("progress") Progress progress,
+            @JsonProperty("prefs") HashMap<Pref, Boolean> prefs) {
         this.discordID = discordID;
         this.name = name;
-        name.setUser(this);
         this.progress = progress;
-        progress.setUser(this);
         this.desc = desc;
+        this.prefs = prefs;
+        this.name.setUser(this);
+        this.progress.setUser(this);
     }
           
     public User(long discordID, String name) {
         this.discordID = discordID;
         this.name = new Name(name);
-        this.name.setUser(this);
         this.desc = "";
         this.progress = new Progress();
+        this.prefs = new HashMap<>();
+        this.prefs.put(Pref.MENTION_RANKUP, true);
+        this.prefs.put(Pref.AUTO_PRESTIGE, false);
+        this.name.setUser(this);
         this.progress.setUser(this);
     }
       
@@ -48,11 +55,15 @@ public class User {
         return name;
     }
     
+    public HashMap<Pref, Boolean> getPrefs() {
+        return prefs;
+    }
+    
     public void setDesc(String desc) {
         this.desc = desc;
     }
   
     public boolean hasUnlocked(Unlockable unlockable) {
-        return progress.getTotalLevel() >= unlockable.getTotalLevelRequired();
+        return progress.getTotalLevelThisLife() >= unlockable.getTotalLevelRequired();
     }
 }

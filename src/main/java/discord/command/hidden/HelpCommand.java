@@ -1,8 +1,8 @@
 package discord.command.hidden;
 
-import discord.BotUtils;
-import discord.CommandManager;
-import discord.UserManager;
+import discord.util.BotUtils;
+import discord.core.command.CommandManager;
+import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import java.util.HashSet;
@@ -16,13 +16,15 @@ public class HelpCommand extends AbstractCommand {
         super(new String[] {"help", "commands"}, 0, CommandCategory.HIDDEN);
     }
     
+    @Override
     public void execute(IMessage message, String[] args) {
         IChannel channel = message.getChannel();
         if (args.length > 0) {
             String name = args[0].toLowerCase();
             AbstractCommand cmd = CommandManager.getCommand(name);
             if (cmd == null) {
-                BotUtils.sendErrorMessage(channel, "Could not find a command by that name.");
+                BotUtils.sendErrorMessage(channel, "Could not find a command by that name. "
+                        + "Use `!help` for a list of available commands.");
             } else {
                 BotUtils.sendUsageMessage(channel, cmd.getUsage(name));
             }
@@ -33,7 +35,7 @@ public class HelpCommand extends AbstractCommand {
             HashSet<AbstractCommand> commands = CommandManager.getAllCommands();          
             commands.removeIf(command -> command.getCategory() == CommandCategory.HIDDEN //Take out hidden
                     || (command.getCategory() == CommandCategory.PERK //take out not unlocked
-                    && command.getLevelRequired() > UserManager.getDBUserFromMessage(message).getProgress().getTotalLevel())
+                    && command.getLevelRequired() > UserManager.getDBUserFromMessage(message).getProgress().getTotalLevelThisLife())
                     || (command.getCategory() == CommandCategory.ADMIN //take out admin if not owner
                     && !message.getAuthor().equals(message.getGuild().getOwner())));
             
@@ -54,6 +56,7 @@ public class HelpCommand extends AbstractCommand {
         }
     }
     
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "", "View available commmands.");
     }

@@ -1,11 +1,11 @@
 package discord.command.perk;
 
 import com.vdurmont.emoji.EmojiManager;
-import discord.BotUtils;
-import discord.UserManager;
+import discord.util.BotUtils;
+import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.object.Name;
+import discord.data.object.Name;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class EmojiCommand extends AbstractCommand{
@@ -16,6 +16,7 @@ public class EmojiCommand extends AbstractCommand{
         super(new String[] {"emoji"}, 1, LEVEL_REQUIRED, CommandCategory.PERK); 
     }
     
+    @Override
     public void execute(IMessage message, String[] args) {
         Name name = UserManager.getDBUserFromMessage(message).getName();
         String emoji = args[0];
@@ -39,10 +40,10 @@ public class EmojiCommand extends AbstractCommand{
         }
     }
     
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[emoji]", "Set an emoji next to your name."
-                + " Providing `\"none\"` as the parameter will remove your current emoji."            
-                + "\n*(Level 40+ or Prestiged)*");
+                + "\n\nProviding `\"none\"` as the parameter instead will remove your current emoji.");
     }
     
 }

@@ -1,4 +1,4 @@
-package discord.object;
+package discord.data.object;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

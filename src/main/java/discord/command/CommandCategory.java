@@ -1,24 +1,27 @@
 package discord.command;
 
 public enum CommandCategory {
-    ADMIN, INFO, PERK, UTILITY, FUN, HIDDEN;
+    ADMIN, INFO, PERK, UTILITY, FUN, GAME, HIDDEN;
 
     @Override
     public String toString() {
         String temp = super.toString();
-        temp = temp.charAt(0) + temp.substring(1).toLowerCase() + " ";
+        temp = temp.charAt(0) + temp.substring(1).toLowerCase();
         switch (this) {
             case ADMIN:
-                return temp + "\uD83D\uDEE1"; //Shield emoji
+                return temp + " \uD83D\uDEE1"; //Shield emoji
             case INFO:
-                return temp + "📜";
+                return temp + " 📜";
             case PERK:
-                return temp + "💎";
+                return temp + " 💎";
             case UTILITY:
-                return temp + "🔧"; 
+                return temp + " 🔧"; 
             case FUN:
-                return temp + "🎉";           
+                return temp + " 🎉";  
+            case GAME:
+                return temp + " 🎲";
+            default:
+                return temp;
         }
-        return "";
     }
 }

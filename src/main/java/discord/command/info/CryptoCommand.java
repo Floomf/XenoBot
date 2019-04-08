@@ -2,7 +2,7 @@ package discord.command.info;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord.BotUtils;
+import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import java.io.BufferedReader;
@@ -19,6 +19,7 @@ public class CryptoCommand extends AbstractCommand {
         super(new String[] {"crypto", "cryptocurrency", "cc", "price"}, 1, CommandCategory.INFO);
     }
     
+    @Override
     public void execute(IMessage message, String[] args) {
         IChannel channel = message.getChannel();
         StringBuilder sb = new StringBuilder();
@@ -59,6 +60,7 @@ public class CryptoCommand extends AbstractCommand {
         }
     }
     
+    @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[full name]", "View price and other info on a crpytocurrency.");
     }

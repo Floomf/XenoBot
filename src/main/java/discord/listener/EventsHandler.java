@@ -1,8 +1,10 @@
-package discord;
+package discord.listener;
 
+import discord.data.XPChecker;
+import discord.core.command.CommandManager;
+import discord.data.UserManager;
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -34,10 +36,7 @@ public class EventsHandler {
     public void onReadyEvent(ReadyEvent event) throws IOException {
         IDiscordClient client = event.getClient();
         IGuild guild = client.getGuilds().get(0);
-        final Properties properties = new Properties();
-        properties.load(this.getClass().getClassLoader().getResourceAsStream("project.properties"));
-        client.changePresence(StatusType.ONLINE, ActivityType.LISTENING, 
-                properties.getProperty("version"));
+        client.changePresence(StatusType.ONLINE, ActivityType.LISTENING, "!help");
         UserManager.createDatabase(guild);
         CommandManager.createCommands();
         
@@ -75,9 +74,7 @@ public class EventsHandler {
     
     @EventSubscriber
     public void onUserVoiceChannelJoinEvent(UserVoiceChannelJoinEvent event) {
-        List<IUser> users = event.getVoiceChannel().getConnectedUsers();
-        users.removeIf(IUser::isBot);
-        if ((future == null || future.isDone()) && users.size() > 1) {
+        if (checkerIsNotActive() && channelHasEnoughUsers(event.getVoiceChannel())) {
             System.out.println("Voice channel users > 1, starting xp checker");
             future = XP_SCHEDULER.scheduleAtFixedRate(new XPChecker(event.getClient()), 1, 1, TimeUnit.MINUTES);
         }
@@ -103,11 +100,11 @@ public class EventsHandler {
     
     private void checkAnyChannelHasEnoughUsers(IGuild guild) {
         boolean hasEnough = anyChannelHasEnoughUsers(guild);
-        if ((future != null && !future.isDone()) && !hasEnough) {
+        if (checkerIsActive() && !hasEnough) {
             System.out.println("All guild voice channel users <= 1, stopping xp checker");
             future.cancel(true);
             UserManager.saveDatabase();
-        } else if ((future == null || future.isDone()) && hasEnough) {
+        } else if (checkerIsNotActive() && hasEnough) {
             System.out.println("Voice channel users > 1, starting xp checker");
             future = XP_SCHEDULER.scheduleAtFixedRate(new XPChecker(guild.getClient()), 1, 1, TimeUnit.MINUTES);
         }
@@ -126,6 +123,14 @@ public class EventsHandler {
         List<IUser> users = channel.getConnectedUsers();
         users.removeIf(IUser::isBot);
         return (users.size() > 1);
+    }
+    
+    private boolean checkerIsActive() {
+        return (future != null && !future.isDone());
+    }
+    
+    private boolean checkerIsNotActive() {
+        return !checkerIsActive();
     }
     
 }
