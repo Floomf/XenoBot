@@ -12,7 +12,7 @@ public class InfoCommand extends AbstractCommand {
     private static final long START_TIME = System.currentTimeMillis();
     
     public InfoCommand() {
-        super(new String[] {"info", "stats"}, 0, CommandCategory.INFO);
+        super(new String[] {"info", "stats", "uptime"}, 0, CommandCategory.INFO);
     }
     
     @Override

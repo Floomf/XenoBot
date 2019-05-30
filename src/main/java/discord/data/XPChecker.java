@@ -12,7 +12,7 @@ public class XPChecker implements Runnable {
 
     private final IDiscordClient client;
 
-    private static final double GLOBAL_XP_MULTIPLIER = 1.0;
+    public static double GLOBAL_XP_MULTIPLIER = 1.0;
 
     private int saveCounter = 1;
 

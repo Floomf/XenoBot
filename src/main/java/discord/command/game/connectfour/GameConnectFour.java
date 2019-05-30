@@ -36,7 +36,7 @@ public class GameConnectFour extends ButtonGame {
         } else if (boardIsFull()) {
             super.tie("Board is full. Tie!");
         } else {
-            super.updateMessageDisplay(super.getThisTurnUser().getName() + " went in Slot ```" + input + "```\n" 
+            super.updateMessageDisplay(super.getThisTurnUser().getName() + " went in slot `" + input + "`\n" 
                     + formatMessage(super.getNextTurnUser(), "Your turn, " + super.getNextTurnUser()));
         }
     }       
