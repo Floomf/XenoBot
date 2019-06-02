@@ -18,15 +18,15 @@ public class ProfileBuilder {
     public ProfileBuilder(IGuild guild, User user) {
         this.user = user;
         this.builder = BotUtils.getBaseBuilder(guild.getClient());
-        this.progress = user.getProgress();        
+        this.progress = user.getProgress();
         setupBase(guild);
     }
     
     private void setupBase(IGuild guild) {
         IUser dUser = guild.getClient().fetchUser(user.getDiscordID()); //temporary?
-        builder.withAuthorName(user.getName().toString());
+        builder.withAuthorName(user.getName().getNick());
         builder.withColor(dUser.getColorForGuild(guild));
-        builder.withThumbnail(dUser.getAvatarURL());      
+        builder.withThumbnail(dUser.getAvatarURL());
     }
     
     public ProfileBuilder addDesc() {
@@ -101,6 +101,11 @@ public class ProfileBuilder {
     public ProfileBuilder addXPBoost() {
         builder.appendField("XP Boost :rocket:", "`" + (int)((progress.getXPMultiplier() - 1) * 100) 
                 + "%`", true); //multiplier to percent
+        return this;
+    }
+    
+    public ProfileBuilder addXPRate(int users) {
+        builder.appendField("Current Rate :hourglass_flowing_sand:", "`" + progress.getXPRate(users) + " XP/min`", true);
         return this;
     }
     

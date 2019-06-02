@@ -9,12 +9,13 @@ import discord.data.RankManager;
 import sx.blah.discord.handle.obj.IGuild;
 import java.awt.Color;
 import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.util.RequestBuffer;
 
 public class Progress {
 
     public final static int MAX_LEVEL = 80;
+    
+    public static double GLOBAL_XP_MULTIPLIER = 1.0;
+    
     private final static int XP_SCALE = 10;
     private final static int XP_FLAT = 50;
 
@@ -98,6 +99,11 @@ public class Progress {
         totalXP += xp;
         return totalXP;
     }
+                                    
+    @JsonIgnore 
+    public double getXPRate(int users) {
+        return 0.5 * (GLOBAL_XP_MULTIPLIER + getXPMultiplier() - 1) * (users + 13); //Maybe can simplify this?
+    }
     
     @JsonIgnore
     private static int getTotalXPToPrestige(int prestige) {
@@ -143,6 +149,10 @@ public class Progress {
             this.xp += xp;
             checkXP(guild);
         }
+    }
+    
+    public void addPeriodicXP(int users, IGuild guild) {
+        addXP(getXPRate(users), guild);
     }
 
     private void checkXP(IGuild guild) {
@@ -234,19 +244,17 @@ public class Progress {
         } else if (prestige.isMax()) {
             if (reincarnation.isReincarnated()) {
                 BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
-                        "Well well.", "**You have reached the maximum prestige once again.** The final badge, the **trident**, is all too familiar."
+                        "Well well.", "**You have reached the maximum prestige once again.** "
                         + "Although this life may have gone by quicker, it was still quite the journey to have gotten here. "
                         + "That said, if you are satisfied and ready to start over with an additional 50% XP boost, "
                         + "you may reincarnate into your next life with `!reincarnate`. Again, the choice is ultimately yours.");
             } else {
                 BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
                         "At last.", "**You have reached the maximum prestige.** "
-                        + "Your everlasting hard work has earned you the final badge, the **trident**."
-                        + "\n\nIt's an incredibly long journey to have gotten here, and I thank you for your dedication to The Realm.",
-                        Color.BLACK);
+                        + "Your everlasting hard work has earned you the final badge, the **trident**.", Color.BLACK);
                 BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
-                        "Final Words", "At max prestige, you may level *infinitely* for fun, but you won't unlock anything else."
-                        + "\n\nHowever, the path doesn't have to end here. If you are satisfied with the life you have lived, you may **reincarnate.** "
+                        "Final Words", "At max prestige, you may level *infinitely* for fun, but you won't unlock anything new."
+                        + "\n\nHowever, your path doesn't have to end here. If you are satisfied with the life you have lived, you may **reincarnate.** "
                         + "Your next life will pass by faster with a 50% XP boost, but your level, prestige, badges, and unlocks "
                         + "will be reset completely, and you will have to earn everything anew."
                         + "\n\nIf you are willing to start again, you may do so with `!reincarnate`. The choice is ultimately yours.", Color.BLACK);

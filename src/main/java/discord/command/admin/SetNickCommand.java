@@ -48,7 +48,7 @@ public class SetNickCommand extends AbstractCommand {
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[@mention] [new nickname]",
-                "Change the nickname of a user in the database.");
+                "Change the nickname of a user on this guild.");
     }
 
 }

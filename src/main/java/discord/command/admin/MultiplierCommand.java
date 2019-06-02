@@ -2,7 +2,7 @@ package discord.command.admin;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.XPChecker;
+import discord.data.object.Progress;
 import discord.util.BotUtils;
 import sx.blah.discord.handle.obj.IMessage;
 
@@ -21,13 +21,13 @@ public class MultiplierCommand extends AbstractCommand {
             BotUtils.sendErrorMessage(message.getChannel(), "Could not parse a valid decimal.");
             return;
         }
-        XPChecker.GLOBAL_XP_MULTIPLIER = multiplier;
+        Progress.GLOBAL_XP_MULTIPLIER = multiplier;
         BotUtils.sendInfoMessage(message.getChannel(), "Global XP multiplier updated to `" + multiplier + "x`.");
     }
     
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "(decimal)", "Change the global XP multiplier for this server."
-                + "\n\nCurrent: `" + XPChecker.GLOBAL_XP_MULTIPLIER + "x`");
+                + "\n\nCurrent: `" + Progress.GLOBAL_XP_MULTIPLIER + "x`");
     }
 }

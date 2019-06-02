@@ -5,6 +5,8 @@ import discord.core.command.CommandHandler;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.data.XPChecker;
+import discord.data.object.Progress;
 import discord.util.ProfileBuilder;
 import discord.data.object.User;
 import java.util.List;
@@ -12,6 +14,7 @@ import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.IVoiceState;
 
 public class ProgressCommand extends AbstractCommand{
     
@@ -44,19 +47,28 @@ public class ProgressCommand extends AbstractCommand{
     
     private EmbedObject buildProgressInfo(IGuild guild, User user) {
         ProfileBuilder builder = new ProfileBuilder(guild, user);
-        
+        Progress prog = user.getProgress();
         builder.addRank();
         builder.addLevel();
-        if (user.getProgress().getPrestige().isPrestiged()) {
+        if (prog.getPrestige().isPrestiged()) {
             builder.addPrestige();
         }
-        if (user.getProgress().getReincarnation().isReincarnated()) {
+        if (prog.getReincarnation().isReincarnated()) {
             builder.addReincarnation();
         }
-        if (user.getProgress().isNotMaxLevel()) {
+        if (prog.isNotMaxLevel()) {
             builder.addXPProgress();
+            IVoiceState vState = guild.getUserByID(user.getDiscordID()).getVoiceStateForGuild(guild);
+            if (vState.getChannel() != null && !XPChecker.voiceStateIsInvalid(vState)) { //Messy but oh well right?
+                List<IUser> voiceUsers = vState.getChannel().getConnectedUsers();
+                voiceUsers.removeIf(dUser -> dUser.isBot() 
+                        || XPChecker.voiceStateIsInvalid(dUser.getVoiceStateForGuild(guild)));
+                if (voiceUsers.size() >= 2) {
+                    builder.addXPRate(voiceUsers.size());
+                }
+            }
             builder.addBarProgressToNextLevel();  
-            if (!user.getProgress().getPrestige().isMax()) {
+            if (!prog.getPrestige().isMax()) {
                 builder.addBarProgressToMaxLevel();
             }
         }
