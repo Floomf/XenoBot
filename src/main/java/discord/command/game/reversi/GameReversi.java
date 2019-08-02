@@ -154,7 +154,7 @@ public class GameReversi extends TypeGame {
             }
             sb.append("\n");
         }
-        sb.append("⏺🇦🇧🇨​🇩​🇪🇫"); //Theres some zero width spaces in here to prevent flag emojis
+        sb.append("⏺🇦​🇧​🇨​🇩​🇪​🇫"); //Theres some zero width spaces in here to prevent flag emojis
 
         return sb.toString();
     }

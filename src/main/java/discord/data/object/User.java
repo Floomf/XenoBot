@@ -34,6 +34,7 @@ public class User {
         this.progress = new Progress();
         this.prefs = new HashMap<>();
         this.prefs.put(Pref.MENTION_RANKUP, true);
+        this.prefs.put(Pref.NOTIFY_UNLOCK, true);
         this.prefs.put(Pref.AUTO_PRESTIGE, false);
         this.name.setUser(this);
         this.progress.setUser(this);

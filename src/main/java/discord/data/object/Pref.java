@@ -1,7 +1,7 @@
 package discord.data.object;
 
 public enum Pref {
-    MENTION_RANKUP, AUTO_PRESTIGE;
+    MENTION_RANKUP, NOTIFY_UNLOCK, AUTO_PRESTIGE;
     
     public static boolean contains(String value) {
         for (Pref pref : Pref.values()) {
@@ -12,6 +12,7 @@ public enum Pref {
         return false;
     }
     
+    @Override
     public String toString() {
         return super.toString().toLowerCase();
     }

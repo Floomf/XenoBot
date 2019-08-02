@@ -9,10 +9,10 @@ import discord.util.BotUtils;
 import java.util.HashMap;
 import sx.blah.discord.handle.obj.IMessage;
 
-public class PreferenceCommand extends AbstractCommand {
+public class PrefCommand extends AbstractCommand {
     
-    public PreferenceCommand() {
-        super(new String[] {"preference", "pref", "setting"}, 1, CommandCategory.UTILITY);
+    public PrefCommand() {
+        super(new String[] {"pref", "preference", "setting"}, 1, CommandCategory.UTILITY);
     }
     
     @Override
