@@ -24,25 +24,18 @@ public class ProgressCommand extends AbstractCommand{
     
     @Override
     public void execute(IMessage message, String[] args) {
-        User user;
         if (args.length > 0) {
             List<IUser> mentions = message.getMentions();
             if (!mentions.isEmpty()) {
-                user = UserManager.getDBUserFromDUser(mentions.get(0));
+                BotUtils.sendEmbedMessage(message.getChannel(), buildProgressInfo(message.getGuild(), 
+                        UserManager.getDBUserFromDUser(mentions.get(0))));
             } else {
-                String name = CommandHandler.combineArgs(0, args);
-                user = UserManager.getDBUserFromName(name);
+                BotUtils.sendErrorMessage(message.getChannel(), "Could not parse a user. Please @mention them.");
             }
         } else {
-            user = UserManager.getDBUserFromMessage(message);
+            BotUtils.sendEmbedMessage(message.getChannel(), 
+                    buildProgressInfo(message.getGuild(), UserManager.getDBUserFromMessage(message)));
         }
-        if (user == null) {
-            BotUtils.sendErrorMessage(message.getChannel(),
-                    "Specified user was not found in the database.");
-            return;
-        }
-        BotUtils.sendEmbedMessage(message.getChannel(),
-                buildProgressInfo(message.getGuild(), user));
     }
     
     private EmbedObject buildProgressInfo(IGuild guild, User user) {

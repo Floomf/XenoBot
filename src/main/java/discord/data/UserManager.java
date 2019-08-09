@@ -106,9 +106,6 @@ public class UserManager {
             if (name.isEmpty()) {
                 name = "Realmer";
             }
-            if (databaseContainsName(name)) {
-                name = getNextAvailableName(name);
-            }
             User user = new User(dUser.getLongID(), name);
             users.put(dUser.getLongID(), user);
             RankManager.verifyRoleOnGuild(guild, user);
@@ -116,14 +113,6 @@ public class UserManager {
             System.out.println("User " + name + " joined. Added them to the database.");
             saveDatabase();
         }
-    }
-
-    private static String getNextAvailableName(String name) {
-        int i = 2;
-        while (databaseContainsName(name + i)) {
-            i++;
-        }
-        return name + i;
     }
 
     public static void handleUserLeave(IUser dUser, IGuild guild) {
@@ -143,21 +132,12 @@ public class UserManager {
     }
 
     private static boolean userIsInvalid(User user, IGuild guild) {
-        return (user.getProgress().getTotalLevelThisLife() < 10 && guild.getUserByID(user.getDiscordID()) == null);
+        return (user.getProgress().getTotalLevel() < 15 && guild.getUserByID(user.getDiscordID()) == null);
     }
 
     //Methods for fetching users
     public static User getDBUserFromID(long id) {
         return users.get(id);
-    }
-
-    public static User getDBUserFromName(String name) {
-        for (User user : users.values()) { //Crappy solution for this, its just the old arraylist again
-            if (user.getName().getNick().equalsIgnoreCase(name)) {
-                return user;
-            }
-        }
-        return null;
     }
 
     public static User getDBUserFromDUser(IUser dUser) {
@@ -168,13 +148,8 @@ public class UserManager {
         return getDBUserFromID(message.getAuthor().getLongID());
     }
 
-    //Contains checks
     private static boolean databaseContainsDUser(IUser dUser) {
         return users.containsKey(dUser.getLongID());
-    }
-
-    public static boolean databaseContainsName(String name) {
-        return (getDBUserFromName(name) != null);
     }
 
 }

@@ -11,7 +11,7 @@ import sx.blah.discord.handle.obj.IMessage;
 
 public class NickCommand extends AbstractCommand {
 
-    private static final int LEVEL_REQUIRED = 60; 
+    public static final int LEVEL_REQUIRED = 40; 
     
     public NickCommand() {
         super(new String[]{"nick", "name", "nickname"}, 1, LEVEL_REQUIRED, CommandCategory.PERK);
@@ -27,12 +27,7 @@ public class NickCommand extends AbstractCommand {
             BotUtils.sendErrorMessage(channel, "Your nickname can only contain basic letters and symbols.");
             return;
         }
-
-        if (UserManager.databaseContainsName(nick)) {
-            BotUtils.sendErrorMessage(channel, "Sorry, but that nickname is already taken.");
-            return;
-        }
-        
+  
         user.getName().setNick(nick, message.getGuild());
         BotUtils.sendInfoMessage(channel, "Nickname updated. Pleasure to meet ya, " + nick + ".");
         UserManager.saveDatabase();

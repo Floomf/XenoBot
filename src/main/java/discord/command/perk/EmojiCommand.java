@@ -10,7 +10,7 @@ import sx.blah.discord.handle.obj.IMessage;
 
 public class EmojiCommand extends AbstractCommand{
     
-    private static final int LEVEL_REQUIRED = 40; 
+    public static final int LEVEL_REQUIRED = 60; 
     
     public EmojiCommand() {
         super(new String[] {"emoji"}, 1, LEVEL_REQUIRED, CommandCategory.PERK); 

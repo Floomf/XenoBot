@@ -34,12 +34,7 @@ public class SetNickCommand extends AbstractCommand {
             BotUtils.sendErrorMessage(channel, "The nickname can only contain basic letters and symbols.");
             return;
         }
-        
-        if (UserManager.databaseContainsName(nick)) {
-            BotUtils.sendErrorMessage(channel, "Sorry, but that nickname is already taken.");
-            return;
-        }
-        
+                
         userToChange.getName().setNick(nick, message.getGuild());
         BotUtils.sendInfoMessage(channel, "Nickname updated to " + nick);
         UserManager.saveDatabase();

@@ -3,6 +3,10 @@ package discord.data.object;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord.command.perk.ColorCommand;
+import discord.command.perk.DescCommand;
+import discord.command.perk.EmojiCommand;
+import discord.command.perk.NickCommand;
 import discord.util.BotUtils;
 import discord.data.ColorManager;
 import discord.data.RankManager;
@@ -242,7 +246,8 @@ public class Progress {
         user.getName().verify(guild);
         BotUtils.sendMessage(guild.getChannelsByName("log").get(0), BotUtils.getMention(user), "PRESTIGE UP!",
                 String.format("**%d → %d**", prestige.getNumber() - 1, prestige.getNumber()), Color.BLACK);
-        if (prestige.getNumber() == 1 && user.getPrefs().get(Pref.NOTIFY_UNLOCK)) { //really shitty to put this here
+        if (getTotalLevelThisLife() == ColorCommand.LEVEL_REQUIRED //really shitty to put this here
+                && user.getPrefs().get(Pref.NOTIFY_UNLOCK)) {
             BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
                     "Perk Unlocked!", "You have unlocked the ability to change your **name color** on " + guild.getName() + "!"
                     + "\n\n*You can type* `!color` *on the server get started.*", Color.PINK);
@@ -285,19 +290,19 @@ public class Progress {
         if (totalLevel % 20 == 0 && !prestige.isMax()) {
             String message = "", title = "";
             Color colorToUse = Color.ORANGE;
-            if (totalLevel == 20) {
+            if (totalLevel == DescCommand.LEVEL_REQUIRED) {
                 title = "Perks Unlocked!";
                 message = "You have unlocked the ability to set **tags** and a **description** for yourself on " + guild.getName() + "!"
                         + "\n\n*You can type* `!tag` *and* `!desc` *on the server to get started.*";
-            } else if (totalLevel == 40) {
-                title = "Perk Unlocked!";
-                message = "You have unlocked the ability to set an **emoji** in your name on " + guild.getName() + "!"
-                        + "\n\n*You can type* `!emoji` *on the server to get started.*";
-            } else if (totalLevel == 60) {
+            } else if (totalLevel == NickCommand.LEVEL_REQUIRED) {
                 title = "Perk Unlocked!";
                 message = "You have unlocked the ability to change your **nickname** on " + guild.getName() + "!"
                         + "\n\n*You can type* `!nick` *on the server to get started.*";
-            } else if (totalLevel > MAX_LEVEL) { //already prestiged, unlock color every 20 levels
+            } else if (totalLevel == EmojiCommand.LEVEL_REQUIRED) {
+                title = "Perk Unlocked!";
+                message = "You have unlocked the ability to set an **emoji** in your name on " + guild.getName() + "!"
+                        + "\n\n*You can type* `!emoji` *on the server to get started.*";
+            } else if (totalLevel >= ColorCommand.LEVEL_REQUIRED) { //already prestiged, unlock color every 20 levels
                 Unlockable color = ColorManager.getUnlockedColor(totalLevel);
                 if (color != null) {
                     title = "Color Unlocked!";

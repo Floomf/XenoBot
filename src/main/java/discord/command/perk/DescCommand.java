@@ -10,7 +10,7 @@ import sx.blah.discord.handle.obj.IMessage;
 
 public class DescCommand extends AbstractCommand {
     
-    private static final int LEVEL_REQUIRED = 20; 
+    public static final int LEVEL_REQUIRED = 20; 
     
     public DescCommand() {
         super(new String[]{"desc", "motto", "title"}, 1, LEVEL_REQUIRED, CommandCategory.PERK);

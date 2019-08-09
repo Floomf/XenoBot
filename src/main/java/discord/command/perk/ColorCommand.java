@@ -19,7 +19,7 @@ import sx.blah.discord.util.EmbedBuilder;
 
 public class ColorCommand extends AbstractCommand {
     
-    private final static int LEVEL_REQUIRED = 81;
+    public final static int LEVEL_REQUIRED = 81;
     
     public ColorCommand() {
         super(new String[] {"color"}, 1, LEVEL_REQUIRED, CommandCategory.PERK);
