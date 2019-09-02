@@ -148,7 +148,7 @@ public class UserManager {
         return getDBUserFromID(message.getAuthor().getLongID());
     }
 
-    private static boolean databaseContainsDUser(IUser dUser) {
+    public static boolean databaseContainsDUser(IUser dUser) {
         return users.containsKey(dUser.getLongID());
     }
 

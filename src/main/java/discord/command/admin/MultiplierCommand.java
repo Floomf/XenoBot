@@ -18,7 +18,7 @@ public class MultiplierCommand extends AbstractCommand {
         try {
             multiplier = Double.parseDouble(args[0]);
         } catch (NumberFormatException e) {
-            BotUtils.sendErrorMessage(message.getChannel(), "Could not parse a valid decimal.");
+            BotUtils.sendErrorMessage(message.getChannel(), "Couldn't parse a valid decimal multiplier.");
             return;
         }
         Progress.GLOBAL_XP_MULTIPLIER = multiplier;

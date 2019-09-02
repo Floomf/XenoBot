@@ -252,19 +252,23 @@ public class Progress {
                     "Perk Unlocked!", "You have unlocked the ability to change your **name color** on " + guild.getName() + "!"
                     + "\n\n*You can type* `!color` *on the server get started.*", Color.PINK);
         } else if (prestige.isMax()) {
-            if (reincarnation.isReincarnated()) {
-                BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
-                        "Well well.", "**You have reached the maximum prestige once again.** "
+            IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID()));
+            if (reincarnation.isMax()) {
+                BotUtils.sendMessage(pmChannel, "The End", "You have reached the maximum prestige for the final time. "
+                        + "You've lived through many lives and countless hours to reach this point, "
+                        + "and I truly thank you for your dedication to " + guild.getName() + "."
+                        + "\n\nThis is truly the end of the road, but you may still level infinitely."
+                        + "\n\nFarewell and **congratulations.**");
+            } else if (reincarnation.isReincarnated()) {
+                BotUtils.sendMessage(pmChannel, "Well well.", "**You have reached the maximum prestige once again.** "
                         + "Although this life may have gone by quicker, it was still quite the journey to have gotten here. "
                         + "That said, if you are satisfied and ready to start over with an additional 50% XP boost, "
-                        + "you may reincarnate into your next life with `!reincarnate`. Again, the choice is ultimately yours.");
+                        + "you may reincarnate into your next life with `!reincarnate`. Again, the choice is ultimately yours.", Color.BLACK);
             } else {
-                BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
-                        "At last.", "**You have reached the maximum prestige.** "
-                        + "Your everlasting hard work has earned you the final badge, the **trident**.", Color.BLACK);
-                BotUtils.sendMessage(guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID())),
-                        "Final Words", "At max prestige, you may level *infinitely* for fun, but you won't unlock anything new."
-                        + "\n\nHowever, your path doesn't have to end here. If you are satisfied with the life you have lived, you may **reincarnate.** "
+                BotUtils.sendMessage(pmChannel, "At last!", "**You have reached the maximum prestige.** "
+                        + "Your everlasting hard work has earned you the final badge, the **trident**."
+                        + "\n\nAt max prestige, you may level *infinitely* for fun, but you won't unlock anything new. "
+                        + "However, your path doesn't have to end here. If you are satisfied with the life you have lived, you may **reincarnate.** "
                         + "Your next life will pass by faster with a 50% XP boost, but your level, prestige, badges, perks, and name colors "
                         + "will be reset completely, and you will have to earn everything anew."
                         + "\n\nIf you are willing to start again, you may do so with `!reincarnate`. The choice is ultimately yours.", Color.BLACK);
@@ -278,9 +282,8 @@ public class Progress {
         BotUtils.setUserRoles(guild, guild.getUserByID(user.getDiscordID()), ColorManager.getUserRolesNoColors(
                 guild.getUserByID(user.getDiscordID()), guild)); //remove color role
         RankManager.verifyRoleOnGuild(guild, user);
-        user.getName().setEmoji(0, guild); //remove emoji
         BotUtils.sendMessage(guild.getChannelsByName("log").get(0), BotUtils.getMention(user), "REINCARNATION",
-                "**" + reincarnation.getEnglish() + "**", Color.PINK);
+                "**" + reincarnation.getRomaji() + "**", Color.PINK);
     }
 
     //Moved here until theres a solution/ unlock manager?

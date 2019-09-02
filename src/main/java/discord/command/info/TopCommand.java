@@ -20,7 +20,7 @@ public class TopCommand extends AbstractCommand {
     @Override
     public void execute(IMessage message, String[] args) {
         if (args.length > 0 && args[0].matches("\\D+")) {
-            BotUtils.sendErrorMessage(message.getChannel(), "Could not parse an amount of users to display.");
+            BotUtils.sendErrorMessage(message.getChannel(), "Couldn't parse a valid amount of users to display.");
             return;
         }
         

@@ -18,15 +18,19 @@ public class ReincarnateCommand extends AbstractCommand {
     @Override
     public void execute(IMessage message, String[] args) {
         User user = UserManager.getDBUserFromMessage(message);
-        if (!user.getProgress().getPrestige().isMax()) {
+        if (user.getProgress().getReincarnation().isMax()) {
+            BotUtils.sendMessage(message.getChannel(), "No more..", "*This is my last life.*");
+            return;
+        } else if (!user.getProgress().getPrestige().isMax()) {
             BotUtils.sendMessage(message.getChannel(), "Not yet..", "*I still have this life to live.*");
             return;
         }
         
+        
         if (args.length == 0) {
             BotUtils.sendInfoMessage(message.getChannel(), "Are you **absolutely sure** you want to reincarnate?"
                     + " Your progress this life will be completely reset, losing your level, prestige, badges, and all unlocks."
-                    + "\n\nIf you are truly ready, confirm your new life by typing `!reincarnate " 
+                    + "\n\nIf you are truly ready, confirm your reincarnation by typing `!reincarnate " 
                     + user.getName().getNick() + '`');
             return;
         }
@@ -34,12 +38,17 @@ public class ReincarnateCommand extends AbstractCommand {
         String name = CommandHandler.combineArgs(0, args);
         if (!name.equals(user.getName().getNick())) {
             BotUtils.sendErrorMessage(message.getChannel(), "Invalid confirmation. If you are truly ready, "
-                    + "confirm your new life by typing `!reincarnate " + user.getName().getNick() + "`");
+                    + "confirm your reincarnation by typing `!reincarnate " + user.getName().getNick() + "`");
             return;
         }
         user.getProgress().reincarnate(message.getGuild());
-        BotUtils.sendMessage(message.getChannel(), "A New Beginning", "You have been reborn into **" 
-            + user.getProgress().getReincarnation().getEnglish()+ "**.", Color.CYAN);       
+        if (user.getProgress().getReincarnation().isMax()) {
+            BotUtils.sendMessage(message.getChannel(), "A Final Beginning", "You have been reborn into your last life: **" 
+            + user.getProgress().getReincarnation().getRomaji()+ "**.", Color.CYAN);    
+        } else { 
+            BotUtils.sendMessage(message.getChannel(), "A New Beginning", "You have been reborn into **" 
+            + user.getProgress().getReincarnation().getRomaji()+ "**.", Color.CYAN);    
+        }
     }
     
     @Override

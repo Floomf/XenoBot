@@ -1,7 +1,6 @@
 package discord.command.info;
 
 import discord.util.BotUtils;
-import discord.core.command.CommandHandler;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
@@ -27,10 +26,14 @@ public class ProgressCommand extends AbstractCommand{
         if (args.length > 0) {
             List<IUser> mentions = message.getMentions();
             if (!mentions.isEmpty()) {
-                BotUtils.sendEmbedMessage(message.getChannel(), buildProgressInfo(message.getGuild(), 
+                if (UserManager.databaseContainsDUser(mentions.get(0))) {
+                    BotUtils.sendEmbedMessage(message.getChannel(), buildProgressInfo(message.getGuild(), 
                         UserManager.getDBUserFromDUser(mentions.get(0))));
+                } else {
+                    BotUtils.sendErrorMessage(message.getChannel(), "Couldn't find that user in the database. Are they a bot?");
+                }              
             } else {
-                BotUtils.sendErrorMessage(message.getChannel(), "Could not parse a user. Please @mention them.");
+                BotUtils.sendErrorMessage(message.getChannel(), "Couldn't parse a user. Please @mention them.");
             }
         } else {
             BotUtils.sendEmbedMessage(message.getChannel(), 

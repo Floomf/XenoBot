@@ -23,7 +23,7 @@ public class HelpCommand extends AbstractCommand {
             String name = args[0].toLowerCase();
             AbstractCommand cmd = CommandManager.getCommand(name);
             if (cmd == null) {
-                BotUtils.sendErrorMessage(channel, "Could not find a command by that name. "
+                BotUtils.sendErrorMessage(channel, "Couldn't find a command by that name. "
                         + "Use `!help` for a list of available commands.");
             } else {
                 BotUtils.sendUsageMessage(channel, cmd.getUsage(name));

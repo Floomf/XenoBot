@@ -22,7 +22,7 @@ public class DescCommand extends AbstractCommand {
         String desc = BotUtils.validateString(CommandHandler.combineArgs(0, args));
         if (desc.isEmpty()) {
             BotUtils.sendErrorMessage(message.getChannel(), 
-                    "Could not parse a valid description. Only basic characters are allowed.");
+                    "Couldn't parse a valid description. Only basic characters are allowed.");
             return;
         } else if (desc.length() > 55) {
             desc = desc.substring(0, 55);

@@ -61,7 +61,7 @@ public class ProfileBuilder {
     
     public ProfileBuilder addReincarnation() {
         builder.appendField("Reincarnation :white_flower:", "`" + progress.getReincarnation().getKanji()
-                + " (" + progress.getReincarnation().getEnglish() + ")`", true);
+                + " (" + progress.getReincarnation().getRomaji() + ")`", true);
         return this;
     }
     
@@ -100,7 +100,7 @@ public class ProfileBuilder {
     
     public ProfileBuilder addXPBoost() {
         builder.appendField("XP Boost :rocket:", "`" + (int)((progress.getXPMultiplier() - 1) * 100) 
-                + "%`", true); //multiplier to percent
+                + "% (" + progress.getXPMultiplier() + "x)`", true); //multiplier to percent
         return this;
     }
     

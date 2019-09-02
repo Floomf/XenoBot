@@ -15,7 +15,7 @@ public class PruneCommand extends AbstractCommand {
     @Override
     public void execute(IMessage message, String[] args) {
         if (!args[0].matches("\\d+")) { //not digits   
-            BotUtils.sendErrorMessage(message.getChannel(), "Could not parse amount of messages to prune.");
+            BotUtils.sendErrorMessage(message.getChannel(), "Couldn't parse a valid amount of messages to prune.");
             return;
         }
         

@@ -22,11 +22,11 @@ public class SetNickCommand extends AbstractCommand {
         IChannel channel = message.getChannel();
         List<IUser> users = message.getMentions();
         if (users.isEmpty()) {
-            BotUtils.sendErrorMessage(channel, "Could not parse a user. Please @mention them.");
+            BotUtils.sendErrorMessage(channel, "Couldn't parse a user. Please @mention them.");
         }
         User userToChange = UserManager.getDBUserFromDUser(users.get(0));
         if (userToChange == null) {
-            BotUtils.sendErrorMessage(channel, "Specified user was not found in the database.");
+            BotUtils.sendErrorMessage(channel, "Couldn't find that user in the database. Are they a bot?");
             return;
         }
         String nick = BotUtils.validateNick(CommandHandler.combineArgs(1, args));
