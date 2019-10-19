@@ -254,24 +254,24 @@ public class Progress {
         } else if (prestige.isMax()) {
             IChannel pmChannel = guild.getClient().getOrCreatePMChannel(guild.getUserByID(user.getDiscordID()));
             if (reincarnation.isMax()) {
-                BotUtils.sendMessage(pmChannel, "The End", "You have reached the maximum prestige for the final time. "
-                        + "You've lived through many lives and countless hours to reach this point, "
+                BotUtils.sendMessage(pmChannel, "The End", "**You have reached the maximum prestige for the final time.** "
+                        + "You've lived through many lives and **thousands** of hours to reach this point, "
                         + "and I truly thank you for your dedication to " + guild.getName() + "."
-                        + "\n\nThis is truly the end of the road, but you may still level infinitely."
-                        + "\n\nFarewell and **congratulations.**");
+                        + "\n\nThis is finally the end of the road, but you may still level infinitely."
+                        + "\n\nFarewell and **congratulations.**", Color.WHITE);
             } else if (reincarnation.isReincarnated()) {
                 BotUtils.sendMessage(pmChannel, "Well well.", "**You have reached the maximum prestige once again.** "
-                        + "Although this life may have gone by quicker, it was still quite the journey to have gotten here. "
+                        + "Although this life may have gone by quicker, it's always a journey to get here. "
                         + "That said, if you are satisfied and ready to start over with an additional 50% XP boost, "
-                        + "you may reincarnate into your next life with `!reincarnate`. Again, the choice is ultimately yours.", Color.BLACK);
+                        + "you may reincarnate into your next life with `!reincarnate`.", Color.BLACK);
             } else {
                 BotUtils.sendMessage(pmChannel, "At last!", "**You have reached the maximum prestige.** "
-                        + "Your everlasting hard work has earned you the final badge, the **trident**."
-                        + "\n\nAt max prestige, you may level *infinitely* for fun, but you won't unlock anything new. "
-                        + "However, your path doesn't have to end here. If you are satisfied with the life you have lived, you may **reincarnate.** "
-                        + "Your next life will pass by faster with a 50% XP boost, but your level, prestige, badges, perks, and name colors "
-                        + "will be reset completely, and you will have to earn everything anew."
-                        + "\n\nIf you are willing to start again, you may do so with `!reincarnate`. The choice is ultimately yours.", Color.BLACK);
+                        + "Your incredible work has earned you your final badge."
+                        + "\n\nAt max prestige, you now level *infinitely* for fun, but your path doesn't have to end here. "
+                        + "If you are willing to start over, you may **reincarnate.** "
+                        + "You'll begin your next life with a 50% XP boost, but your level and prestige will reset completely, "
+                        + "and you'll have to unlock everything again."
+                        + "\n\nIf you are ever ready to be reborn, you may do so with `!reincarnate`. The choice is ultimately yours.", Color.BLACK);
             }
         }
     }
@@ -294,17 +294,17 @@ public class Progress {
             String message = "", title = "";
             Color colorToUse = Color.ORANGE;
             if (totalLevel == DescCommand.LEVEL_REQUIRED) {
-                title = "Perks Unlocked!";
-                message = "You have unlocked the ability to set **tags** and a **description** for yourself on " + guild.getName() + "!"
-                        + "\n\n*You can type* `!tag` *and* `!desc` *on the server to get started.*";
+                title = "Perk Unlocked!";
+                message = "You have unlocked the ability to set your **profile description** on " + guild.getName() + "!"
+                        + "\n\n*You can type* `!desc` *on the server to do so.*";
             } else if (totalLevel == NickCommand.LEVEL_REQUIRED) {
                 title = "Perk Unlocked!";
                 message = "You have unlocked the ability to change your **nickname** on " + guild.getName() + "!"
-                        + "\n\n*You can type* `!nick` *on the server to get started.*";
+                        + "\n\n*You can type* `!nick` *on the server to do so.*";
             } else if (totalLevel == EmojiCommand.LEVEL_REQUIRED) {
                 title = "Perk Unlocked!";
                 message = "You have unlocked the ability to set an **emoji** in your name on " + guild.getName() + "!"
-                        + "\n\n*You can type* `!emoji` *on the server to get started.*";
+                        + "\n\n*You can type* `!emoji` *on the server to do so.*";
             } else if (totalLevel >= ColorCommand.LEVEL_REQUIRED) { //already prestiged, unlock color every 20 levels
                 Unlockable color = ColorManager.getUnlockedColor(totalLevel);
                 if (color != null) {

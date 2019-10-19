@@ -1,7 +1,9 @@
 package discord.data.object;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord.data.RankManager;
 
 //Immutable
 public class Rank {
@@ -29,6 +31,11 @@ public class Rank {
     
     public int getLevelRequired() {
         return levelRequired;
+    }
+    
+    @JsonIgnore
+    public boolean isMax() {
+        return this.equals(RankManager.getMaxRank());
     }
     
 }

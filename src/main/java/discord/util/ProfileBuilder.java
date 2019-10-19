@@ -35,7 +35,8 @@ public class ProfileBuilder {
     }
     
     public ProfileBuilder addRank() {
-        builder.appendField("Rank :trident:", "`" + progress.getRank().getName() + "`", true);
+        builder.appendField("Rank :trident:", "`" + progress.getRank().getName()
+                + (progress.getRank().isMax() ? "` (Max)" : "`"), true);
         return this;
     }
     
@@ -84,12 +85,12 @@ public class ProfileBuilder {
     
     public ProfileBuilder addTotalLevel() {
         builder.appendField("Total Level :arrows_counterclockwise:", 
-                "`" + progress.getTotalLevel() + "`", true);
+                "`" + String.format("%,d", progress.getTotalLevel()) + "`", true);
         return this;
     }
     
     public ProfileBuilder addTotalXP() {
-        builder.appendField("Total XP :clock4:", "`" + progress.getTotalXP() + "`", true);
+        builder.appendField("Total XP :clock4:", "`" + String.format("%,d", progress.getTotalXP()) + "`", true);
         return this;
     }
     

@@ -14,7 +14,7 @@ import sx.blah.discord.handle.obj.IUser;
 
 public class RankManager {
 
-    private static Rank[] RANKS;
+    public static Rank[] RANKS;
 
     static {
         ObjectMapper mapper = new ObjectMapper();
@@ -33,6 +33,10 @@ public class RankManager {
             }
         }
         return RANKS[RANKS.length - 1]; //has to be last rank
+    }
+    
+    public static Rank getMaxRank() {
+        return RANKS[RANKS.length - 1];
     }
 
     public static void verifyRankOfUser(IGuild guild, User user) {

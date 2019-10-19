@@ -18,10 +18,10 @@ public class Reincarnation {
         {"永遠", "Eien"},
         {"腐敗", "Fuhai"},
         {"下痢", "Geri"},
-        {"革命", "Hanjou"},
+        {"繁盛", "Hanjou"},
         {"意味", "Imi"},
         {"慈悲", "Jihi"},
-        {"危険", "Kutsū"},
+        {"苦痛", "Kutsū"},
         {"無罪", "Muzai"},
         {"忍耐", "Nintai"},
         {"恐れ", "Osore"},
@@ -29,7 +29,7 @@ public class Reincarnation {
         {"真実", "Shinjitsu"},
         {"統一", "Touitsu"},
         {"有無", "Umu"},
-        {"誘惑", "Yukubou"},
+        {"欲望", "Yokubou"},
         {"全滅", "Zenmetsu"}
     };
 

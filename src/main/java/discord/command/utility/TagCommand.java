@@ -1,4 +1,4 @@
-package discord.command.perk;
+package discord.command.utility;
 
 import discord.util.BotUtils;
 import discord.core.command.CommandHandler;
@@ -15,12 +15,12 @@ import sx.blah.discord.handle.obj.IUser;
 
 public class TagCommand extends AbstractCommand {
     
-    private static final int LEVEL_REQUIRED = 20;
+    private static final long GAME_ROLE_ID = 621486907620196392L;
     
     private ArrayList<String> tags = new ArrayList<>();
     
     public TagCommand() {
-        super(new String[] {"tag", "label"}, 1, LEVEL_REQUIRED, CommandCategory.PERK);
+        super(new String[] {"tag", "label"}, 1, 0, CommandCategory.UTILITY);
         try {
             Files.lines(Paths.get("tags.txt")).forEachOrdered(line -> {
                 if (!line.trim().isEmpty()) {
@@ -88,6 +88,9 @@ public class TagCommand extends AbstractCommand {
         IUser dUser = message.getAuthor();
         if (!dUser.hasRole(role)) {
             dUser.addRole(role);
+            if (!dUser.hasRole(message.getGuild().getRoleByID(GAME_ROLE_ID))) { //poop
+                dUser.addRole(message.getGuild().getRoleByID(GAME_ROLE_ID));
+            }
         } else {
             dUser.removeRole(role);
         }
