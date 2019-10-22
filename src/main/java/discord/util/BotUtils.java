@@ -2,7 +2,7 @@ package discord.util;
 
 import discord.core.command.CommandManager;
 import discord.Main;
-import discord.data.object.User;
+import discord.data.object.user.User;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.List;

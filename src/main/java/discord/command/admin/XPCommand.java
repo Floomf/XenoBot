@@ -4,7 +4,7 @@ import discord.util.BotUtils;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.object.User;
+import discord.data.object.user.User;
 import java.util.List;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;

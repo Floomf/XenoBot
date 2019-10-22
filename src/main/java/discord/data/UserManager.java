@@ -1,6 +1,6 @@
 package discord.data;
 
-import discord.data.object.User;
+import discord.data.object.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.util.BotUtils;
 import java.io.File;

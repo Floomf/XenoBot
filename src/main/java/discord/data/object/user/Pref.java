@@ -1,4 +1,4 @@
-package discord.data.object;
+package discord.data.object.user;
 
 public enum Pref {
     MENTION_RANKUP, NOTIFY_UNLOCK, AUTO_PRESTIGE;

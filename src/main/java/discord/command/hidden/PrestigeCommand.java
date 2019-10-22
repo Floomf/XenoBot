@@ -4,7 +4,7 @@ import discord.util.BotUtils;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.object.Progress;
+import discord.data.object.user.Progress;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class PrestigeCommand extends AbstractCommand {

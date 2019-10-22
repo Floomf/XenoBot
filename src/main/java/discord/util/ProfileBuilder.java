@@ -1,8 +1,8 @@
  package discord.util;
 
-import discord.data.object.Prestige;
-import discord.data.object.Progress;
-import discord.data.object.User;
+import discord.data.object.user.Prestige;
+import discord.data.object.user.Progress;
+import discord.data.object.user.User;
 import java.text.DecimalFormat;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IGuild;

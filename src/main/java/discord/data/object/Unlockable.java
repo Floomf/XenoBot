@@ -1,6 +1,9 @@
 package discord.data.object;
 
 //Immutable
+
+import discord.data.object.user.Progress;
+
 public class Unlockable {
     
     private final String name;

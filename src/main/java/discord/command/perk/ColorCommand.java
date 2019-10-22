@@ -6,7 +6,7 @@ import discord.core.command.CommandHandler;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.object.User;
+import discord.data.object.user.User;
 import discord.data.object.Unlockable;
 import java.util.Arrays;
 import java.util.List;

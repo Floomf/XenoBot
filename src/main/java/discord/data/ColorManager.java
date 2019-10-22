@@ -1,7 +1,7 @@
 package discord.data;
 
 import discord.data.object.Unlockable;
-import discord.data.object.User;
+import discord.data.object.user.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

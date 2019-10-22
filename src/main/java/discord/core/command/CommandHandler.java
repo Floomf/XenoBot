@@ -7,7 +7,7 @@ import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.api.events.EventSubscriber;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.object.Progress;
+import discord.data.object.user.Progress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;

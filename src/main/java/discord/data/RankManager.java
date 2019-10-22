@@ -2,9 +2,9 @@ package discord.data;
 
 import discord.util.BotUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord.data.object.Pref;
-import discord.data.object.Rank;
-import discord.data.object.User;
+import discord.data.object.user.Pref;
+import discord.data.object.user.Rank;
+import discord.data.object.user.User;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;

@@ -1,7 +1,9 @@
-package discord.data.object;
+package discord.data.object.user;
 
+import discord.data.object.user.Name;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord.data.object.Unlockable;
 import java.util.HashMap;
 
 public class User {

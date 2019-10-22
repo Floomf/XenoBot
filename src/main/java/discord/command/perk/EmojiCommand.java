@@ -5,7 +5,7 @@ import discord.util.BotUtils;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.object.Name;
+import discord.data.object.user.Name;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class EmojiCommand extends AbstractCommand{

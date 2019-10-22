@@ -3,18 +3,19 @@ package discord.command.info;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.data.UserManager;
-import discord.data.object.User;
+import discord.data.object.user.User;
 import discord.util.BotUtils;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.util.EmbedBuilder;
 
 public class TopCommand extends AbstractCommand {
     
     public TopCommand() {
-        super(new String[] {"top", "leaderboard"}, 0, CommandCategory.INFO);
+        super(new String[] {"top", "leaderboard", "rankings"}, 0, CommandCategory.INFO);
     }
     
     @Override
@@ -24,7 +25,7 @@ public class TopCommand extends AbstractCommand {
             return;
         }
         
-        int amount = 15;       
+        int amount = 10;       
         if (args.length > 0) {
             amount = Integer.parseInt(args[0]);
             if (amount > 25) {
@@ -49,8 +50,17 @@ public class TopCommand extends AbstractCommand {
                     user.getProgress().getTotalLevel(), 
                     user.getProgress().getTotalXP());
         }
-        BotUtils.sendEmbedMessage(message.getChannel(), 
-                BotUtils.getBuilder(message.getClient(), "Top " + amount + " Users", desc, Color.ORANGE).build());
+        
+        int totalXP = 0;
+        for (User user : users) {
+            totalXP += user.getProgress().getTotalXP();
+        }
+        
+        EmbedBuilder builder = BotUtils.getBuilder(message.getClient(), "Top " + amount + " Users", desc);
+        builder.withFooterText(String.format("%,d", totalXP) + " XP has been earned on this guild.");
+        builder.withColor(Color.CYAN);
+                                 
+        BotUtils.sendEmbedMessage(message.getChannel(), builder.build());
     }
     
     @Override

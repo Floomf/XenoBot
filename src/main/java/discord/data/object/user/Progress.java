@@ -1,4 +1,4 @@
-package discord.data.object;
+package discord.data.object.user;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,6 +10,7 @@ import discord.command.perk.NickCommand;
 import discord.util.BotUtils;
 import discord.data.ColorManager;
 import discord.data.RankManager;
+import discord.data.object.Unlockable;
 import sx.blah.discord.handle.obj.IGuild;
 import java.awt.Color;
 import sx.blah.discord.handle.obj.IChannel;

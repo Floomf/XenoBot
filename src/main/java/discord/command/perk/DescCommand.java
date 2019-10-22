@@ -5,7 +5,7 @@ import discord.core.command.CommandHandler;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.object.User;
+import discord.data.object.user.User;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class DescCommand extends AbstractCommand {
