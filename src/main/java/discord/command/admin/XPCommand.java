@@ -4,52 +4,49 @@ import discord.util.BotUtils;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.object.user.User;
+import discord.util.MessageUtils;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+
 import java.util.List;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
 
 public class XPCommand extends AbstractCommand {
-    
+
     public XPCommand() {
-        super(new String[] {"givexp", "giveexp", "gxp"}, 2, CommandCategory.ADMIN); 
+        super(new String[]{"givexp", "gxp"}, 2, CommandCategory.ADMIN);
     }
-    
+
     @Override
-    public void execute(IMessage message, String[] args) {
-        IChannel channel = message.getChannel();
-        List<IUser> users = message.getMentions();
-        double xp;
-        
+    public void execute(Message message, TextChannel channel, String[] args) {
+        List<User> users = message.getUserMentions().filter(user -> !user.isBot()).collectList().block();
+
         if (users.isEmpty()) {
-            BotUtils.sendErrorMessage(channel, 
-                    "Could not identify any user. Please @mention at least one.");
+            MessageUtils.sendErrorMessage(channel, "Could not identify any user. Please @mention at least one.");
             return;
         }
-        
+
         //check xp amount
+        double xp;
         try {
             xp = Double.parseDouble(args[0]);
-            if (xp > 10000.0) xp = 10000.0; 
+            if (xp > 20000.0) xp = 20000.0;
         } catch (NumberFormatException ex) {
-            BotUtils.sendErrorMessage(channel, "Could not parse the specified XP amount.");
+            MessageUtils.sendErrorMessage(channel, "Could not parse the specified XP amount.");
             return;
         }
-        
-        for (IUser dUser : users) {
-            User user = UserManager.getDBUserFromDUser(dUser);
-            if (user == null) continue;
-            user.getProgress().addXP(xp, message.getGuild());
-            BotUtils.sendInfoMessage(channel, "Gave " + user.getName().getNick() + " **" + xp + "**XP");         
-        }   
-        UserManager.saveDatabase(); //Will still save if no users were found, fix it sometime
+
+        for (User user : users) {
+            UserManager.getDUserFromID(user.getId().asLong()).getProg().addXP(xp);
+            MessageUtils.sendInfoMessage(channel, "Gave " + user.getUsername() + " **" + xp + "**XP");
+        }
+        UserManager.saveDatabase();
     }
-    
+
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[amount] [@mentions]", 
+        return BotUtils.buildUsage(alias, "[amount] [@mentions]",
                 "Give users XP in the database.");
     }
-    
+
 }

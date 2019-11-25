@@ -1,53 +1,74 @@
 package discord.data;
 
-import discord.data.object.user.User;
+import discord.data.object.user.DUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.util.BotUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+
+import discord4j.core.event.domain.guild.MemberJoinEvent;
+import discord4j.core.event.domain.guild.MemberLeaveEvent;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 public class UserManager {
 
-    private static HashMap<Long, User> users;
-    
-    public static Collection<User> getUsers() {
-        return users.values();
+    //we can't map member to DUser because some members can't be retrieved if they aren't on the guild
+    private static HashMap<Long, DUser> dUsers;
+
+    public static Collection<DUser> getDUsers() {
+        return dUsers.values();
     }
 
-    public static void createDatabase(IGuild guild) {
-        users = new HashMap<>();
+    public static void createDatabase(Guild guild) {
+        dUsers = new HashMap<>();
         if (new File("users.json").exists()) {
-            loadDatabase();
+            loadDatabase(guild);
             checkNewUsersInGuild(guild);
-            checkRemovedUsersInGuild(guild);
         } else {
             System.out.println("Creating database...");
-            List<IUser> allUsers = guild.getUsers();
-            allUsers.removeIf(user -> user.isBot());
-            allUsers.forEach(user -> {
-                users.put(user.getLongID(), new User(user.getLongID(), user.getDisplayName(guild)));
-            });
+            List<Member> allMembers = guild.getMembers().collectList().block();
+            allMembers.removeIf(Member::isBot);
+            allMembers.forEach(UserManager::addMemberToDB);
             System.out.println("Database created.");
         }
-        validateUsers(guild);
         saveDatabase();
     }
 
-    private static void loadDatabase() {
+    private static void loadDatabase(Guild guild) {
         ObjectMapper mapper = new ObjectMapper();
         //mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             System.out.println("Loading database...");
-            User[] usersToLoad = mapper.readValue(new File("users.json"), User[].class);
-            for (User user : usersToLoad) {
-                users.put(user.getDiscordID(), user);
+            DUser[] dUsersToLoad = mapper.readValue(new File("users.json"), DUser[].class);
+            for (DUser user : dUsersToLoad) {
+                dUsers.put(user.getDiscordID(), user);
             }
+
+            //setting DUsers Member field and removing invalid users
+            for (DUser dUser : dUsersToLoad) {
+                //Only way I know to return null for member not in guild (like the old code)
+                Member member = guild.getMemberById(Snowflake.of(dUser.getDiscordID())).onErrorResume(e -> Mono.empty()).block();
+                if (member == null) {
+                    if (dUser.getProg().getLevel() <= 15) {
+                        dUsers.remove(dUser.getDiscordID());
+                        System.out.println("Removed " + dUser.getName() + " from the database.");
+                    }
+                    continue;
+                }
+
+                dUser.setGuildMember(member);
+                dUser.verifyOnGuild();
+            }
+
             System.out.println("Database loaded.");
         } catch (IOException e) {
             System.err.println("Database failed to load with error: " + e);
@@ -58,98 +79,96 @@ public class UserManager {
         ObjectMapper mapper = new ObjectMapper();
         System.out.println("Attempting to save database...");
         try {
-            mapper.writerWithDefaultPrettyPrinter().writeValue(new File("users.json"), users.values());
+            mapper.writerWithDefaultPrettyPrinter().writeValue(new File("users.json"), dUsers.values());
             System.out.println("Database saved.");
         } catch (IOException e) {
             System.err.println("Database failed to save with error: " + e);
         }
     }
 
-    public static void validateUsers(IGuild guild) {
-        for (User user : users.values()) {
-            if (guild.getUserByID(user.getDiscordID()) != null) {
-                RankManager.verifyRoleOnGuild(guild, user);
-                user.getName().verify(guild);
-            }
-        }
-    }
-
-    //Check possible users that have left the guild, if so, remove them from the database
-    public static void checkRemovedUsersInGuild(IGuild guild) {
-        System.out.println("Checking any possible guild users (that left) to remove from the database...");
-        users.values().removeIf(user -> userIsInvalid(user, guild)); //Won't log when a user is removed, just does it silently
-        System.out.println("Removed any possible users that were invalid");
-    }
-
     //Check possible users that are not already in database in guild, add them if found
-    private static void checkNewUsersInGuild(IGuild guild) {
-        List<IUser> guildUsers = guild.getUsers();
+    private static void checkNewUsersInGuild(Guild guild) {
+        List<Member> guildMembers = guild.getMembers().collectList().block();
 
-        System.out.println("Checking possible newly joined guild users to add to the database...");
-        for (IUser dUser : guildUsers) {
-            if (!dUser.isBot() && !databaseContainsDUser(dUser)) {
-                handleUserJoin(dUser, guild);
+        System.out.println("Checking any newly joined guild users to add to the database...");
+        for (Member member : guildMembers) {
+            if (member.isBot() || databaseContainsMember(member)) {
+                continue;
             }
+            addMemberToDB(member);
         }
         System.out.println("Finished checking possible new guild users.");
     }
 
-    public static void handleUserJoin(IUser dUser, IGuild guild) {
-        if (databaseContainsDUser(dUser)) {
-            User existingUser = getDBUserFromDUser(dUser);
-            RankManager.verifyRoleOnGuild(guild, existingUser);
-            existingUser.getName().verify(guild);
-            System.out.println("User " + existingUser.getName().getNick() + " joined. Already found them saved in the database.");
-        } else { //They're not in the database, so we add the new user in
-            String name = BotUtils.validateNick(dUser.getDisplayName(guild));
-            //if the name validator returns an empty name, we need a placeholder
-            if (name.isEmpty()) {
-                name = "Realmer";
+
+    private static void addMemberToDB(Member member) {
+        String name = BotUtils.validateNick(member.getDisplayName());
+        //if the name validator returns an empty name, we need a placeholder
+        if (name.isEmpty()) {
+            name = "Realmer";
+        }
+        DUser dUser = new DUser(member, name);
+        dUsers.put(member.getId().asLong(), dUser);
+        dUser.verifyOnGuild();
+
+        System.out.println("Added " + member.getDisplayName() + " to the database.");
+    }
+
+    public static void onMemberJoinEvent(MemberJoinEvent event) {
+        System.out.println(event.getMember().getDisplayName() + " joined the guild.");
+        Member member = event.getMember();
+        if (!member.isBot()) {
+            if (databaseContainsMember(member)) {
+                DUser existingUser = getDUserFromMember(member);
+                existingUser.setGuildMember(member);
+                existingUser.verifyOnGuild();
+                System.out.println("Already found " + event.getMember().getDisplayName() + " in the database.");
+            } else { //They're not in the database, so we add the new user in
+                addMemberToDB(member);
+                saveDatabase();
             }
-            User user = new User(dUser.getLongID(), name);
-            users.put(dUser.getLongID(), user);
-            RankManager.verifyRoleOnGuild(guild, user);
-            user.getName().verify(guild);
-            System.out.println("User " + name + " joined. Added them to the database.");
-            saveDatabase();
         }
     }
 
-    public static void handleUserLeave(IUser dUser, IGuild guild) {
-        if (databaseContainsDUser(dUser)) {
-            removeUserIfInvalid(getDBUserFromDUser(dUser), guild);
-        } else {
-            System.out.println("User " + dUser.getName() + " left the guild, but they weren't in the database anyway.");
+    public static void onMemberLeaveEvent(MemberLeaveEvent event) {
+        System.out.println("Member " + event.getUser().getUsername() + " left the guild.");
+        if (!event.getUser().isBot()) {
+            DUser dUser = dUsers.get(event.getUser().getId().asLong());
+            if (dUser.getProg().getTotalLevel() <= 15) {
+                dUsers.remove(event.getUser().getId().asLong());
+                System.out.println("Removed " + event.getUser().getUsername() + " from the database.");
+                saveDatabase();
+            }
         }
-    }
-
-    private static void removeUserIfInvalid(User user, IGuild guild) {
-        //we keep users that are level 10 and up for now
-        if (userIsInvalid(user, guild)) {
-            users.remove(user.getDiscordID());
-            System.out.println("Removed " + user.getName() + " from the database.");
-        }
-    }
-
-    private static boolean userIsInvalid(User user, IGuild guild) {
-        return (user.getProgress().getTotalLevel() < 15 && guild.getUserByID(user.getDiscordID()) == null);
     }
 
     //Methods for fetching users
-    public static User getDBUserFromID(long id) {
-        return users.get(id);
+    public static DUser getDUserFromID(long id) {
+        return dUsers.get(id);
     }
 
-    public static User getDBUserFromDUser(IUser dUser) {
-        return getDBUserFromID(dUser.getLongID());
+    public static DUser getDUserFromUser(User user) {
+        return dUsers.get(user.getId().asLong());
     }
 
-    public static User getDBUserFromMessage(IMessage message) {
-        return getDBUserFromID(message.getAuthor().getLongID());
+    public static DUser getDUserFromMember(Member member) {
+        return dUsers.get(member.getId().asLong());
     }
 
-    public static boolean databaseContainsDUser(IUser dUser) {
-        return users.containsKey(dUser.getLongID());
+    public static DUser getDUserFromMessage(Message message) {
+        return dUsers.get(message.getAuthor().get().getId().asLong()); //uh oh
+    }
+
+    public static int size() {
+        return dUsers.size();
+    }
+
+    public static boolean databaseContainsUser(User user) {
+        return dUsers.containsKey(user.getId().asLong());
+    }
+
+    private static boolean databaseContainsMember(Member member) {
+        return dUsers.containsKey(member.getId().asLong());
     }
 
 }

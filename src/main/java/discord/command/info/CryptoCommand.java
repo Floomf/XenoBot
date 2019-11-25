@@ -1,26 +1,21 @@
 package discord.command.info;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.util.EmbedBuilder;
+
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.Message;
 
 public class CryptoCommand extends AbstractCommand {
-    
+
     public CryptoCommand() {
-        super(new String[] {"crypto", "cryptocurrency", "cc", "price"}, 1, CommandCategory.INFO);
+        super(new String[]{"crypto", "cryptocurrency", "cc", "price"}, 1, CommandCategory.INFO);
     }
-    
+
     @Override
-    public void execute(IMessage message, String[] args) {
+    public void execute(Message message, TextChannel channel, String[] args) {
+        /*
         IChannel channel = message.getChannel();
         StringBuilder sb = new StringBuilder();
         EmbedBuilder builder = new EmbedBuilder();
@@ -57,12 +52,12 @@ public class CryptoCommand extends AbstractCommand {
         } catch (IOException e) {
             e.printStackTrace();
             BotUtils.sendErrorMessage(channel, "Specified coin was not found in the database.");
-        }
+        }*/ //TODO rewrite
     }
-    
+
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[full name]", "View price and other info on a crpytocurrency.");
     }
-    
+
 }

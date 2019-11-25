@@ -9,15 +9,15 @@ public enum CommandCategory {
         temp = temp.charAt(0) + temp.substring(1).toLowerCase();
         switch (this) {
             case ADMIN:
-                return temp + " \uD83D\uDEE1"; //Shield emoji
+                return temp + " 🛡️";
             case INFO:
                 return temp + " 📜";
             case PERK:
                 return temp + " 💎";
             case UTILITY:
-                return temp + " 🔧"; 
+                return temp + " 🔧";
             case FUN:
-                return temp + " 🎉";  
+                return temp + " 🎉";
             case GAME:
                 return temp + " 🎲";
             default:

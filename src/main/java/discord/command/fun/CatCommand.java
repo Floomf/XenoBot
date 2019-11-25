@@ -1,45 +1,30 @@
 package discord.command.fun;
 
+import kong.unirest.Unirest;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import org.apache.commons.io.FileUtils;
-import sx.blah.discord.handle.obj.IMessage;
+
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.Message;
 
 public class CatCommand extends AbstractCommand {
-    
+
     public CatCommand() {
-        super(new String[] {"cat", "kitty"}, 1, CommandCategory.FUN);
+        super(new String[]{"cat", "kitty", "pussy"}, 0, CommandCategory.FUN);
     }
-    
+
     @Override
-    public void execute(IMessage message, String[] args) {
-        args[0] = args[0].toLowerCase();
-        if (args[0].equals("pic") || args[0].equals("gif")) {
-            String type = args[0];
-            if (type.equals("pic")) {
-                type = "png";
-            }
-            File f = new File("cat." + type);
-            try {
-                FileUtils.copyURLToFile(new URL( //shh, close your eyes
-                        "https://thecatapi.com/api/images/get?format=src&api_key=MjA2OTcy&type=" + type), f);
-                message.getChannel().sendFile(f);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            BotUtils.sendErrorMessage(message.getChannel(), 
-                    "Unknown media type. Type `!cat` for help.");
-        }
+    public void execute(Message message, TextChannel channel, String[] args) {
+        channel.createMessage(spec -> spec.setEmbed(embed -> embed.setImage(
+                Unirest.get("https://api.thecatapi.com/v1/images/search")
+                        .header("x-api-key", "82ac98b9-6bc2-4e04-9401-9949905f1f92") //shhh
+                        .asJson().getBody().getArray().getJSONObject(0).getString("url")))).block();
     }
-    
+
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[pic/gif]", "View a random cat picture/gif");
+        return BotUtils.buildUsage(alias, "", "View a random cat.");
     }
-    
+
 }

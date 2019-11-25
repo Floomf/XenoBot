@@ -1,16 +1,12 @@
 package discord.core.game;
 
-import discord.core.game.AbstractGame;
-import discord.util.BotUtils;
-import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.RequestBuffer;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
 
 public abstract class TypeGame extends AbstractGame {
 
-    public TypeGame(IMessage message, IUser[] players) {
+    public TypeGame(Message message, Member[] players) {
         super(message, players);
     }
 
@@ -21,42 +17,48 @@ public abstract class TypeGame extends AbstractGame {
 
     @Override
     protected final void setup() {
-        super.getGameMessage().getClient().getDispatcher().registerListener(this);
+        super.getGameMessage().getClient().getEventDispatcher().on(MessageCreateEvent.class)
+                .takeUntil(active -> !super.isActive())
+                .subscribe(this::onMessageCreateEvent);
     }
 
     @Override
     protected final void onEnd() {
-        super.getGameMessage().getClient().getDispatcher().unregisterListener(this);
+        //super.getGameMessage().getClient().getDispatcher().unregisterListener(this);
     }
-    
-    @EventSubscriber
-    public void onMessageEvent(MessageReceivedEvent event) throws InterruptedException {
-        IMessage userMessage = event.getMessage();
-        IUser fromUser = userMessage.getAuthor();
-        if (userMessage.getChannel().equals(super.getGameMessage().getChannel())) {
-            if (userMessage.getContent().equalsIgnoreCase("forfeit") && (fromUser.equals(super.getThisTurnUser()) 
-                    || fromUser.equals(super.getNextTurnUser()))) {
-                win(fromUser, fromUser.getName() + " forfeits. " + super.getOtherUser(fromUser).getName() + " wins!");
-            }
-            
-            if (userMessage.getAuthor().equals(super.getThisTurnUser())) {
-                String input = userMessage.getContent().toLowerCase().trim();
-                BotUtils.deleteMessage(userMessage);
-                if (isValidInput(input)) {
-                    onTurn(input);
-                    if (super.isActive()) {
-                        setupNextTurn();
-                    }
-                } else {
-                    IMessage invalidMessage = RequestBuffer.request(
-                            () -> userMessage.getChannel().sendMessage("Invalid position.")).get();
-                    Thread.sleep(2000);
-                    BotUtils.deleteMessage(invalidMessage);
+
+    private void onMessageCreateEvent(MessageCreateEvent event) {
+        Message userMessage = event.getMessage();
+        if (userMessage.getChannel().block().equals(super.getGameMessage().getChannel().block())) { //has to be in guild
+            Member fromMember = userMessage.getAuthorAsMember().block();
+            if (fromMember.equals(super.getThisTurnUser()) || fromMember.equals(super.getNextTurnUser())) {
+                if (userMessage.getContent().orElse("").equalsIgnoreCase("forfeit")) {
+                    userMessage.delete().block();
+                    win(super.getOtherUser(fromMember), fromMember.getDisplayName() + " forfeits.\n" + super.getOtherUser(fromMember).getMention() + " wins!");
                 }
-            } else if (userMessage.getAuthor().equals(super.getNextTurnUser())) {
-                BotUtils.deleteMessage(userMessage);
+
+                if (userMessage.getAuthor().get().equals(super.getThisTurnUser())) {
+                    System.out.println("h");
+                    String input = userMessage.getContent().orElse("").toLowerCase().trim();
+                    userMessage.delete().block();
+                    if (isValidInput(input)) {
+                        onTurn(input);
+                        if (super.isActive()) {
+                            setupNextTurn();
+                        }
+                    } else {
+                        Message invalidMessage = userMessage.getChannel().block().createMessage("**Invalid position.**").block();
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        invalidMessage.delete().block();
+                    }
+                }
             }
         }
     }
 
 }
+

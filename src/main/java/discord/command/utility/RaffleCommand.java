@@ -3,10 +3,16 @@ package discord.command.utility;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.util.BotUtils;
+
 import java.util.List;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.StatusType;
+
+import discord.util.MessageUtils;
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.presence.Status;
 
 public class RaffleCommand extends AbstractCommand {
 
@@ -15,47 +21,47 @@ public class RaffleCommand extends AbstractCommand {
     }
 
     @Override
-    public void execute(IMessage message, String[] args) {
+    public void execute(Message message, TextChannel channel, String[] args) {
         String poolType = args[0].toLowerCase();
-        
+
         if (!poolType.matches("all|online|voice")) {
-            BotUtils.sendErrorMessage(message.getChannel(),
-                    "Unknown pool type. Type `!raffle` for help.");
+            MessageUtils.sendErrorMessage(channel, "Unknown pool type. Type `!raffle` for help.");
             return;
         }
-        
-        List<IUser> raffleUsers = message.getGuild().getUsers();
-        
+
+        List<User> raffleUsers = message.getGuild().block().getMembers().cast(User.class).collectList().block();
+
         if (poolType.equals("online")) {
-            raffleUsers.removeIf(user -> user.getPresence().getStatus().equals(StatusType.OFFLINE));
+            raffleUsers.removeIf(user -> ((Member) user).getPresence().block().getStatus().equals(Status.OFFLINE));
         } else if (poolType.equals("voice")) {
-            if (message.getAuthor().getVoiceStateForGuild(message.getGuild()).getChannel() == null) {
-                BotUtils.sendErrorMessage(message.getChannel(), "You aren't connected to any voice channel on this guild.");
+            if (message.getAuthorAsMember().block().getVoiceState().block() == null) {
+                MessageUtils.sendErrorMessage(channel, "You aren't connected to any voice channel on this guild.");
                 return;
             }
-            raffleUsers = message.getAuthor().getVoiceStateForGuild(message.getGuild()).getChannel().getConnectedUsers();
-        }     
+            raffleUsers = message.getAuthorAsMember().block().getVoiceState().block().getChannel().block()
+                    .getVoiceStates().flatMap(VoiceState::getUser).collectList().block();
+        }
 
-        raffleUsers.removeIf(user -> (user.equals(message.getAuthor()) || user.isBot()));
+        raffleUsers.removeIf(user -> user.equals(message.getAuthorAsMember().block()) || user.isBot());
 
         if (raffleUsers.isEmpty()) {
-            BotUtils.sendErrorMessage(message.getChannel(), "There aren't any valid users in the selected pool!");
+            MessageUtils.sendErrorMessage(channel, "There aren't any valid users in the selected pool!");
             return;
         }
 
-        IUser winner = raffleUsers.get((int) (Math.random() * raffleUsers.size()));
-        BotUtils.sendEmbedMessage(message.getChannel(), BotUtils.getBuilder(message.getClient(), "Winner! 🎉", winner.mention())
-                .withImage(winner.getAvatarURL()).build());
+        Member winner = raffleUsers.get((int) (Math.random() * raffleUsers.size())).asMember(message.getGuild().block().getId()).block();
+        channel.createMessage(spec -> spec.setEmbed(MessageUtils.message("Winner! 🎉", winner.getMention(), winner.getColor().block())
+                .andThen(embed -> embed.setImage(winner.getAvatarUrl())))).block();
     }
 
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[all/online/voice]",
                 "Randomly pick a user in the specified pool (not including yourself or bots)."
-                + "\n\n**Pool Types:**"
-                + "\n`all` - All server users."
-                + "\n`online` - All server users that are online."
-                + "\n`voice` - All users in your currently connected voice channel.");
+                        + "\n\n**Pool Types:**"
+                        + "\n`all` - All server users."
+                        + "\n`online` - All server users that are online."
+                        + "\n`voice` - All users in your currently connected voice channel.");
     }
 
 }

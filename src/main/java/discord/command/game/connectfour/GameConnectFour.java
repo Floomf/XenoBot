@@ -1,54 +1,74 @@
 package discord.command.game.connectfour;
 
+import discord4j.core.object.entity.Message;
 import discord.core.game.Button;
 import discord.core.game.ButtonGame;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Member;
+
+import java.util.Random;
 
 public class GameConnectFour extends ButtonGame {
-       
-    private static final int LENGTH = 7, HEIGHT = 6;    
-    
+
+    private static final int LENGTH = 7, HEIGHT = 6;
+
     private static final int RED = 1, BLUE = -1, EMPTY = 0;
-    
+
+    private static final String[] PIECES = {":red_circle:", ":blue_circle:",
+            ":green_circle:", ":purple_circle:", ":yellow_circle:"};
+
     private final int[][] board = new int[HEIGHT][LENGTH];
-    private IUser redPlayer;
-    private IUser bluePlayer;
-    
-    public GameConnectFour(IMessage message, IUser[] players) {
+    private Member player1;
+    private Member player2;
+
+    private String player1piece;
+    private String player2piece;
+
+    public GameConnectFour(Message message, Member[] players) {
         super(message, players);
         super.getButtonManager().addNumButtons(message, LENGTH);
+        assignPieces();
     }
-    
+
+    private void assignPieces() {
+        Random rand = new Random();
+        int one = rand.nextInt(PIECES.length);
+        int two = rand.nextInt(PIECES.length);
+        while (two == one) {
+            two = rand.nextInt(PIECES.length);
+        }
+        player1piece = PIECES[one];
+        player2piece = PIECES[two];
+    }
+
     @Override
     protected void onStart() {
-        redPlayer = super.getThisTurnUser();
-        bluePlayer = super.getNextTurnUser();
-        super.updateMessageDisplay(formatMessage(redPlayer, "You start off, " + redPlayer));
+        player1 = super.getThisTurnUser();
+        player2 = super.getNextTurnUser();
+        super.updateMessageDisplay(formatMessage(player1, "You start off, " + player1.getMention()));
     }
-    
+
     @Override
     protected void onTurn(int input) {
         placePiece(super.getThisTurnUser(), input - 1);
         if (playerHasWon(super.getThisTurnUser())) {
-            IUser winner = super.getThisTurnUser();
-            super.win(winner, formatMessage(winner, winner.getName() + " wins!"));
+            Member winner = super.getThisTurnUser();
+            super.win(winner, formatMessage(winner, winner.getDisplayName() + " wins!"));
         } else if (boardIsFull()) {
             super.tie("Board is full. Tie!");
         } else {
-            super.updateMessageDisplay(super.getThisTurnUser().getName() + " went in slot `" + input + "`\n" 
-                    + formatMessage(super.getNextTurnUser(), "Your turn, " + super.getNextTurnUser()));
+            super.updateMessageDisplay(super.getThisTurnUser().getDisplayName() + " went in slot `" + input + "`\n"
+                    + formatMessage(super.getNextTurnUser(), "Your turn, " + super.getNextTurnUser().getMention()));
         }
-    }       
-    
+    }
+
     @Override
     protected boolean isValidInput(int input) {
         //if top slot of column empty, c is still open
         //remember arrays are 0 based
-        return (board[0][input - 1] == EMPTY); 
+        return (board[0][input - 1] == EMPTY);
     }
-    
-    private void placePiece(IUser player, int col) {
+
+    private void placePiece(Member player, int col) {
         for (int row = board.length - 1; row >= 0; row--) {
             if (board[row][col] == EMPTY) {
                 board[row][col] = getPieceForPlayer(player);
@@ -56,20 +76,20 @@ public class GameConnectFour extends ButtonGame {
             }
         }
     }
-    
-    private String formatMessage(IUser player, String message) {
+
+    private String formatMessage(Member player, String message) {
         return getUnicodeForPiece(getPieceForPlayer(player)) + " " + message;
     }
-       
+
     @Override
     protected String getBoard() {
         StringBuilder sb = new StringBuilder();
-        
+
         //Append the row of numbers
         for (int i = 1; i <= 7; i++) {
-            sb.append(Button.getFromNum(i).getEmoji());
+            sb.append(Button.getFromNum(i).getEmoji().asUnicodeEmoji().get().getRaw());
         }
-        
+
         //Append the actual board
         for (int row = 0; row < board.length; row++) {
             sb.append("\n");
@@ -79,8 +99,8 @@ public class GameConnectFour extends ButtonGame {
         }
         return sb.toString();
     }
-    
-    private boolean playerHasWon(IUser player) {
+
+    private boolean playerHasWon(Member player) {
         int winSum = getPieceForPlayer(player) * 4;
 
         for (int r = HEIGHT - 1; r >= 0; r--) { //start from bottom row
@@ -88,27 +108,27 @@ public class GameConnectFour extends ButtonGame {
                 if (board[r][c] == EMPTY) continue;
                 //Check up
                 if (r - 3 >= 0) { //if theres 3 more slots up
-                    if (board[r][c] + board[r - 1][c]  + board[r - 2][c] 
+                    if (board[r][c] + board[r - 1][c] + board[r - 2][c]
                             + board[r - 3][c] == winSum) {
                         return true;
-                    }                    
+                    }
                 }
                 if (c + 3 < LENGTH) { //if theres 3 more slots to right
                     //Check right
-                    if (board[r][c] + board[r][c + 1] + board[r][c + 2] 
+                    if (board[r][c] + board[r][c + 1] + board[r][c + 2]
                             + board[r][c + 3] == winSum) {
                         return true;
                     }
                     //Check diag up right
                     if (r - 3 >= 0) {
-                        if (board[r][c] + board[r - 1][c + 1] + board[r - 2][c + 2] 
+                        if (board[r][c] + board[r - 1][c + 1] + board[r - 2][c + 2]
                                 + board[r - 3][c + 3] == winSum) {
                             return true;
                         }
-                    }                   
+                    }
                     //Check diag down right
                     if (r + 3 < HEIGHT) {
-                        if (board[r][c] + board[r + 1][c + 1] + board[r + 2][c + 2] 
+                        if (board[r][c] + board[r + 1][c + 1] + board[r + 2][c + 2]
                                 + board[r + 3][c + 3] == winSum) {
                             return true;
                         }
@@ -117,33 +137,34 @@ public class GameConnectFour extends ButtonGame {
             }
         }
         return false;
-    }  
-    
+    }
+
     private boolean boardIsFull() {
         for (int piece : board[0]) { //only have to check top row
             if (piece == EMPTY) return false;
         }
         return true;
     }
-    
-    private int getPieceForPlayer(IUser player) {
-        if (player.equals(redPlayer)) {
+
+    private int getPieceForPlayer(Member player) {
+        if (player.equals(player1)) {
             return RED;
-        } else if (player.equals(bluePlayer)) {
+        } else if (player.equals(player2)) {
             return BLUE;
         }
         return EMPTY;
     }
-    
+
     private String getUnicodeForPiece(int piece) {
         switch (piece) {
             case RED:
-                return "🔴"; //Red circle
+                return player1piece;
             case BLUE:
-                return "🔵"; //Blue Circle
+                return player2piece;
             case EMPTY:
                 return "⚫"; //Black circle
         }
         return "";
     }
 }
+

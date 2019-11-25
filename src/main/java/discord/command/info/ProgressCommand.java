@@ -6,44 +6,47 @@ import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.data.object.XPChecker;
 import discord.data.object.user.Progress;
+import discord.util.MessageUtils;
 import discord.util.ProfileBuilder;
-import discord.data.object.user.User;
-import java.util.List;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.IVoiceState;
+import discord.data.object.user.DUser;
 
-public class ProgressCommand extends AbstractCommand{
-    
+import java.util.List;
+import java.util.function.Consumer;
+
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.spec.EmbedCreateSpec;
+import reactor.core.publisher.Flux;
+import discord4j.core.object.entity.Message;
+
+public class ProgressCommand extends AbstractCommand {
+
     public ProgressCommand() {
-        super(new String[] {"progress", "prog", "level", "lvl", "rank", "xp"}, 0, CommandCategory.INFO);
+        super(new String[]{"progress", "prog", "level", "lvl", "rank", "xp"}, 0, CommandCategory.INFO);
     }
-    
+
     @Override
-    public void execute(IMessage message, String[] args) {
+    public void execute(Message message, TextChannel channel, String[] args) {
         if (args.length > 0) {
-            List<IUser> mentions = message.getMentions();
+            List<User> mentions = message.getUserMentions().onErrorResume(e -> Flux.empty()).collectList().block();
             if (!mentions.isEmpty()) {
-                if (UserManager.databaseContainsDUser(mentions.get(0))) {
-                    BotUtils.sendEmbedMessage(message.getChannel(), buildProgressInfo(message.getGuild(), 
-                        UserManager.getDBUserFromDUser(mentions.get(0))));
+                if (UserManager.databaseContainsUser(mentions.get(0))) {
+                    channel.createMessage(spec -> spec.setEmbed(buildProgressInfo(UserManager.getDUserFromID(mentions.get(0).getId().asLong())))).block();
                 } else {
-                    BotUtils.sendErrorMessage(message.getChannel(), "Couldn't find that user in the database. Are they a bot?");
-                }              
+                    MessageUtils.sendErrorMessage(channel, "Couldn't find that user in the database. Are they a bot?");
+                }
             } else {
-                BotUtils.sendErrorMessage(message.getChannel(), "Couldn't parse a user. Please @mention them.");
+                MessageUtils.sendErrorMessage(channel, "Couldn't parse a user. Please @mention them.");
             }
         } else {
-            BotUtils.sendEmbedMessage(message.getChannel(), 
-                    buildProgressInfo(message.getGuild(), UserManager.getDBUserFromMessage(message)));
+            channel.createMessage(spec -> spec.setEmbed(buildProgressInfo(UserManager.getDUserFromMessage(message)))).block();
         }
     }
-    
-    private EmbedObject buildProgressInfo(IGuild guild, User user) {
-        ProfileBuilder builder = new ProfileBuilder(guild, user);
-        Progress prog = user.getProgress();
+
+    private Consumer<EmbedCreateSpec> buildProgressInfo(DUser user) {
+        ProfileBuilder builder = new ProfileBuilder(user);
+        Progress prog = user.getProg();
         builder.addRank();
         builder.addLevel();
         if (prog.getPrestige().isPrestiged()) {
@@ -54,26 +57,26 @@ public class ProgressCommand extends AbstractCommand{
         }
         if (prog.isNotMaxLevel()) {
             builder.addXPProgress();
-            IVoiceState vState = guild.getUserByID(user.getDiscordID()).getVoiceStateForGuild(guild);
-            if (vState.getChannel() != null && !XPChecker.voiceStateIsInvalid(vState)) { //Messy but oh well right?
-                List<IUser> voiceUsers = vState.getChannel().getConnectedUsers();
-                voiceUsers.removeIf(dUser -> dUser.isBot() 
-                        || XPChecker.voiceStateIsInvalid(dUser.getVoiceStateForGuild(guild)));
-                if (voiceUsers.size() >= 2) {
-                    builder.addXPRate(voiceUsers.size());
+            VoiceState vState = user.asGuildMember().getVoiceState().block();
+
+            if (vState != null && !XPChecker.voiceStateIsNotTalking(vState)) { //Messy but oh well right?
+                List<VoiceState> states = vState.getChannel().block().getVoiceStates().collectList().block();
+                states.removeIf(state -> state.getUser().block().isBot() || XPChecker.voiceStateIsNotTalking(state));
+                if (states.size() >= 2) {
+                    builder.addXPRate(states.size());
                 }
             }
-            builder.addBarProgressToNextLevel();  
+            builder.addBarProgressToNextLevel();
             if (!prog.getPrestige().isMax()) {
                 builder.addBarProgressToMaxLevel();
             }
         }
         return builder.build();
     }
-    
+
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[nickname/@mention]", "View you or another user's level progress.");
+        return BotUtils.buildUsage(alias, "@mention", "View you or another user's progress.");
     }
-    
+
 }

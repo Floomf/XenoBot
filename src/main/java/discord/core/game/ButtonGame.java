@@ -1,40 +1,39 @@
 package discord.core.game;
 
-import discord.util.BotUtils;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IReaction;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.reaction.ReactionEmoji;
 
 public abstract class ButtonGame extends AbstractGame {
-    
+
     private final ButtonManager buttonManager;
-    
-    public ButtonGame(IMessage message, IUser[] players) {
+
+    public ButtonGame(Message message, Member[] players) {
         super(message, players);
         this.buttonManager = new ButtonManager();
     }
-       
+
     //Games are responsible for calling updateMessageDisplay() each turn
     abstract protected void onTurn(int input);
-    
+
     abstract protected boolean isValidInput(int input);
-    
+
     @Override
     protected final void setup() {
-        buttonManager.addButton(super.getGameMessage(), Button.EXIT); 
+        buttonManager.addButton(super.getGameMessage(), Button.EXIT);
     }
-    
+
     @Override
     protected final void onEnd() {
-        BotUtils.removeAllReactions(super.getGameMessage());
+        super.getGameMessage().removeAllReactions().block();
     }
-    
-    public final void handleMessageReaction(IReaction reaction, IUser fromUser) {
+
+    public final void handleMessageReaction(ReactionEmoji reaction, Member fromUser) {
         if (super.isActive()) {
             Button button = buttonManager.getButton(reaction);
             if (button != null) {
                 if (button.equals(Button.EXIT) && (fromUser.equals(super.getThisTurnUser()) || fromUser.equals(super.getNextTurnUser()))) {
-                    win(fromUser, fromUser.getName() + " forfeits. " + super.getOtherUser(fromUser).getName() + " wins!");
+                    win(super.getOtherUser(fromUser), fromUser.getDisplayName() + " forfeits.\n" + super.getOtherUser(fromUser).getMention() + " wins!");
                 } else if (isValidInput(button.getNumValue()) && fromUser.equals(super.getThisTurnUser())) {
                     onTurn(button.getNumValue());
                     if (super.isActive()) {
@@ -42,12 +41,13 @@ public abstract class ButtonGame extends AbstractGame {
                     }
                 }
             }
-            BotUtils.removeMessageReaction(super.getGameMessage(), fromUser, reaction);
+            super.getGameMessage().removeReaction(reaction, fromUser.getId()).block();
         }
     }
-       
+
     protected final ButtonManager getButtonManager() {
         return buttonManager;
     }
-         
+
 }
+

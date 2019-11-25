@@ -1,39 +1,40 @@
 package discord.command.game.reversi;
 
+import discord4j.core.object.entity.Member;
 import discord.core.game.TypeGame;
 import discord.core.game.Button;
 
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Message;
 
 public class GameReversi extends TypeGame {
 
-    private static final int HEIGHT = 6, LENGTH = 6;
+    private static final int HEIGHT = 8, LENGTH = 8;
 
     private static final int RED = 1, BLUE = -1, EMPTY = 0, VALID = 2;
 
     private static final int NORTH = -1, SOUTH = 1;
     private static final int EAST = 1, WEST = -1;
 
-    public final int board[][] = new int[HEIGHT][LENGTH];
-    private IUser redPlayer;
-    private IUser bluePlayer;
+    private final int[][] board = new int[HEIGHT][LENGTH];
+    private Member redPlayer;
+    private Member bluePlayer;
 
-    public GameReversi(IMessage message, IUser[] players) {
+    public GameReversi(Message message, Member[] players) {
         super(message, players);
     }
 
     @Override
     protected void onStart() {
         //Starting pieces
-        board[2][2] = BLUE;
-        board[2][3] = RED;
-        board[3][2] = RED;
         board[3][3] = BLUE;
+        board[3][4] = RED;
+        board[4][3] = RED;
+        board[4][4] = BLUE;
         redPlayer = super.getThisTurnUser();
         bluePlayer = super.getNextTurnUser();
         updateValidChoices(RED);
-        super.updateMessageDisplay(formatMessage(redPlayer, "You start off, " + redPlayer));
+        super.updateMessageDisplay(formatMessage(redPlayer, "You start off, " + redPlayer.getMention()
+                + "\nEnter a grid position to place your piece (like \"f4\")."));
     }
 
     @Override
@@ -42,20 +43,20 @@ public class GameReversi extends TypeGame {
                 getRowForGridNumber(input.charAt(1)), getColForGridLetter(input.charAt(0)));
 
         if (updateValidChoices(getPieceForPlayer(super.getNextTurnUser()))) {
-            super.updateMessageDisplay(super.getThisTurnUser().getName() + " went at `" + input.toUpperCase() + "`\n"
-                    + formatMessage(super.getNextTurnUser(), "Your turn, " + super.getNextTurnUser()));
+            super.updateMessageDisplay(super.getThisTurnUser().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
+                    + formatMessage(super.getNextTurnUser(), "Your turn, " + super.getNextTurnUser().getMention()));
         } else { //One player couldn't go
             super.setupNextTurn(); //Skip over their turn
             if (updateValidChoices(getPieceForPlayer(super.getNextTurnUser()))) {
-                super.updateMessageDisplay(super.getThisTurnUser().getName() + " went at `" + input.toUpperCase() + "`\n"
-                        + formatMessage(super.getNextTurnUser(), super.getThisTurnUser().getName() 
-                        + " doesn't have a valid move. Your turn again, " + super.getNextTurnUser()));
+                super.updateMessageDisplay(super.getThisTurnUser().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
+                        + formatMessage(super.getNextTurnUser(), super.getThisTurnUser().getDisplayName()
+                        + " doesn't have a valid move. Your turn again, " + super.getNextTurnUser().getMention()));
             } else { //Both players couldn't go, so game is over
                 findWinner();
             }
         }
     }
-    
+
     private void findWinner() {
         int sum = 0;
         for (int row = 0; row < HEIGHT; row++) {
@@ -64,9 +65,9 @@ public class GameReversi extends TypeGame {
             }
         }
         if (sum > 0) {
-            super.win(redPlayer, formatMessage(redPlayer, redPlayer.getName() + " wins by " + sum + " pieces!"));
+            super.win(redPlayer, formatMessage(redPlayer, redPlayer.getDisplayName() + " wins by " + sum + " pieces!"));
         } else if (sum < 0) {
-            super.win(bluePlayer, formatMessage(bluePlayer, bluePlayer.getName() + " wins by " + (-sum) + " pieces!"));
+            super.win(bluePlayer, formatMessage(bluePlayer, bluePlayer.getDisplayName() + " wins by " + (-sum) + " pieces!"));
         } else {
             super.tie("Even split of captures! The game is a tie.");
         }
@@ -113,7 +114,7 @@ public class GameReversi extends TypeGame {
         return hasValidChoice;
     }
 
-    private String formatMessage(IUser player, String message) {
+    private String formatMessage(Member player, String message) {
         return getUnicodeForPiece(getPieceForPlayer(player)) + " " + message;
     }
 
@@ -148,18 +149,18 @@ public class GameReversi extends TypeGame {
         StringBuilder sb = new StringBuilder();
 
         for (int row = 0; row < HEIGHT; row++) {
-            sb.append(Button.getFromNum(HEIGHT - row).getEmoji());
+            sb.append(Button.getFromNum(HEIGHT - row).getEmoji().asUnicodeEmoji().get().getRaw());
             for (int col = 0; col < LENGTH; col++) {
                 sb.append(getUnicodeForPiece(board[row][col]));
             }
             sb.append("\n");
         }
-        sb.append("⏺🇦​🇧​🇨​🇩​🇪​🇫"); //Theres some zero width spaces in here to prevent flag emojis
+        sb.append("⏺🇦\u200B🇧\u200B🇨\u200B🇩\u200B🇪\u200B🇫\u200B🇬\u200B🇭"); //Theres some zero width spaces in here to prevent flag emojis
 
         return sb.toString();
     }
 
-    private int getPieceForPlayer(IUser player) {
+    private int getPieceForPlayer(Member player) {
         if (player.equals(redPlayer)) {
             return RED;
         } else {
@@ -183,7 +184,7 @@ public class GameReversi extends TypeGame {
 
     @Override
     protected boolean isValidInput(String input) {
-        if (input.matches("[a-f]\\d")) {  //regex for valid position on our grid
+        if (input.matches("[a-h]\\d")) {  //regex for valid position on our grid
             int row = getRowForGridNumber(input.charAt(1));
             int col = getColForGridLetter(input.charAt(0));
             return (row > -1 && row < HEIGHT && col > -1 && col < LENGTH && positionIsValidAt(row, col));
@@ -206,3 +207,4 @@ public class GameReversi extends TypeGame {
     }
 
 }
+

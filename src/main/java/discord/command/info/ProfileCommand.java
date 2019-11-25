@@ -5,50 +5,53 @@ import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.data.object.user.Prestige;
+import discord.util.MessageUtils;
 import discord.util.ProfileBuilder;
 import discord.data.object.user.Reincarnation;
-import discord.data.object.user.User;
+import discord.data.object.user.DUser;
+
 import java.util.List;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import java.util.function.Consumer;
+
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.spec.EmbedCreateSpec;
+import reactor.core.publisher.Flux;
+import discord4j.core.object.entity.Message;
 
 public class ProfileCommand extends AbstractCommand {
-    
+
     public ProfileCommand() {
-        super(new String[] {"profile", "prof"}, 0, CommandCategory.INFO);
+        super(new String[]{"profile", "prof"}, 0, CommandCategory.INFO);
     }
-    
+
     //code copy and paste
     @Override
-    public void execute(IMessage message, String[] args) {
+    public void execute(Message message, TextChannel channel, String[] args) {
         if (args.length > 0) {
-            List<IUser> mentions = message.getMentions();
+            List<User> mentions = message.getUserMentions().onErrorResume(e -> Flux.empty()).collectList().block();
             if (!mentions.isEmpty()) {
-                if (UserManager.databaseContainsDUser(mentions.get(0))) {
-                    BotUtils.sendEmbedMessage(message.getChannel(), buildProfileInfo(message.getGuild(), 
-                        UserManager.getDBUserFromDUser(mentions.get(0))));
+                if (UserManager.databaseContainsUser(mentions.get(0))) {
+                    channel.createMessage(spec -> spec.setEmbed(buildProfileInfo(UserManager.getDUserFromID(mentions.get(0).getId().asLong())))).block();
                 } else {
-                    BotUtils.sendErrorMessage(message.getChannel(), "Couldn't find that user in the database. Are they a bot?");
-                }              
+                    MessageUtils.sendErrorMessage(channel, "Couldn't find that user in the database. Are they a bot?");
+                }
             } else {
-                BotUtils.sendErrorMessage(message.getChannel(), "Couldn't parse a user. Please @mention them.");
+                MessageUtils.sendErrorMessage(channel, "Couldn't parse a user. Please @mention them.");
             }
         } else {
-            BotUtils.sendEmbedMessage(message.getChannel(), 
-                    buildProfileInfo(message.getGuild(), UserManager.getDBUserFromMessage(message)));
+            channel.createMessage(spec -> spec.setEmbed(buildProfileInfo(UserManager.getDUserFromMessage(message)))).block();
         }
     }
-    
-    public EmbedObject buildProfileInfo(IGuild guild, User user) {
-        ProfileBuilder builder = new ProfileBuilder(guild, user);
-        Prestige prestige = user.getProgress().getPrestige();
-        Reincarnation reincarnation = user.getProgress().getReincarnation();
+
+    private Consumer<EmbedCreateSpec> buildProfileInfo(DUser user) {
+        ProfileBuilder builder = new ProfileBuilder(user);
+        Prestige prestige = user.getProg().getPrestige();
+        Reincarnation reincarnation = user.getProg().getReincarnation();
         if (!user.getDesc().isEmpty()) {
             builder.addDesc();
         }
-      
+
         builder.addRank();
         builder.addLevel();
         if (prestige.isPrestiged()) {
@@ -57,7 +60,7 @@ public class ProfileCommand extends AbstractCommand {
         if (reincarnation.isReincarnated()) {
             builder.addReincarnation();
         }
-        if (user.getProgress().isNotMaxLevel()) {
+        if (user.getProg().isNotMaxLevel()) {
             builder.addXPProgress();
         }
         if (reincarnation.isReincarnated()) {
@@ -70,16 +73,16 @@ public class ProfileCommand extends AbstractCommand {
                 builder.addBadgeCase();
             }
         }
-        if (user.getProgress().isNotMaxLevel() && !user.getProgress().getPrestige().isMax()) { 
+        if (user.getProg().isNotMaxLevel() && !user.getProg().getPrestige().isMax()) {
             builder.addBarProgressToMaxLevel();
         }
         return builder.build();
     }
-    
+
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[nickname/@mention]", 
+        return BotUtils.buildUsage(alias, "@mention",
                 "View you or another user's detailed profile.");
     }
-    
+
 }

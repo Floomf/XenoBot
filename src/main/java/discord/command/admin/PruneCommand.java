@@ -1,39 +1,42 @@
 package discord.command.admin;
 
+import reactor.core.publisher.Flux;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.util.RequestBuffer;
+import discord.util.MessageUtils;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.TextChannel;
 
 public class PruneCommand extends AbstractCommand {
-    
+
     public PruneCommand() {
-        super(new String[] {"prune"}, 1, CommandCategory.ADMIN); 
+        super(new String[]{"prune"}, 1, CommandCategory.ADMIN);
     }
-    
+
     @Override
-    public void execute(IMessage message, String[] args) {
+    public void execute(Message message, TextChannel channel, String[] args) {
         if (!args[0].matches("\\d+")) { //not digits   
-            BotUtils.sendErrorMessage(message.getChannel(), "Couldn't parse a valid amount of messages to prune.");
+            MessageUtils.sendErrorMessage(channel, "Couldn't parse a valid amount of messages to prune.");
             return;
         }
-        
+
         int amount = Integer.parseInt(args[0]);
         if (amount > 50 || amount < 1) {
-            BotUtils.sendErrorMessage(message.getChannel(), 
-                    "Invalid amount of messages to prune! You may prune up to 50 at a time.");
+            MessageUtils.sendErrorMessage(channel, "Invalid amount of messages to prune! You may prune up to 50 at a time.");
             return;
         }
-        RequestBuffer.request(() -> message.getChannel().getMessageHistory(amount + 1).bulkDelete()); 
-        //amount + 1 to include their prune command message       
+        channel.bulkDelete(channel.getMessagesBefore(message.getId()).take(amount)
+                .concatWith(Flux.just(message))
+                .map(Message::getId))
+                .collectList().block();
     }
-    
+
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[amount]", 
+        return BotUtils.buildUsage(alias, "[amount]",
                 "Mass prune (delete) messages in this channel.\nYou may prune up to 50 messages at a time.");
     }
-    
+
 }
     

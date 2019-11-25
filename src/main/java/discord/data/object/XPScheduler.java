@@ -6,15 +6,17 @@
 package discord.data.object;
 
 import discord.data.UserManager;
-import discord.data.object.XPChecker;
+
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.IVoiceChannel;
+
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.VoiceChannel;
+
 
 public class XPScheduler {
 
@@ -26,11 +28,11 @@ public class XPScheduler {
         this.checker = checker;
     }
 
-    public void handleUserVoiceChannelEvent(IGuild guild) {
+    public void handleUserVoiceChannelEvent(Guild guild) {
         checkAnyChannelHasEnoughUsers(guild);
     }
 
-    public void checkAnyChannelHasEnoughUsers(IGuild guild) {
+    public void checkAnyChannelHasEnoughUsers(Guild guild) {
         boolean hasEnoughUsers = anyChannelHasEnoughUsers(guild);
         if (checkerIsActive() && !hasEnoughUsers) {
             System.out.println("All guild voice channel users <= 1, stopping xp checker");
@@ -42,10 +44,10 @@ public class XPScheduler {
         }
     }
 
-    private boolean anyChannelHasEnoughUsers(IGuild guild) {
-        List<IVoiceChannel> channels = guild.getVoiceChannels();
-        channels.remove(guild.getAFKChannel());
-        for (IVoiceChannel channel : channels) {
+    private boolean anyChannelHasEnoughUsers(Guild guild) {
+        List<VoiceChannel> channels = guild.getChannels().ofType(VoiceChannel.class).collectList().block();
+        channels.remove(guild.getAfkChannel().block()); //TODO solve this
+        for (VoiceChannel channel : channels) {
             if (channelHasEnoughUsers(channel)) {
                 return true;
             }
@@ -53,10 +55,11 @@ public class XPScheduler {
         return false;
     }
 
-    private boolean channelHasEnoughUsers(IVoiceChannel channel) {
-        List<IUser> users = channel.getConnectedUsers();
-        users.removeIf(IUser::isBot);
-        return (users.size() > 1);
+    private boolean channelHasEnoughUsers(VoiceChannel channel) {
+        return channel.getVoiceStates()
+                .flatMap(VoiceState::getUser)
+                .filter(user -> !user.isBot())
+                .collectList().block().size() > 1;
     }
 
     private boolean checkerIsActive() {

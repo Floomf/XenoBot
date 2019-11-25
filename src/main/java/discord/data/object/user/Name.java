@@ -3,70 +3,71 @@ package discord.data.object.user;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord.util.BotUtils;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
+
+import java.util.Optional;
 
 public class Name {
-    
+
     @JsonIgnore
-    private User user;
-    
+    private DUser user;
+
     private String nick;
     private int emojiCP;
-    
+
     @JsonCreator
-    protected Name(@JsonProperty("nick") String nick, 
-            @JsonProperty("emojiCP") int emojiCP) {
+    protected Name(@JsonProperty("nick") String nick,
+                   @JsonProperty("emojiCP") int emojiCP) {
         this.nick = nick;
         this.emojiCP = emojiCP;
     }
-    
+
     protected Name(String nick) {
         this.nick = nick;
         this.emojiCP = 0;
-    }     
-    
+    }
+
     public String getNick() {
         return nick;
     }
-    
-    public int getEmojiCP() {
-        return emojiCP;
-    }
-    
-    protected void setUser(User user) {
+
+    protected void setUser(DUser user) {
         this.user = user;
     }
-    
-    public void setNick(String nick, IGuild guild) {
+
+    public void setNick(String nick) {
         this.nick = nick;
-        verify(guild);
+        verifyOnGuild();
     }
-    
-    public void setEmoji(int codepoint, IGuild guild) {
+
+    public void setEmoji(int codepoint) {
         this.emojiCP = codepoint;
-        verify(guild);
+        verifyOnGuild();
     }
-    
-    public void verify(IGuild guild) {
+
+    public void verifyOnGuild() {
         String name = this.toString();
-        IUser dUser = guild.getUserByID(user.getDiscordID());
-        String dNick = dUser.getNicknameForGuild(guild);               
-        if ((dNick == null && !dUser.getName().equals(name)) 
-                || (dNick != null && !dNick.equals(name))) {
-            if (guild.getOwner().equals(dUser)) {
-                System.out.println("Need to set owner's name to " + name);
-                return;
-            }
-            BotUtils.setUserNickname(guild, dUser, name);
+        System.out.println("Verifying name " + name + " for " + this.getNick());
+        Optional<String> discordNick = user.asGuildMember().getNickname();
+        if (discordNick.isPresent() && discordNick.get().equals(name)) {
+            return;
+        } else if (!discordNick.isPresent() && user.asGuildMember().getDisplayName().equals(name)) {
+            return;
         }
+
+        if (user.asGuildMember().equals(user.asGuildMember().getGuild().block().getOwner().block())) {
+            System.out.println("Need to set owner's name to " + name);
+            return;
+        }
+
+        System.out.println("Set nick " + name + " for " + this.getNick());
+
+        user.asGuildMember().edit(spec -> spec.setNickname(name)).block();
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        Prestige prestige = user.getProgress().getPrestige();
+        Prestige prestige = user.getProg().getPrestige();
         if (prestige.getNumber() > 0) {
             sb.append(prestige.getBadge()).append(" ");
         }
@@ -76,5 +77,5 @@ public class Name {
         }
         return sb.toString();
     }
-    
+
 }

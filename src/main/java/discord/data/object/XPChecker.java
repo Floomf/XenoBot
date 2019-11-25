@@ -1,45 +1,39 @@
 package discord.data.object;
 
 import discord.data.UserManager;
+
 import java.util.List;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.IVoiceChannel;
-import sx.blah.discord.handle.obj.IVoiceState;
+
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.VoiceChannel;
 
 public class XPChecker implements Runnable {
 
-    private final IDiscordClient client;
+    private final Guild guild;
     private int saveCounter = 1;
 
-    public XPChecker(IDiscordClient client) {
-        this.client = client;
+    public XPChecker(Guild guild) {
+        this.guild = guild;
     }
 
     @Override
     public void run() {
-        if (client.isReady()) {
+        if (guild.getClient().isConnected()) {
             System.out.println("Checking all guild users to add xp");
-            checkGuilds(client.getGuilds());
+            checkVoiceChannels();
         } else {
-            System.out.println(String.format("Client isn't ready, won't check users"));
+            System.out.println("Client isn't ready, won't check users");
         }
     }
 
-    private void checkGuilds(List<IGuild> guilds) {
-        for (IGuild guild : guilds) {
-            checkVoiceChannels(guild);
+    private void checkVoiceChannels() {
+        List<VoiceChannel> channels = guild.getChannels().ofType(VoiceChannel.class).collectList().block();
+        channels.removeIf(channel -> channel.equals(guild.getAfkChannel().block())); //TODO solve this
+        for (VoiceChannel channel : channels) {
+            checkUsers(channel.getVoiceStates().collectList().block()); //tested it and it wasn't null with empty voice channels
         }
-    }
-
-    private void checkVoiceChannels(IGuild guild) {
-        List<IVoiceChannel> channels = guild.getVoiceChannels();
-        channels.removeIf(channel -> channel.equals(guild.getAFKChannel()));
-        for (IVoiceChannel channel : channels) {
-            checkUsers(channel.getConnectedUsers(), guild);
-        }
-        if (saveCounter == 10) {
+        if (saveCounter == 15) {
             UserManager.saveDatabase();
             saveCounter = 1;
         } else {
@@ -47,15 +41,17 @@ public class XPChecker implements Runnable {
         }
     }
 
-    private void checkUsers(List<IUser> dUsers, IGuild guild) {
-        dUsers.removeIf(user -> user.isBot() || voiceStateIsInvalid(user.getVoiceStateForGuild(guild))); //only count real people that are "talking"
-        if (dUsers.size() >= 2) {
-            dUsers.removeIf(dUser -> UserManager.getDBUserFromDUser(dUser).getProgress().isMaxLevel());
-            dUsers.forEach(dUser -> UserManager.getDBUserFromDUser(dUser).getProgress().addPeriodicXP(dUsers.size(), guild));
+    private void checkUsers(List<VoiceState> states) {
+        states.removeIf(state -> (state.getUser().block().isBot() || voiceStateIsNotTalking(state))); //only count real people that are "talking"
+        int initialSize = states.size();
+        if (states.size() >= 2) {
+            states.removeIf(state -> UserManager.getDUserFromID(state.getUserId().asLong()).getProg().isMaxLevel());
+            states.forEach(state -> UserManager.getDUserFromID(state.getUserId().asLong()).getProg().addPeriodicXP(initialSize));
         }
     }
-    
-    public static boolean voiceStateIsInvalid(IVoiceState state) {
-        return (state.isSelfDeafened() || state.isSelfMuted() || state.isDeafened() || state.isMuted());
+
+    public static boolean voiceStateIsNotTalking(VoiceState state) {
+        return state.isMuted() || state.isDeaf() || state.isSelfMuted() || state.isSelfDeaf();
     }
+
 }

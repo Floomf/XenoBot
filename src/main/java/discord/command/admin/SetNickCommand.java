@@ -1,15 +1,19 @@
 package discord.command.admin;
 
+import discord4j.core.object.entity.User;
+import reactor.core.publisher.Flux;
 import discord.util.BotUtils;
 import discord.core.command.CommandHandler;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.object.user.User;
+import discord.data.object.user.DUser;
+
+import discord.util.MessageUtils;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.Message;
+
 import java.util.List;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
 
 public class SetNickCommand extends AbstractCommand {
 
@@ -18,25 +22,25 @@ public class SetNickCommand extends AbstractCommand {
     }
 
     @Override
-    public void execute(IMessage message, String[] args) {
-        IChannel channel = message.getChannel();
-        List<IUser> users = message.getMentions();
-        if (users.isEmpty()) {
-            BotUtils.sendErrorMessage(channel, "Couldn't parse a user. Please @mention them.");
+    public void execute(Message message, TextChannel channel, String[] args) {
+        List<User> mentions = message.getUserMentions().onErrorResume(e -> Flux.empty()).collectList().block();
+        if (mentions.isEmpty()) {
+            MessageUtils.sendErrorMessage(channel, "Couldn't parse a user. Please @mention them.");
+            return;
         }
-        User userToChange = UserManager.getDBUserFromDUser(users.get(0));
+        DUser userToChange = UserManager.getDUserFromUser(mentions.get(0));
         if (userToChange == null) {
-            BotUtils.sendErrorMessage(channel, "Couldn't find that user in the database. Are they a bot?");
+            MessageUtils.sendErrorMessage(channel, "Couldn't find that user in the database. Are they a bot?");
             return;
         }
         String nick = BotUtils.validateNick(CommandHandler.combineArgs(1, args));
         if (nick.isEmpty()) {
-            BotUtils.sendErrorMessage(channel, "The nickname can only contain basic letters and symbols.");
+            MessageUtils.sendErrorMessage(channel, "The nickname can only contain basic letters and symbols.");
             return;
         }
-                
-        userToChange.getName().setNick(nick, message.getGuild());
-        BotUtils.sendInfoMessage(channel, "Nickname updated to " + nick);
+
+        userToChange.getName().setNick(nick);
+        MessageUtils.sendInfoMessage(channel, "Nickname updated to " + nick);
         UserManager.saveDatabase();
     }
 

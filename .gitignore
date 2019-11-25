@@ -1,8 +1,8 @@
-/manifest.mf
-/users.json
-/ranks.json
-/token.txt
-/nbactions.xml
-/dependency-reduced-pom.xml
+/.idea/
 /target/
-/tags.txt
+dependency-reduced-pom.xml
+Xeno.iml
+
+users.json
+ranks.json
+tags.txt

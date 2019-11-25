@@ -5,37 +5,42 @@ import discord.core.command.CommandHandler;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.object.user.User;
-import sx.blah.discord.handle.obj.IMessage;
+import discord.util.MessageUtils;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.TextChannel;
 
 public class DescCommand extends AbstractCommand {
-    
-    public static final int LEVEL_REQUIRED = 20; 
-    
+
+    public static final int LEVEL_REQUIRED = 20;
+
     public DescCommand() {
-        super(new String[]{"desc", "motto", "title"}, 1, LEVEL_REQUIRED, CommandCategory.PERK);
+        super(new String[]{"desc", "motto", "title"}, 1, CommandCategory.PERK);
     }
 
     @Override
-    public void execute(IMessage message, String[] args) {
-        User user = UserManager.getDBUserFromDUser(message.getAuthor());       
+    public void execute(Message message, TextChannel channel, String[] args) {
         String desc = BotUtils.validateString(CommandHandler.combineArgs(0, args));
+
         if (desc.isEmpty()) {
-            BotUtils.sendErrorMessage(message.getChannel(), 
-                    "Couldn't parse a valid description. Only basic characters are allowed.");
+            MessageUtils.sendErrorMessage(channel, "Couldn't parse a valid description. Only basic characters are allowed.");
             return;
-        } else if (desc.length() > 55) {
-            desc = desc.substring(0, 55);
+        } else if (desc.length() > 150) {
+            desc = desc.substring(0, 150);
         }
-        user.setDesc(desc);
-        BotUtils.sendInfoMessage(message.getChannel(), 
-                "How expressive! Updated your description accordingly.");              
+
+        UserManager.getDUserFromMessage(message).setDesc(desc);
+        UserManager.saveDatabase();
+        MessageUtils.sendInfoMessage(channel, "How expressive! Updated your description accordingly.");
+    }
+
+    @Override
+    public int getLevelRequired() {
+        return LEVEL_REQUIRED;
     }
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[text]", 
-                "Change or create your description on your profile.");
+        return BotUtils.buildUsage(alias, "[text]", "Set a description on your profile.");
     }
-    
+
 }

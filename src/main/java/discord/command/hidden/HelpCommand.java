@@ -5,60 +5,58 @@ import discord.core.command.CommandManager;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+
+import java.awt.*;
 import java.util.HashSet;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.util.EmbedBuilder;
+
+import discord.util.MessageUtils;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.Message;
 
 public class HelpCommand extends AbstractCommand {
-    
+
     public HelpCommand() {
-        super(new String[] {"help", "commands"}, 0, CommandCategory.HIDDEN);
+        super(new String[]{"help", "commands"}, 0, CommandCategory.HIDDEN);
     }
-    
+
     @Override
-    public void execute(IMessage message, String[] args) {
-        IChannel channel = message.getChannel();
+    public void execute(Message message, TextChannel channel, String[] args) {
         if (args.length > 0) {
             String name = args[0].toLowerCase();
             AbstractCommand cmd = CommandManager.getCommand(name);
             if (cmd == null) {
-                BotUtils.sendErrorMessage(channel, "Couldn't find a command by that name. "
+                MessageUtils.sendErrorMessage(channel, "Couldn't find a command by that name. "
                         + "Use `!help` for a list of available commands.");
             } else {
-                BotUtils.sendUsageMessage(channel, cmd.getUsage(name));
+                MessageUtils.sendUsageMessage(channel, cmd.getUsage(name));
             }
         } else {
-            EmbedBuilder builder = BotUtils.getBuilder(message.getClient(), "Available Commands", 
-                    "*For info on a command, use* **`!help [command]`**");
-            
-            HashSet<AbstractCommand> commands = CommandManager.getAllCommands();          
+            HashSet<AbstractCommand> commands = CommandManager.getAllCommands();
             commands.removeIf(command -> command.getCategory() == CommandCategory.HIDDEN //Take out hidden
                     || (command.getCategory() == CommandCategory.PERK //take out not unlocked
-                    && command.getLevelRequired() > UserManager.getDBUserFromMessage(message).getProgress().getTotalLevelThisLife())
+                    && command.getLevelRequired() > UserManager.getDUserFromMessage(message).getProg().getTotalLevelThisLife())
                     || (command.getCategory() == CommandCategory.ADMIN //take out admin if not owner
-                    && !message.getAuthor().equals(message.getGuild().getOwner())));
-            
-            if (!message.getAuthor().equals(message.getGuild().getOwner())) {
-                commands.removeIf(command -> command.getCategory() == CommandCategory.ADMIN);
-            }
-            
-            for (CommandCategory c : CommandCategory.values()) {
-                StringBuilder sb = new StringBuilder();
-                commands.stream().filter(cmd -> cmd.getCategory() == c)
-                        .forEach(cmd -> sb.append("`!").append(cmd.getName()).append("`  "));
-                if (sb.length() > 0) { //skip over empty categories
-                    builder.appendField(c.toString(), sb.toString(), false);       
-                }
-            }
-            
-            BotUtils.sendEmbedMessage(channel, builder.build());            
+                    && !message.getAuthorAsMember().block().equals(message.getGuild().block().getOwner().block())));
+
+            channel.createMessage(spec -> spec.setEmbed(MessageUtils.message("Available Commands",
+                    "*For info on a command, use* **`!help [command]`**", Color.CYAN)
+                    .andThen(embed -> {
+                        for (CommandCategory c : CommandCategory.values()) {
+                            StringBuilder sb = new StringBuilder();
+                            commands.stream().filter(cmd -> cmd.getCategory() == c)
+                                    .forEach(cmd -> sb.append("`!").append(cmd.getName()).append("`  "));
+                            if (sb.length() > 0) { //skip over empty categories
+                                embed.addField(c.toString(), sb.toString(), false);
+                            }
+                        }
+                    }))).block();
+
         }
     }
-    
+
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "", "View available commmands.");
+        return BotUtils.buildUsage(alias, "", "View available commands.");
     }
 
 }
