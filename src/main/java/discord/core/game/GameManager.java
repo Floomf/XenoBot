@@ -50,7 +50,6 @@ public class GameManager {
 
     public static void processGameCommand(Message message, TextChannel channel, String gameName, Class<? extends AbstractGame> gameType) {
         List<User> opponentList = message.getUserMentions().onErrorResume(e -> Flux.empty()).collectList().block();
-        ;
         if (opponentList.isEmpty()) {
             MessageUtils.sendErrorMessage(channel, "Could not parse a valid opponent. Please @mention them.");
             return;

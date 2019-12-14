@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Name {
@@ -12,26 +14,22 @@ public class Name {
     private DUser user;
 
     private String nick;
-    private int emojiCP;
+    private String[] emojis;
 
     @JsonCreator
     protected Name(@JsonProperty("nick") String nick,
-                   @JsonProperty("emojiCP") int emojiCP) {
+                   @JsonProperty("emojis") String[] emojis) {
         this.nick = nick;
-        this.emojiCP = emojiCP;
+        this.emojis = emojis;
     }
 
     protected Name(String nick) {
         this.nick = nick;
-        this.emojiCP = 0;
+        this.emojis = new String[0];
     }
 
     public String getNick() {
         return nick;
-    }
-
-    protected void setUser(DUser user) {
-        this.user = user;
     }
 
     public void setNick(String nick) {
@@ -39,9 +37,18 @@ public class Name {
         verifyOnGuild();
     }
 
-    public void setEmoji(int codepoint) {
-        this.emojiCP = codepoint;
+    //used for jackson serialization
+    public String[] getEmojis() {
+        return this.emojis;
+    }
+
+    public void setEmojis(String[] emojis) {
+        this.emojis = emojis;
         verifyOnGuild();
+    }
+
+    protected void setUser(DUser user) {
+        this.user = user;
     }
 
     public void verifyOnGuild() {
@@ -72,8 +79,11 @@ public class Name {
             sb.append(prestige.getBadge()).append(" ");
         }
         sb.append(nick);
-        if (emojiCP > 0) {
-            sb.append(" ").appendCodePoint(emojiCP);
+        if (emojis.length > 0) {
+            sb.append(" ");
+            for (String emoji : emojis) {
+                sb.append(emoji);
+            }
         }
         return sb.toString();
     }

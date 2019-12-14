@@ -16,14 +16,20 @@ public enum Button {
     CHECKMARK(ReactionEmoji.unicode("\u2705"), 0),
     EXIT(ReactionEmoji.unicode("\uD83D\uDEAB"), 0);
 
+    private static Button[] cachedValues = null;
     private final ReactionEmoji emoji;
     private final int numValue;
-
-    private static Button[] cachedValues = null;
 
     Button(ReactionEmoji emoji, int numericValue) {
         this.emoji = emoji;
         this.numValue = numericValue;
+    }
+
+    public static Button getFromNum(int num) {
+        if (cachedValues == null) {
+            cachedValues = Button.values();
+        }
+        return cachedValues[num - 1];
     }
 
     public ReactionEmoji getEmoji() {
@@ -32,13 +38,6 @@ public enum Button {
 
     public int getNumValue() {
         return numValue;
-    }
-
-    public static Button getFromNum(int num) {
-        if (cachedValues == null) {
-            cachedValues = Button.values();
-        }
-        return cachedValues[num - 1];
     }
 
 }

@@ -45,6 +45,11 @@ public class Rank {
         return RANKS[RANKS.length - 1]; //has to be last rank
     }
 
+    @JsonIgnore
+    public static Rank getMaxRank() {
+        return RANKS[RANKS.length - 1];
+    }
+
     public String getName() {
         return name;
     }
@@ -55,11 +60,6 @@ public class Rank {
 
     public int getLevelRequired() {
         return levelRequired;
-    }
-
-    @JsonIgnore
-    public static Rank getMaxRank() {
-        return RANKS[RANKS.length - 1];
     }
 
     @JsonIgnore

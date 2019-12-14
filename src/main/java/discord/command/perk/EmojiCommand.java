@@ -1,6 +1,8 @@
 package discord.command.perk;
 
 import com.vdurmont.emoji.EmojiManager;
+import com.vdurmont.emoji.EmojiParser;
+import discord.core.command.CommandHandler;
 import discord.util.BotUtils;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
@@ -15,27 +17,21 @@ public class EmojiCommand extends AbstractCommand {
     public static final int LEVEL_REQUIRED = 60;
 
     public EmojiCommand() {
-        super(new String[]{"emoji"}, 1, CommandCategory.PERK);
+        super(new String[]{"emoji", "emojis"}, 1, CommandCategory.PERK);
     }
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
         Name name = UserManager.getDUserFromMessage(message).getName();
-        String emoji = args[0];
-
+        String emojis = CommandHandler.combineArgs(0, args).replace(" ", "");
         //EmojiManager makes it easy to check for emoji
-        if (EmojiManager.isEmoji(emoji)) {
-            //some emojis take up 2 characters
-            if (emoji.length() == 2) {
-                name.setEmoji(Character.toCodePoint(emoji.charAt(0), emoji.charAt(1)));
-            } else {
-                name.setEmoji(emoji.codePointAt(0));
-            }
-            MessageUtils.sendInfoMessage(channel, "Splendid choice. Updated your name emoji to " + emoji);
+        if (EmojiManager.isOnlyEmojis(emojis)) {
+            name.setEmojis(EmojiParser.extractEmojis(emojis).stream().limit(2).toArray(String[]::new));
+            MessageUtils.sendInfoMessage(channel, "Splendid choice. Updated your name emoji(s) accordingly.");
             UserManager.saveDatabase();
-        } else if (emoji.toLowerCase().equals("none")) {
-            name.setEmoji(0);
-            MessageUtils.sendInfoMessage(channel, "Your name emoji has been removed.");
+        } else if (emojis.toLowerCase().equals("none")) {
+            name.setEmojis(new String[0]);
+            MessageUtils.sendInfoMessage(channel, "Your name emojis have been removed.");
             UserManager.saveDatabase();
         } else {
             MessageUtils.sendErrorMessage(channel, "Could not parse a unicode emoji from input.");
@@ -49,8 +45,8 @@ public class EmojiCommand extends AbstractCommand {
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[emoji]", "Set an emoji next to your name."
-                + "\n\nProviding `\"none\"` as the parameter instead will remove your current emoji.");
+        return BotUtils.buildUsage(alias, "[emoji(s)]", "Set up to two emojis next to your name."
+                + "\n\nProviding `none` as the parameter instead will remove your current emojis.");
     }
 
 }

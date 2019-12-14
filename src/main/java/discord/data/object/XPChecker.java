@@ -17,6 +17,10 @@ public class XPChecker implements Runnable {
         this.guild = guild;
     }
 
+    public static boolean voiceStateIsNotTalking(VoiceState state) {
+        return state.isMuted() || state.isDeaf() || state.isSelfMuted() || state.isSelfDeaf();
+    }
+
     @Override
     public void run() {
         if (guild.getClient().isConnected()) {
@@ -48,10 +52,6 @@ public class XPChecker implements Runnable {
             states.removeIf(state -> UserManager.getDUserFromID(state.getUserId().asLong()).getProg().isMaxLevel());
             states.forEach(state -> UserManager.getDUserFromID(state.getUserId().asLong()).getProg().addPeriodicXP(initialSize));
         }
-    }
-
-    public static boolean voiceStateIsNotTalking(VoiceState state) {
-        return state.isMuted() || state.isDeaf() || state.isSelfMuted() || state.isSelfDeaf();
     }
 
 }

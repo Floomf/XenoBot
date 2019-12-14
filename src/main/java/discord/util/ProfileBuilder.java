@@ -11,9 +11,9 @@ import discord4j.core.spec.EmbedCreateSpec;
 
 public class ProfileBuilder {
 
-    private Consumer<EmbedCreateSpec> embed;
     private final DUser user;
     private final Progress prog;
+    private Consumer<EmbedCreateSpec> embed;
 
     public ProfileBuilder(DUser user) {
         this.user = user;

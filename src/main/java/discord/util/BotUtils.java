@@ -40,8 +40,8 @@ public class BotUtils {
 
     public static String validateNick(String nick) {
         String result = validateString(nick);
-        if (result.length() > 24) { //we dont want the nick too long
-            result = result.substring(0, 23);
+        if (result.length() > 25) { //we dont want the nick too long
+            result = result.substring(0, 24);
         }
         return result.trim(); //trim in case the string is cut off and the last char is a space
     }

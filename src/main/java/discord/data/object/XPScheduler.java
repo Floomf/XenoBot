@@ -21,8 +21,8 @@ import discord4j.core.object.entity.VoiceChannel;
 public class XPScheduler {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private ScheduledFuture<?> future;
     private final XPChecker checker;
+    private ScheduledFuture<?> future;
 
     public XPScheduler(XPChecker checker) {
         this.checker = checker;

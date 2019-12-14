@@ -11,15 +11,15 @@ import java.util.HashMap;
 public class DUser {
 
     private final long discordID;
+    private final Name name;
+    private final Progress prog;
+    private final HashMap<Pref, Boolean> prefs;
+
+    private String desc;
 
     //we want this final but can't deserialize it?
     @JsonIgnore
     private Member guildMember;
-
-    private final Name name;
-    private String desc;
-    private final Progress prog;
-    private final HashMap<Pref, Boolean> prefs;
 
     @JsonCreator
     public DUser(@JsonProperty("discordID") long discordID,
@@ -62,6 +62,10 @@ public class DUser {
         return desc;
     }
 
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
     public Progress getProg() {
         return prog;
     }
@@ -77,10 +81,6 @@ public class DUser {
     @JsonIgnore
     public void setGuildMember(Member guildMember) {
         this.guildMember = guildMember;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
     }
 
     public boolean hasUnlocked(Unlockable unlockable) {

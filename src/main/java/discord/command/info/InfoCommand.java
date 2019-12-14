@@ -19,21 +19,6 @@ public class InfoCommand extends AbstractCommand {
         super(new String[]{"info", "stats", "uptime"}, 0, CommandCategory.INFO);
     }
 
-    @Override
-    public void execute(Message message, TextChannel channel, String[] args) {
-        channel.createMessage(spec -> spec.setEmbed(embed -> {
-            embed.setAuthor(message.getClient().getSelf().block().getUsername(), "", "");
-            embed.setThumbnail(message.getClient().getSelf().block().getAvatarUrl());
-            embed.setColor(Color.CYAN);
-
-            embed.addField("Version 🏷", "`" + BotUtils.getVersion() + "`", true);
-            embed.addField("Uptime 🕓", "`" + formatElapsedTime(System.currentTimeMillis() - START_TIME) + "`", true);
-            embed.addField("Guilds 🏘", "`" + message.getClient().getGuilds().collectList().block().size() + "`", true);
-            embed.addField("Users 🚹", "`" + UserManager.size() + "`", true);
-            embed.addField("Commands ⌨", "`" + CommandManager.getAllCommands().size() + "`", true);
-        })).block();
-    }
-
     private static String formatElapsedTime(long millis) {
         String result = "";
         long totalSeconds = millis / 1000;
@@ -58,6 +43,21 @@ public class InfoCommand extends AbstractCommand {
         }
 
         return result.trim(); //Way to get rid of last space
+    }
+
+    @Override
+    public void execute(Message message, TextChannel channel, String[] args) {
+        channel.createMessage(spec -> spec.setEmbed(embed -> {
+            embed.setAuthor(message.getClient().getSelf().block().getUsername(), "", "");
+            embed.setThumbnail(message.getClient().getSelf().block().getAvatarUrl());
+            embed.setColor(Color.CYAN);
+
+            embed.addField("Version 🏷", "`" + BotUtils.getVersion() + "`", true);
+            embed.addField("Uptime 🕓", "`" + formatElapsedTime(System.currentTimeMillis() - START_TIME) + "`", true);
+            embed.addField("Guilds 🏘", "`" + message.getClient().getGuilds().collectList().block().size() + "`", true);
+            embed.addField("Users 🚹", "`" + UserManager.size() + "`", true);
+            embed.addField("Commands ⌨", "`" + CommandManager.getAllCommands().size() + "`", true);
+        })).block();
     }
 
     @Override
