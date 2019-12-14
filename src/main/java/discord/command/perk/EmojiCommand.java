@@ -26,7 +26,7 @@ public class EmojiCommand extends AbstractCommand {
         String emojis = CommandHandler.combineArgs(0, args).replace(" ", "");
         //EmojiManager makes it easy to check for emoji
         if (EmojiManager.isOnlyEmojis(emojis)) {
-            name.setEmojis(EmojiParser.extractEmojis(emojis).stream().limit(2).toArray(String[]::new));
+            name.setEmojis(EmojiParser.extractEmojis(emojis).stream().limit(3).toArray(String[]::new));
             MessageUtils.sendInfoMessage(channel, "Splendid choice. Updated your name emoji(s) accordingly.");
             UserManager.saveDatabase();
         } else if (emojis.toLowerCase().equals("none")) {
@@ -45,7 +45,7 @@ public class EmojiCommand extends AbstractCommand {
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[emoji(s)]", "Set up to two emojis next to your name."
+        return BotUtils.buildUsage(alias, "[emoji(s)]", "Set up to three emojis next to your name."
                 + "\n\nProviding `none` as the parameter instead will remove your current emojis.");
     }
 
