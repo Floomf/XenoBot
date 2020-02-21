@@ -11,7 +11,7 @@ import discord4j.core.object.entity.TextChannel;
 public class PruneCommand extends AbstractCommand {
 
     public PruneCommand() {
-        super(new String[]{"prune"}, 1, CommandCategory.ADMIN);
+        super(new String[]{"prune"}, 2, CommandCategory.ADMIN);
     }
 
     @Override
@@ -22,20 +22,22 @@ public class PruneCommand extends AbstractCommand {
         }
 
         int amount = Integer.parseInt(args[0]);
-        if (amount > 50 || amount < 1) {
-            MessageUtils.sendErrorMessage(channel, "Invalid amount of messages to prune! You may prune up to 50 at a time.");
+        if (amount > 100 || amount < 1) {
+            MessageUtils.sendErrorMessage(channel, "Invalid amount of messages to prune! You may prune up to 100 at a time.");
             return;
         }
-        channel.bulkDelete(channel.getMessagesBefore(message.getId()).take(amount)
-                .concatWith(Flux.just(message))
+        TextChannel pruneChannel = BotUtils.getGuildTextChannel(args[1].toLowerCase(), channel.getGuild().block());
+
+        pruneChannel.bulkDelete(pruneChannel.getMessagesBefore(pruneChannel.getLastMessageId().get()).take(amount)
                 .map(Message::getId))
+                .concatWith(Flux.just(pruneChannel.getLastMessageId().get()))
                 .collectList().block();
     }
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[amount]",
-                "Mass prune (delete) messages in this channel.\nYou may prune up to 50 messages at a time.");
+        return BotUtils.buildUsage(alias, "[amount] [channel name]",
+                "Mass prune (delete) messages in a channel.\nYou may prune up to 100 messages at a time.");
     }
 
 }

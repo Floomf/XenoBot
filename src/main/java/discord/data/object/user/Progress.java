@@ -96,13 +96,13 @@ public class Progress {
     }
 
     @JsonIgnore
+    public int getTotalXPThisLife() {
+        return (int) (getTotalXPToPrestige(prestige.getNumber()) + getTotalXPToLevel(level) + xp);
+    }
+
+    @JsonIgnore
     public int getTotalXP() {
-        int totalXP = 0;
-        totalXP += reincarnation.getNumber() * getTotalXPToPrestige(Prestige.MAX_PRESTIGE);
-        totalXP += getTotalXPToPrestige(prestige.getNumber());
-        totalXP += getTotalXPToLevel(level);
-        totalXP += xp;
-        return totalXP;
+        return getTotalXPThisLife() + reincarnation.getNumber() * getTotalXPToPrestige(Prestige.MAX_PRESTIGE);
     }
 
     @JsonIgnore
@@ -123,7 +123,7 @@ public class Progress {
     public static int getTotalXPToLevel(int level) {
         int totalXP = 0;
         for (int i = 1; i < level; i++) {
-            totalXP += i * XP_SCALE + XP_FLAT; //hardcoded
+            totalXP += i * XP_SCALE + XP_FLAT;
         }
         return totalXP;
     }
@@ -278,14 +278,44 @@ public class Progress {
     }
 
     public void reincarnate() {
-        setDefaultStats();
         reincarnation = reincarnation.reincarnate();
-        user.asGuildMember().edit(spec -> spec.setRoles(ColorManager.getMemberRolesNoColor(user.asGuildMember()))).block();
-        verifyRankOnGuild();
         BotUtils.getGuildTextChannel("log", user.asGuildMember().getGuild().block()).createMessage(spec -> {
             spec.setContent(user.asGuildMember().getMention());
             spec.setEmbed(MessageUtils.message("REINCARNATION", "**" + reincarnation.getRomaji() + "**", Color.PINK));
         }).block();
+
+        int carryXP = getTotalXPThisLife() - getTotalXPToPrestige(Prestige.MAX_PRESTIGE); //need to store
+        setDefaultStats();
+        verifyRankOnGuild();
+        carryXPToNextLife(carryXP);
+        user.getName().verifyOnGuild();
+
+        user.asGuildMember().edit(spec -> spec.setRoles(ColorManager.getMemberRolesNoColor(user.asGuildMember()))).block();
+    }
+
+    public void carryXPToNextLife(int xp) {
+        int prestigeXP = getTotalXPToLevel(MAX_LEVEL);
+        int timesToPrestige = Math.min(xp / prestigeXP, Prestige.MAX_PRESTIGE); //thank you intellij
+
+        //handles sending prestige messages instead of running prestige() multiple times
+        for (int i = 1; i <= timesToPrestige; i++) {
+            final int p = i;
+            BotUtils.getGuildTextChannel("log", user.asGuildMember().getGuild().block()).createMessage(spec -> {
+                spec.setContent(user.asGuildMember().getMention());
+                spec.setEmbed(MessageUtils.message("PRESTIGE UP!", String.format("**%d → %d**", p - 1, p), Color.BLACK));
+            }).block();
+        }
+
+        prestige = new Prestige(timesToPrestige);
+
+        if (prestige.isMax()) { //have to set max rank back
+            rank = Rank.getMaxRank();
+            verifyRankOnGuild();
+        }
+
+        xp -= timesToPrestige * prestigeXP;
+        this.xp = xp;
+        checkXP(); //check for leveling and ranking up with the remaining xp
     }
 
     //Moved here until theres a solution/ unlock manager?

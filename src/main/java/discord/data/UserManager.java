@@ -109,7 +109,6 @@ public class UserManager {
         }
         DUser dUser = new DUser(member, name);
         dUsers.put(member.getId().asLong(), dUser);
-        dUser.verifyOnGuild();
 
         System.out.println("Added " + member.getDisplayName() + " to the database.");
     }

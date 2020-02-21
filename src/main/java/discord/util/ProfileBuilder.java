@@ -54,15 +54,16 @@ public class ProfileBuilder {
     }
 
     public ProfileBuilder addPrestige() {
-        embed = embed.andThen(embed -> embed.addField("Prestige :trophy:", "`" + prog.getPrestige().getNumber() + "`"
-                + prog.getPrestige().getBadge()
+        embed = embed.andThen(embed -> embed.addField("Prestige :trophy:", "`" + getOrdinal(prog.getPrestige().getNumber()) + "`"
+                + " (" + prog.getPrestige().getBadge() + ")"
                 + (prog.getPrestige().isMax() ? " (Max)" : ""), true));
         return this;
     }
 
     public ProfileBuilder addReincarnation() {
-        embed = embed.andThen(embed -> embed.addField("Reincarnation :white_flower:", "`" + prog.getReincarnation().getKanji()
-                + " (" + prog.getReincarnation().getRomaji() + ")`", true));
+        embed = embed.andThen(embed -> embed.addField("Reincarnation :white_flower:", "`" + getOrdinal(prog.getReincarnation().getNumber())
+                + " (" + prog.getReincarnation().getKanji()
+                + "-" + prog.getReincarnation().getRomaji() + ")`", true));
         return this;
     }
 
@@ -134,4 +135,11 @@ public class ProfileBuilder {
         return sb.toString();
     }
 
+    //we only have to support up to max reincarnation (20)
+    private String getOrdinal(int cardinal) {
+        if (cardinal == 1) return "1st";
+        else if (cardinal == 2) return "2nd";
+        else if (cardinal == 3) return "3rd";
+        else return cardinal + "th";
+    }
 }

@@ -48,6 +48,7 @@ public class DUser {
         this.prefs.put(Pref.AUTO_PRESTIGE, false);
         this.name.setUser(this);
         this.prog.setUser(this);
+        verifyOnGuild();
     }
 
     public long getDiscordID() {

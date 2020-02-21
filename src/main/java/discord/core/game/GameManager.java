@@ -40,10 +40,10 @@ public class GameManager {
 
             if (GAMES.containsKey(event.getMessage().block()) && (GAMES.get(event.getMessage().block()) instanceof ButtonGame)) {
                 ButtonGame game = (ButtonGame) GAMES.get(event.getMessage().block());
-                game.handleMessageReaction(event.getEmoji(), event.getUser().block().asMember(event.getGuildId().get()).block());
+                game.handleMessageReaction(event.getEmoji(), event.getMember().get());
             } else if (REQUESTS.containsKey(event.getMessage().block())) {
                 GameRequest request = REQUESTS.get(event.getMessage().block());
-                request.handleMessageReaction(event.getEmoji(), event.getUser().block().asMember(event.getGuildId().get()).block());
+                request.handleMessageReaction(event.getEmoji(), event.getMember().get());
             }
         }
     }
