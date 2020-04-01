@@ -17,8 +17,13 @@ public class GameTwentyThree extends ButtonGame {
     }
 
     @Override
+    protected String getGameTitle() {
+        return "23";
+    }
+
+    @Override
     protected void onStart() {
-        super.updateMessageDisplay("Game started! There are `" + amount + "` potatoes to snack on."
+        super.setInfoDisplay("Game started! There are `" + amount + "` potatoes to snack on."
                 + "\nYou may eat up to `3` per turn. The person to eat the last potato loses!"
                 + "\n\nYou start off, " + super.getThisTurnUser().getMention());
     }
@@ -28,7 +33,7 @@ public class GameTwentyThree extends ButtonGame {
         amount -= input;
         String suffix = ((input > 1) ? "es" : "");
         if (amount > 0) {
-            super.updateMessageDisplay(super.getThisTurnUser().getDisplayName() + " ate `" + input +
+            super.setInfoDisplay(super.getThisTurnUser().getDisplayName() + " ate `" + input +
                     "` potato" + suffix + ". Your move, " + super.getNextTurnUser().getMention());
         } else {
             super.win(super.getNextTurnUser(), super.getThisTurnUser().getDisplayName()

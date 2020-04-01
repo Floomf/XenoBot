@@ -19,7 +19,7 @@ public class CommandHandler {
         TextChannel channel = message.getChannel().ofType(TextChannel.class).block();
 
         if (channel == null || !(message.getContent().orElse("").startsWith(CommandManager.CMD_PREFIX)
-                && channel.getName().equals("commands"))) {
+                && (channel.getName().equals("commands") || channel.getName().equals("testing")))) {
             return;
         }
 

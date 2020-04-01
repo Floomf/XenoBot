@@ -29,6 +29,11 @@ public class GameConnectFour extends ButtonGame {
         assignPieces();
     }
 
+    @Override
+    protected String getGameTitle() {
+        return "Connect Four";
+    }
+
     private void assignPieces() {
         Random rand = new Random();
         int one = rand.nextInt(PIECES.length);
@@ -44,7 +49,7 @@ public class GameConnectFour extends ButtonGame {
     protected void onStart() {
         player1 = super.getThisTurnUser();
         player2 = super.getNextTurnUser();
-        super.updateMessageDisplay(formatMessage(player1, "You start off, " + player1.getMention()));
+        super.setInfoDisplay(formatMessage(player1, "You start off, " + player1.getMention()));
     }
 
     @Override
@@ -52,11 +57,11 @@ public class GameConnectFour extends ButtonGame {
         placePiece(super.getThisTurnUser(), input - 1);
         if (playerHasWon(super.getThisTurnUser())) {
             Member winner = super.getThisTurnUser();
-            super.win(winner, formatMessage(winner, winner.getDisplayName() + " wins!"));
+            super.win(winner, formatMessage(winner, winner.getDisplayName() + " wins!\n\n" + getBoard()));
         } else if (boardIsFull()) {
             super.tie("Board is full. Tie!");
         } else {
-            super.updateMessageDisplay(super.getThisTurnUser().getDisplayName() + " went in slot `" + input + "`\n"
+            super.setInfoDisplay(super.getThisTurnUser().getDisplayName() + " went in slot `" + input + "`\n"
                     + formatMessage(super.getNextTurnUser(), "Your turn, " + super.getNextTurnUser().getMention()));
         }
     }
@@ -80,6 +85,7 @@ public class GameConnectFour extends ButtonGame {
     private String formatMessage(Member player, String message) {
         return getUnicodeForPiece(getPieceForPlayer(player)) + " " + message;
     }
+
 
     @Override
     protected String getBoard() {
@@ -162,7 +168,7 @@ public class GameConnectFour extends ButtonGame {
             case BLUE:
                 return player2piece;
             case EMPTY:
-                return "⚫"; //Black circle
+                return "⚪"; //White circle
         }
         return "";
     }

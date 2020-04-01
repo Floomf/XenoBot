@@ -136,7 +136,7 @@ public class ProfileBuilder {
     }
 
     //we only have to support up to max reincarnation (20)
-    private String getOrdinal(int cardinal) {
+    public static String getOrdinal(int cardinal) {
         if (cardinal == 1) return "1st";
         else if (cardinal == 2) return "2nd";
         else if (cardinal == 3) return "3rd";

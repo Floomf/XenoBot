@@ -58,7 +58,7 @@ public class ProgressCommand extends AbstractCommand {
         if (prog.isNotMaxLevel()) {
             builder.addXPProgress();
             VoiceState vState = user.asGuildMember().getVoiceState().block();
-
+            //TODO fix nullpointerexception
             if (vState != null && !XPChecker.voiceStateIsNotTalking(vState)) { //Messy but oh well right?
                 List<VoiceState> states = vState.getChannel().block().getVoiceStates().collectList().block();
                 states.removeIf(state -> state.getUser().block().isBot() || XPChecker.voiceStateIsNotTalking(state));

@@ -13,6 +13,9 @@ public abstract class TypeGame extends AbstractGame {
     //Games are responsible for calling updateMessageDisplay() each turn
     abstract protected void onTurn(String input);
 
+    //bad design?
+    protected void onEnd(){};
+
     abstract protected boolean isValidInput(String input);
 
     @Override
@@ -22,14 +25,10 @@ public abstract class TypeGame extends AbstractGame {
                 .subscribe(this::onMessageCreateEvent);
     }
 
-    @Override
-    protected final void onEnd() {
-        //super.getGameMessage().getClient().getDispatcher().unregisterListener(this);
-    }
 
     private void onMessageCreateEvent(MessageCreateEvent event) {
         Message userMessage = event.getMessage();
-        if (userMessage.getChannel().block().equals(super.getGameMessage().getChannel().block())) { //has to be in guild
+        if (super.isActive() && userMessage.getChannel().block().equals(super.getGameMessage().getChannel().block())) { //has to be in guild
             Member fromMember = userMessage.getAuthorAsMember().block();
             if (fromMember.equals(super.getThisTurnUser()) || fromMember.equals(super.getNextTurnUser())) {
                 if (userMessage.getContent().orElse("").equalsIgnoreCase("forfeit")) {
@@ -38,16 +37,15 @@ public abstract class TypeGame extends AbstractGame {
                 }
 
                 if (userMessage.getAuthor().get().equals(super.getThisTurnUser())) {
-                    System.out.println("h");
                     String input = userMessage.getContent().orElse("").toLowerCase().trim();
                     userMessage.delete().block();
                     if (isValidInput(input)) {
                         onTurn(input);
-                        if (super.isActive()) {
+                        if (super.isActive()) { //kinda messy
                             setupNextTurn();
                         }
                     } else {
-                        Message invalidMessage = userMessage.getChannel().block().createMessage("**Invalid position.**").block();
+                        Message invalidMessage = userMessage.getChannel().block().createMessage("**Invalid input.**").block();
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {

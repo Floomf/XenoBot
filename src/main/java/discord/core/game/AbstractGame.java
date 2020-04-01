@@ -1,5 +1,6 @@
 package discord.core.game;
 
+import discord.Main;
 import discord4j.core.object.entity.Member;
 
 import java.util.Timer;
@@ -25,6 +26,8 @@ public abstract class AbstractGame {
         this.active = false;
     }
 
+    abstract protected String getGameTitle();
+
     //For setting up specific game types (button manager and message listener);
     abstract protected void setup();
 
@@ -46,16 +49,20 @@ public abstract class AbstractGame {
     }
 
     protected final void win(Member winner, String winMessage) {
-        updateMessageDisplay(winMessage);
+        //some games don't want the board to display at end, so don't call updateMessageDisplay()
+        gameMessage.edit(spec -> spec.setEmbed(embed -> {
+            embed.setDescription(winMessage);
+            embed.setAuthor(getGameTitle(), "", Main.BOT_AVATAR_URL);
+        })).block();
         end();
     }
 
     protected final void tie(String tieMessage) {
-        updateMessageDisplay(tieMessage);
+        setInfoDisplay(tieMessage);
         end();
     }
 
-    private void end() {
+    protected final void end() {
         if (active) {
             turnTimer.cancel();
             active = false;
@@ -68,8 +75,15 @@ public abstract class AbstractGame {
         return active;
     }
 
-    protected final void updateMessageDisplay(String info) {
-        gameMessage.edit(spec -> spec.setContent(info + "\n" + getBoard())).block();
+    protected final void setGameDisplay(String text) {
+        gameMessage.edit(spec -> spec.setEmbed(embed -> {
+            embed.setDescription(text);
+            embed.setAuthor(getGameTitle(), "", Main.BOT_AVATAR_URL);
+        })).block();
+    }
+
+    protected final void setInfoDisplay(String info) {
+         setGameDisplay(info + "\n\n" + getBoard());
     }
 
     protected final Message getGameMessage() {

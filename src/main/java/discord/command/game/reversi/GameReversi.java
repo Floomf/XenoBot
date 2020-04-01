@@ -1,9 +1,8 @@
 package discord.command.game.reversi;
 
-import discord4j.core.object.entity.Member;
-import discord.core.game.TypeGame;
 import discord.core.game.Button;
-
+import discord.core.game.TypeGame;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 
 public class GameReversi extends TypeGame {
@@ -24,6 +23,11 @@ public class GameReversi extends TypeGame {
     }
 
     @Override
+    protected String getGameTitle() {
+        return "Reversi";
+    }
+
+    @Override
     protected void onStart() {
         //Starting pieces
         board[3][3] = BLUE;
@@ -33,7 +37,7 @@ public class GameReversi extends TypeGame {
         redPlayer = super.getThisTurnUser();
         bluePlayer = super.getNextTurnUser();
         updateValidChoices(RED);
-        super.updateMessageDisplay(formatMessage(redPlayer, "You start off, " + redPlayer.getMention()
+        super.setInfoDisplay(formatMessage(redPlayer, "You start off, " + redPlayer.getMention()
                 + "\nEnter a grid position to place your piece (like \"f4\")."));
     }
 
@@ -43,18 +47,28 @@ public class GameReversi extends TypeGame {
                 getRowForGridNumber(input.charAt(1)), getColForGridLetter(input.charAt(0)));
 
         if (updateValidChoices(getPieceForPlayer(super.getNextTurnUser()))) {
-            super.updateMessageDisplay(super.getThisTurnUser().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
+            super.setInfoDisplay(super.getThisTurnUser().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
                     + formatMessage(super.getNextTurnUser(), "Your turn, " + super.getNextTurnUser().getMention()));
         } else { //One player couldn't go
             super.setupNextTurn(); //Skip over their turn
             if (updateValidChoices(getPieceForPlayer(super.getNextTurnUser()))) {
-                super.updateMessageDisplay(super.getThisTurnUser().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
+                super.setInfoDisplay(super.getThisTurnUser().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
                         + formatMessage(super.getNextTurnUser(), super.getThisTurnUser().getDisplayName()
                         + " doesn't have a valid move. Your turn again, " + super.getNextTurnUser().getMention()));
             } else { //Both players couldn't go, so game is over
                 findWinner();
             }
         }
+    }
+
+    @Override
+    protected boolean isValidInput(String input) {
+        if (input.matches("[a-h]\\d")) {  //regex for valid position on our grid
+            int row = getRowForGridNumber(input.charAt(1));
+            int col = getColForGridLetter(input.charAt(0));
+            return (row > -1 && row < HEIGHT && col > -1 && col < LENGTH && positionIsValidAt(row, col));
+        }
+        return false;
     }
 
     private void findWinner() {
@@ -65,9 +79,9 @@ public class GameReversi extends TypeGame {
             }
         }
         if (sum > 0) {
-            super.win(redPlayer, formatMessage(redPlayer, redPlayer.getDisplayName() + " wins by " + sum + " pieces!"));
+            super.win(redPlayer, formatMessage(redPlayer, redPlayer.getDisplayName() + " wins by " + sum + " pieces!") + "\n\n" + getBoard());
         } else if (sum < 0) {
-            super.win(bluePlayer, formatMessage(bluePlayer, bluePlayer.getDisplayName() + " wins by " + (-sum) + " pieces!"));
+            super.win(bluePlayer, formatMessage(bluePlayer, bluePlayer.getDisplayName() + " wins by " + (-sum) + " pieces!") + "\n\n" + getBoard());
         } else {
             super.tie("Even split of captures! The game is a tie.");
         }
@@ -182,15 +196,6 @@ public class GameReversi extends TypeGame {
         return "";
     }
 
-    @Override
-    protected boolean isValidInput(String input) {
-        if (input.matches("[a-h]\\d")) {  //regex for valid position on our grid
-            int row = getRowForGridNumber(input.charAt(1));
-            int col = getColForGridLetter(input.charAt(0));
-            return (row > -1 && row < HEIGHT && col > -1 && col < LENGTH && positionIsValidAt(row, col));
-        }
-        return false;
-    }
 
     private int getRowForGridNumber(char c) {
         //this works by subtracting ascii code for 0, learned this in nand2tetris too

@@ -70,7 +70,10 @@ public class GameRequest {
 
     public void createGame() {
         try {
-            requestMessage.edit(spec -> spec.setContent("Loading `" + gameName + "`..").setEmbed(null)).block();
+            requestMessage.edit(spec ->  {
+                spec.setContent("");
+                spec.setEmbed(embed -> embed.setDescription("Loading `" + gameName + "`.."));
+            }).block();
             AbstractGame game = gameType.getConstructor( //dont know how else to do this?
                     Message.class, Member[].class).newInstance(requestMessage, players);
             GameManager.addGame(requestMessage, game);
