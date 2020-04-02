@@ -25,7 +25,6 @@ public abstract class TypeGame extends AbstractGame {
                 .subscribe(this::onMessageCreateEvent);
     }
 
-
     private void onMessageCreateEvent(MessageCreateEvent event) {
         Message userMessage = event.getMessage();
         if (super.isActive() && userMessage.getChannel().block().equals(super.getGameMessage().getChannel().block())) { //has to be in guild
@@ -34,6 +33,7 @@ public abstract class TypeGame extends AbstractGame {
                 if (userMessage.getContent().orElse("").equalsIgnoreCase("forfeit")) {
                     userMessage.delete().block();
                     win(super.getOtherUser(fromMember), fromMember.getDisplayName() + " forfeits.\n" + super.getOtherUser(fromMember).getMention() + " wins!");
+                    return;
                 }
 
                 if (userMessage.getAuthor().get().equals(super.getThisTurnUser())) {
