@@ -75,9 +75,8 @@ public class CommandHandler {
         //check if command requires certain level
         Progress progress = UserManager.getDUserFromMessage(message).getProg();
         if (command.getLevelRequired() > progress.getTotalLevelThisLife()) {
-            MessageUtils.sendErrorMessage(channel, "You must be " + (command.getLevelRequired() > Progress.MAX_LEVEL
-                    ? "**prestiged" : "level **" + command.getLevelRequired())
-                    + "** to use this command! You can use `!prog` to view your progress.");
+            MessageUtils.sendErrorMessage(channel, "You must be level `" + command.getLevelRequired()
+                    + "` to use this command! You can use `!prog` to view your progress.");
             return;
         }
 

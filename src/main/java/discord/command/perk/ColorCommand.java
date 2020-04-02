@@ -23,7 +23,7 @@ import discord4j.core.object.entity.Message;
 
 public class ColorCommand extends AbstractCommand {
 
-    public static final int LEVEL_REQUIRED = Progress.MAX_LEVEL + 1;
+    public static final int LEVEL_REQUIRED = Progress.MAX_LEVEL;
 
     public ColorCommand() {
         super(new String[]{"color"}, 1, CommandCategory.PERK);
@@ -90,7 +90,7 @@ public class ColorCommand extends AbstractCommand {
 
     @Override
     public int getLevelRequired() {
-        return LEVEL_REQUIRED; //prestiged
+        return LEVEL_REQUIRED;
     }
 
     @Override
