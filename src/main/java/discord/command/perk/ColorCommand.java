@@ -12,6 +12,8 @@ import discord.data.object.Unlockable;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import discord.util.MessageUtils;
@@ -20,6 +22,7 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.object.entity.Message;
+import reactor.core.publisher.Flux;
 
 public class ColorCommand extends AbstractCommand {
 
@@ -39,15 +42,26 @@ public class ColorCommand extends AbstractCommand {
         //handle special arguments
         if (name.equals("list") || name.equals("choices")) {
             Unlockable[] unlockedColors = ColorManager.getUnlockedColorsForDUser(user);
+
+            List<String> defaultColorMentions = message.getGuild().block().getRoles()
+                    .filter(role -> ColorManager.isDefaultColor(role.getName())).map(Role::getMention).collectList().block();
+            List<String> unlockedColorMentions = message.getGuild().block().getRoles()
+                    .filter(role -> ColorManager.colorIsInArray(unlockedColors, role.getName())).map(Role::getMention).collectList().block();
+
+            //We have to reverse them due to the way they are ordered on discord
+            Collections.reverse(defaultColorMentions);
+            Collections.reverse(unlockedColorMentions);
+
             channel.createMessage(spec -> spec.setEmbed(MessageUtils.message("Available Colors", "", Color.WHITE)
                     .andThen(embed -> {
-                        embed.addField("Default", "`" + Arrays.toString(ColorManager.getDefaultColors()) + "`", false);
+                        embed.addField("Default", defaultColorMentions.toString().replace("[", "").replace("]", ""), false);
                         embed.addField("Unlocked [" + unlockedColors.length + "/" + ColorManager.COLORS_UNLOCKS.length + "]",
-                                "`" + Arrays.toString(unlockedColors) + "`", false);
+                                unlockedColorMentions.toString().replace("[", "").replace("]", ""), false);
                         embed.setFooter(unlockedColors.length == ColorManager.COLORS_UNLOCKS.length
                                 ? "You've unlocked every color. Astounding."
                                 : "You can keep leveling to unlock more colors.", "");
                     }))).block();
+
             return;
         } else if (name.equals("none")) {
             message.getAuthorAsMember().block().edit(spec -> spec.setRoles(ColorManager.getMemberRolesNoColor(message.getAuthorAsMember().block()))).block();

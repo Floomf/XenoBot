@@ -94,8 +94,19 @@ public class ColorManager {
         return null;
     }
 
+    public static boolean colorIsInArray(Unlockable[] colors, String name) {
+        for (Unlockable c : colors) {
+            if (c.toString().equalsIgnoreCase(name)) return true;
+        }
+        return false;
+    }
+
+    public static boolean isDefaultColor(String name) {
+        return colorIsInArray(COLORS_DEFAULT, name);
+    }
+
     public static boolean isColor(String name) {
-        return getColor(name) != null;
+        return isDefaultColor(name) || colorIsInArray(COLORS_UNLOCKS, name);
     }
 
     public static Set<Snowflake> getMemberRolesNoColor(Member member) {
