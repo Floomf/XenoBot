@@ -34,6 +34,11 @@ public class GameConnectFour extends ButtonGame {
         return "Connect Four";
     }
 
+    @Override
+    protected String getForfeitMessage(Member forfeiter) {
+        return forfeiter.getMention() + " forfeits. " + super.getOtherUser(forfeiter).getMention() + " wins!\n\n" + getBoard();
+    }
+
     private void assignPieces() {
         Random rand = new Random();
         int one = rand.nextInt(PIECES.length);
@@ -47,22 +52,22 @@ public class GameConnectFour extends ButtonGame {
 
     @Override
     protected void onStart() {
-        player1 = super.getThisTurnUser();
-        player2 = super.getNextTurnUser();
+        player1 = super.getPlayerThisTurn();
+        player2 = super.getPlayerNextTurn();
         super.setInfoDisplay(formatMessage(player1, "You start off, " + player1.getMention()));
     }
 
     @Override
     protected void onTurn(int input) {
-        placePiece(super.getThisTurnUser(), input - 1);
-        if (playerHasWon(super.getThisTurnUser())) {
-            Member winner = super.getThisTurnUser();
-            super.win(winner, formatMessage(winner, winner.getDisplayName() + " wins!\n\n" + getBoard()));
+        placePiece(super.getPlayerThisTurn(), input - 1);
+        if (playerHasWon(super.getPlayerThisTurn())) {
+            Member winner = super.getPlayerThisTurn();
+            super.win(formatMessage(winner, winner.getMention() + " wins!\n\n" + getBoard()));
         } else if (boardIsFull()) {
             super.tie("Board is full. Tie!");
         } else {
-            super.setInfoDisplay(super.getThisTurnUser().getDisplayName() + " went in slot `" + input + "`\n"
-                    + formatMessage(super.getNextTurnUser(), "Your turn, " + super.getNextTurnUser().getMention()));
+            super.setInfoDisplay(super.getPlayerThisTurn().getMention() + " went in slot `" + input + "`\n"
+                    + formatMessage(super.getPlayerNextTurn(), "Your turn, " + super.getPlayerNextTurn().getMention()));
         }
     }
 

@@ -37,7 +37,7 @@ public class ColorCommand extends AbstractCommand {
         DUser user = UserManager.getDUserFromMessage(message);
         Member member = message.getAuthorAsMember().block();
 
-        String name = CommandHandler.combineArgs(0, args).toLowerCase();
+        String name = CommandHandler.combineArgs(0, args).toLowerCase().replace("@", "");
 
         //handle special arguments
         if (name.equals("list") || name.equals("choices")) {

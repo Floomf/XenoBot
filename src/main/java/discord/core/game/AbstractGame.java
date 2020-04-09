@@ -5,6 +5,7 @@ import discord4j.core.object.entity.Member;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import discord4j.core.object.entity.Message;
 
@@ -13,20 +14,22 @@ public abstract class AbstractGame {
     private final Message gameMessage;
 
     private final Member[] players;
-    private Timer turnTimer;
+    private Timer afkTimer;
 
     private boolean active;
     private int turn = 0;
-    private Member userThisTurn;
+    private Member playerThisTurn;
 
     public AbstractGame(Message message, Member[] players) {
         this.gameMessage = message;
         this.players = players;
-        this.turnTimer = new Timer();
+        this.afkTimer = new Timer();
         this.active = false;
     }
 
     abstract protected String getGameTitle();
+
+    abstract protected String getForfeitMessage(Member forfeiter);
 
     //For setting up specific game types (button manager and message listener);
     abstract protected void setup();
@@ -40,15 +43,15 @@ public abstract class AbstractGame {
 
     public final void start() {
         if (!active) {
-            userThisTurn = players[0];
+            playerThisTurn = players[0];
             active = true;
-            startTurnTimer(userThisTurn);
+            startAfkTimer(playerThisTurn);
             setup();
             onStart();
         }
     }
 
-    protected final void win(Member winner, String winMessage) {
+    protected final void win(String winMessage) {
         //some games don't want the board to display at end, so don't call updateMessageDisplay()
         gameMessage.edit(spec -> spec.setEmbed(embed -> {
             embed.setDescription(winMessage);
@@ -64,7 +67,7 @@ public abstract class AbstractGame {
 
     protected final void end() {
         if (active) {
-            turnTimer.cancel();
+            afkTimer.cancel();
             active = false;
             onEnd();
             GameManager.removeGame(gameMessage);
@@ -90,12 +93,12 @@ public abstract class AbstractGame {
         return gameMessage;
     }
 
-    protected final Member getNextTurnUser() {
+    protected final Member getPlayerNextTurn() {
         return players[(turn + 1) % players.length];
     }
 
-    protected final Member getThisTurnUser() {
-        return userThisTurn;
+    protected final Member getPlayerThisTurn() {
+        return playerThisTurn;
     }
 
     //Only works with 2 player games
@@ -107,24 +110,31 @@ public abstract class AbstractGame {
         }
     }
 
-    protected final void setupNextTurn() {
-        userThisTurn = getNextTurnUser();
-        turn++;
-        startTurnTimer(userThisTurn);
+    protected final boolean playerIsInGame(Member player) {
+        for (Member p : players) {
+            if (p.equals(player)) return true;
+        }
+        return false;
     }
 
-    private void startTurnTimer(Member player) {
+    protected final void setupNextTurn() {
+        playerThisTurn = getPlayerNextTurn();
+        turn++;
+        startAfkTimer(playerThisTurn);
+    }
+
+    private void startAfkTimer(Member player) {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                win(getNextTurnUser(), player.getDisplayName() + " failed to go in time. "
-                        + getNextTurnUser().getDisplayName() + " wins!");
+                win(player.getDisplayName() + " failed to go in time. "
+                        + getPlayerNextTurn().getDisplayName() + " wins!");
             }
         };
-        turnTimer.cancel();
-        turnTimer = new Timer();
-        turnTimer.schedule(task, 600000L); //10 minutes
+        afkTimer.cancel();
+        afkTimer = new Timer();
+        afkTimer.schedule(task, TimeUnit.MINUTES.toMillis(15));
     }
-
+    
 }
 

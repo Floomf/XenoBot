@@ -22,10 +22,15 @@ public class GameTwentyThree extends ButtonGame {
     }
 
     @Override
+    protected String getForfeitMessage(Member member) {
+        return member.getMention() + " forfeits. " + super.getOtherUser(member).getMention() + " wins!";
+    }
+
+    @Override
     protected void onStart() {
         super.setInfoDisplay("Game started! There are `" + amount + "` potatoes to snack on."
                 + "\nYou may eat up to `3` per turn. The person to eat the last potato loses!"
-                + "\n\nYou start off, " + super.getThisTurnUser().getMention());
+                + "\n\nYou start off, " + super.getPlayerThisTurn().getMention());
     }
 
     @Override
@@ -33,11 +38,11 @@ public class GameTwentyThree extends ButtonGame {
         amount -= input;
         String suffix = ((input > 1) ? "es" : "");
         if (amount > 0) {
-            super.setInfoDisplay(super.getThisTurnUser().getDisplayName() + " ate `" + input +
-                    "` potato" + suffix + ". Your move, " + super.getNextTurnUser().getMention());
+            super.setInfoDisplay(super.getPlayerThisTurn().getDisplayName() + " ate `" + input +
+                    "` potato" + suffix + ". Your move, " + super.getPlayerNextTurn().getMention());
         } else {
-            super.win(super.getNextTurnUser(), super.getThisTurnUser().getDisplayName()
-                    + " ate the last potato" + suffix + ". **" + super.getNextTurnUser().getDisplayName() + "** wins!");
+            super.win(super.getPlayerThisTurn().getDisplayName() + " ate the last potato"
+                    + suffix + ". **" + super.getPlayerNextTurn().getDisplayName() + "** wins!");
         }
     }
 

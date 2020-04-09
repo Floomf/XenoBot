@@ -55,10 +55,10 @@ public class GameManager {
             return;
         }
 
-        if (opponentList.get(0).isBot() || opponentList.get(0).equals(message.getAuthor().get())) {
+/*        if (opponentList.get(0).isBot() || opponentList.get(0).equals(message.getAuthor().get())) {
             MessageUtils.sendErrorMessage(channel, "You can't play against yourself or a bot.");
             return;
-        }
+        }*/
 
         if (opponentList.get(0).asMember(message.getGuild().block().getId()).block().getPresence().block().getStatus().equals(Status.OFFLINE)) {
             MessageUtils.sendErrorMessage(channel, "Your opponent must be online.");

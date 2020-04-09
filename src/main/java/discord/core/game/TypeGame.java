@@ -29,14 +29,15 @@ public abstract class TypeGame extends AbstractGame {
         Message userMessage = event.getMessage();
         if (super.isActive() && userMessage.getChannel().block().equals(super.getGameMessage().getChannel().block())) { //has to be in guild
             Member fromMember = userMessage.getAuthorAsMember().block();
-            if (fromMember.equals(super.getThisTurnUser()) || fromMember.equals(super.getNextTurnUser())) {
-                if (userMessage.getContent().orElse("").equalsIgnoreCase("forfeit")) {
+            if (super.playerIsInGame(fromMember)) {
+                if (userMessage.getContent().orElse("").equalsIgnoreCase("forfeit")
+                    || userMessage.getContent().orElse("").equalsIgnoreCase("ff")) {
                     userMessage.delete().block();
-                    win(super.getOtherUser(fromMember), fromMember.getDisplayName() + " forfeits.\n" + super.getOtherUser(fromMember).getMention() + " wins!");
+                    win(getForfeitMessage(fromMember));
                     return;
                 }
 
-                if (userMessage.getAuthor().get().equals(super.getThisTurnUser())) {
+                if (fromMember.equals(super.getPlayerThisTurn())) {
                     String input = userMessage.getContent().orElse("").toLowerCase().trim();
                     userMessage.delete().block();
                     if (isValidInput(input)) {
@@ -45,9 +46,9 @@ public abstract class TypeGame extends AbstractGame {
                             setupNextTurn();
                         }
                     } else {
-                        Message invalidMessage = userMessage.getChannel().block().createMessage("**Invalid input.**").block();
+                        Message invalidMessage = userMessage.getChannel().block().createMessage("`Invalid input.`").block();
                         try {
-                            Thread.sleep(2000);
+                            Thread.sleep(1500);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

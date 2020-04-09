@@ -27,6 +27,10 @@ public class GameReversi extends TypeGame {
         return "Reversi";
     }
 
+    protected String getForfeitMessage(Member forfeiter) {
+        return forfeiter.getMention() + " forfeits. " + super.getOtherUser(forfeiter).getMention() + " wins!\n\n" + getBoard();
+    }
+
     @Override
     protected void onStart() {
         //Starting pieces
@@ -34,27 +38,27 @@ public class GameReversi extends TypeGame {
         board[3][4] = RED;
         board[4][3] = RED;
         board[4][4] = BLUE;
-        redPlayer = super.getThisTurnUser();
-        bluePlayer = super.getNextTurnUser();
+        redPlayer = super.getPlayerThisTurn();
+        bluePlayer = super.getPlayerNextTurn();
         updateValidChoices(RED);
         super.setInfoDisplay(formatMessage(redPlayer, "You start off, " + redPlayer.getMention()
-                + "\nEnter a grid position to place your piece (like \"f4\")."));
+                + "\nEnter a grid position to place your piece (like \"f4\"):"));
     }
 
     @Override
     protected void onTurn(String input) {
-        placePiece(getPieceForPlayer(super.getThisTurnUser()),
+        placePiece(getPieceForPlayer(super.getPlayerThisTurn()),
                 getRowForGridNumber(input.charAt(1)), getColForGridLetter(input.charAt(0)));
 
-        if (updateValidChoices(getPieceForPlayer(super.getNextTurnUser()))) {
-            super.setInfoDisplay(super.getThisTurnUser().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
-                    + formatMessage(super.getNextTurnUser(), "Your turn, " + super.getNextTurnUser().getMention()));
+        if (updateValidChoices(getPieceForPlayer(super.getPlayerNextTurn()))) {
+            super.setInfoDisplay(super.getPlayerThisTurn().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
+                    + formatMessage(super.getPlayerNextTurn(), "Your turn, " + super.getPlayerNextTurn().getMention()));
         } else { //One player couldn't go
             super.setupNextTurn(); //Skip over their turn
-            if (updateValidChoices(getPieceForPlayer(super.getNextTurnUser()))) {
-                super.setInfoDisplay(super.getThisTurnUser().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
-                        + formatMessage(super.getNextTurnUser(), super.getThisTurnUser().getDisplayName()
-                        + " doesn't have a valid move. Your turn again, " + super.getNextTurnUser().getMention()));
+            if (updateValidChoices(getPieceForPlayer(super.getPlayerNextTurn()))) {
+                super.setInfoDisplay(super.getPlayerThisTurn().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
+                        + formatMessage(super.getPlayerNextTurn(), super.getPlayerThisTurn().getDisplayName()
+                        + " doesn't have a valid move. Your turn again, " + super.getPlayerNextTurn().getMention()));
             } else { //Both players couldn't go, so game is over
                 findWinner();
             }
@@ -79,9 +83,9 @@ public class GameReversi extends TypeGame {
             }
         }
         if (sum > 0) {
-            super.win(redPlayer, formatMessage(redPlayer, redPlayer.getDisplayName() + " wins by " + sum + " pieces!") + "\n\n" + getBoard());
+            super.win(formatMessage(redPlayer, redPlayer.getDisplayName() + " wins by " + sum + " pieces!") + "\n\n" + getBoard());
         } else if (sum < 0) {
-            super.win(bluePlayer, formatMessage(bluePlayer, bluePlayer.getDisplayName() + " wins by " + (-sum) + " pieces!") + "\n\n" + getBoard());
+            super.win(formatMessage(bluePlayer, bluePlayer.getDisplayName() + " wins by " + (-sum) + " pieces!") + "\n\n" + getBoard());
         } else {
             super.tie("Even split of captures! The game is a tie.");
         }

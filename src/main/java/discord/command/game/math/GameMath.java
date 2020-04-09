@@ -44,9 +44,14 @@ public class GameMath extends TypeGame {
     }
 
     @Override
+    protected String getForfeitMessage(Member forfeiter) {
+        return "You forfeited.";
+    }
+
+    @Override
     protected void onStart() {
         genProblem();
-        super.setInfoDisplay("Start! Enter the answer:");
+        super.setInfoDisplay("**Start!** Enter the answer:");
 
         gameTimer.schedule(new TimerTask() {
             public void run() {
@@ -77,16 +82,16 @@ public class GameMath extends TypeGame {
     protected void onEnd() {
         String endMessage = "🛑 **Time's up!**\nYour score: `" + score + "`\n";
 
-        if (!highScores.containsKey(super.getThisTurnUser().getId())) {
-            highScores.put(super.getThisTurnUser().getId(), new Highscore(super.getThisTurnUser().getId().asLong(), score));
+        if (!highScores.containsKey(super.getPlayerThisTurn().getId())) {
+            highScores.put(super.getPlayerThisTurn().getId(), new Highscore(super.getPlayerThisTurn().getId().asLong(), score));
             endMessage += "\n**NEW HIGH SCORE!**\n\n";
             saveScores();
-        } else if (highScores.get(super.getThisTurnUser().getId()).validateNewScore(score)) {
+        } else if (highScores.get(super.getPlayerThisTurn().getId()).validateNewScore(score)) {
             endMessage += "\n**NEW HIGH SCORE!**\n\n";
             saveScores();
         }
 
-        endMessage += "Your best: `" + highScores.get(getThisTurnUser().getId()).getHighscore() + "`\n\n";
+        endMessage += "Your best: `" + highScores.get(getPlayerThisTurn().getId()).getHighscore() + "`\n\n";
         endMessage += getHighscores();
 
         super.setGameDisplay(endMessage);
