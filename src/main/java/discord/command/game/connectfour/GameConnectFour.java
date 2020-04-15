@@ -36,7 +36,12 @@ public class GameConnectFour extends ButtonGame {
 
     @Override
     protected String getForfeitMessage(Member forfeiter) {
-        return forfeiter.getMention() + " forfeits. " + super.getOtherUser(forfeiter).getMention() + " wins!\n\n" + getBoard();
+        return forfeiter.getMention() + " forfeited. " + super.getOtherUser(forfeiter).getMention() + " wins!\n\n" + getBoard();
+    }
+
+    @Override
+    protected String getIdleMessage(Member idler) {
+        return idler.getMention() + " failed to go in time. " + super.getOtherUser(idler).getMention() + " wins!\n\n" + getBoard();
     }
 
     private void assignPieces() {

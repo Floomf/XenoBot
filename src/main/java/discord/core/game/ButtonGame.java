@@ -32,7 +32,7 @@ public abstract class ButtonGame extends AbstractGame {
         if (super.isActive()) {
             Button button = buttonManager.getButton(reaction);
             if (button != null) {
-                if (button.equals(Button.EXIT) && (fromUser.equals(super.getPlayerThisTurn()) || fromUser.equals(super.getPlayerNextTurn()))) {
+                if (button.equals(Button.EXIT) && super.playerIsInGame(fromUser)) {
                     win(getForfeitMessage(fromUser));
                 } else if (isValidInput(button.getNumValue()) && fromUser.equals(super.getPlayerThisTurn())) {
                     onTurn(button.getNumValue());

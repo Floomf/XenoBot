@@ -22,8 +22,13 @@ public class GameTwentyThree extends ButtonGame {
     }
 
     @Override
-    protected String getForfeitMessage(Member member) {
-        return member.getMention() + " forfeits. " + super.getOtherUser(member).getMention() + " wins!";
+    protected String getForfeitMessage(Member forfeiter) {
+        return forfeiter.getMention() + " forfeited. " + super.getOtherUser(forfeiter).getMention() + " wins!";
+    }
+
+    @Override
+    protected String getIdleMessage(Member idler) {
+        return idler.getMention() + " failed to go in time. " + super.getOtherUser(idler).getMention() + " wins!";
     }
 
     @Override

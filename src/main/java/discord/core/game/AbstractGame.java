@@ -14,7 +14,7 @@ public abstract class AbstractGame {
     private final Message gameMessage;
 
     private final Member[] players;
-    private Timer afkTimer;
+    private Timer idleTimer;
 
     private boolean active;
     private int turn = 0;
@@ -23,13 +23,15 @@ public abstract class AbstractGame {
     public AbstractGame(Message message, Member[] players) {
         this.gameMessage = message;
         this.players = players;
-        this.afkTimer = new Timer();
+        this.idleTimer = new Timer();
         this.active = false;
     }
 
     abstract protected String getGameTitle();
 
     abstract protected String getForfeitMessage(Member forfeiter);
+
+    abstract protected String getIdleMessage(Member idler);
 
     //For setting up specific game types (button manager and message listener);
     abstract protected void setup();
@@ -42,11 +44,11 @@ public abstract class AbstractGame {
     abstract protected String getBoard();
 
     public final void start() {
-        if (!active) {
+        if (!active) { //is this necessary?
             playerThisTurn = players[0];
             active = true;
-            startAfkTimer(playerThisTurn);
             setup();
+            startIdleTimer(playerThisTurn);
             onStart();
         }
     }
@@ -65,9 +67,9 @@ public abstract class AbstractGame {
         end();
     }
 
-    protected final void end() {
-        if (active) {
-            afkTimer.cancel();
+    private final void end() {
+        if (active) { //is this necessary?
+            idleTimer.cancel();
             active = false;
             onEnd();
             GameManager.removeGame(gameMessage);
@@ -120,20 +122,19 @@ public abstract class AbstractGame {
     protected final void setupNextTurn() {
         playerThisTurn = getPlayerNextTurn();
         turn++;
-        startAfkTimer(playerThisTurn);
+        startIdleTimer(playerThisTurn);
     }
 
-    private void startAfkTimer(Member player) {
+    private void startIdleTimer(Member player) {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                win(player.getDisplayName() + " failed to go in time. "
-                        + getPlayerNextTurn().getDisplayName() + " wins!");
+                win(getIdleMessage(player));
             }
         };
-        afkTimer.cancel();
-        afkTimer = new Timer();
-        afkTimer.schedule(task, TimeUnit.MINUTES.toMillis(15));
+        idleTimer.cancel();
+        idleTimer = new Timer();
+        idleTimer.schedule(task, TimeUnit.MINUTES.toMillis(15));
     }
     
 }

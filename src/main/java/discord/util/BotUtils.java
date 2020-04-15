@@ -24,6 +24,10 @@ public class BotUtils {
         return guild.getRoles().filter(role -> role.getName().equalsIgnoreCase(name)).collectList().block().get(0);
     }
 
+    public static String getGuildEmojiString(Guild guild, String emojiName) {
+        return guild.getEmojis().filter(e -> e.getName().equals(emojiName)).collectList().block().get(0).asFormat(); //will break if emoji doesnt exist
+    }
+
     public static String buildUsage(String alias, String args, String desc) {
         return (String.format("`%s%s%s` \n\n%s", CommandManager.CMD_PREFIX, alias, args.isEmpty() ? "" : " " + args, desc));
     }

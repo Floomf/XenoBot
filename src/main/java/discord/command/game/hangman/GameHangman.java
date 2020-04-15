@@ -1,6 +1,9 @@
 package discord.command.game.hangman;
 
 import discord.core.game.TypeGame;
+import discord.data.UserManager;
+import discord.data.object.user.DUser;
+import discord.util.BotUtils;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import kong.unirest.Unirest;
@@ -14,6 +17,8 @@ public class GameHangman extends TypeGame {
 
     private String word;
     private String partOfSpeech;
+
+    private AnswerType type;
 
     private char[] wordProgress;
     private char[] guesses;
@@ -30,6 +35,7 @@ public class GameHangman extends TypeGame {
         assignRandomWord(type);
         wordProgress = new char[word.length()];
         guesses = new char[26];
+        this.type = type;
         Arrays.fill(guesses, '-');
 
         for (int i = 0; i < wordProgress.length; i++) {
@@ -59,7 +65,7 @@ public class GameHangman extends TypeGame {
             case LARGE:
                 return getRandIntInRange(13, 20);
             case HUGE:
-                return getRandIntInRange(21, 30);
+                return getRandIntInRange(21, 33);
         }
         return 0; //bad
     }
@@ -82,8 +88,8 @@ public class GameHangman extends TypeGame {
     private void assignRandomWord(AnswerType type) {
         Random r = new Random();
         String firstLetters = "abcdefghijklmnopqrstuwy";
-        String lettersToAdd = "?????????????????????????????"; //up to 29
-        String url = "https://api.datamuse.com/words?md=p&max=125&sp=";
+        String lettersToAdd = "????????????????????????????????"; //up to 33 letters total
+        String url = "https://api.datamuse.com/words?md=p&sp=";
         url += firstLetters.charAt(r.nextInt(firstLetters.length()));
         url += lettersToAdd.substring(0, getLettersFromType(type) - 1);
 
@@ -91,6 +97,7 @@ public class GameHangman extends TypeGame {
         JSONObject wordJson = wordsJson.getJSONObject(r.nextInt(wordsJson.length()));
 
         word = wordJson.getString("word");
+        System.out.println("Fetched " + word);
 
         if (wordJson.isNull("tags")) {
             partOfSpeech = "???";
@@ -106,12 +113,17 @@ public class GameHangman extends TypeGame {
 
     @Override
     protected String getForfeitMessage(Member forfeiter) {
-        return "**You forfeited.** The word was:\n\n```yaml\n" + word.toUpperCase() + "```\n" + getWordInfo();
+        return "**You forfeited.**";
+    }
+
+    @Override
+    protected String getIdleMessage(Member idler) {
+        return "**You failed to guess in time.** The word was:\n\n" + getFullWordAndInfo();
     }
 
     @Override
     protected void onStart() {
-        super.setGameDisplay("**Start!** Guess a letter:\n\n" + getWordGuessBox() + "\n" + getWordInfo());
+        super.setGameDisplay("**Start!** Guess a letter:\n\n" + getWordGuessAndInfo());
     }
 
     @Override
@@ -126,15 +138,22 @@ public class GameHangman extends TypeGame {
             }
 
             if (hasWon()) {
-                win("🎉 **You win!** The answer was:\n\n```yaml\n" + word.toUpperCase() + "```\n" + getWordInfo());
+                DUser user = UserManager.getDUserFromMember(super.getPlayerThisTurn());
+                if (user.getProg().isNotMaxLevel()) {
+                    user.getProg().addXP(getXPForAnswerType());
+                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo()
+                            + "\n\n`+" + getXPForAnswerType() + " XP` " + BotUtils.getGuildEmojiString(super.getGameMessage().getGuild().block(), "Pog"));
+                } else {
+                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo());
+                }
             } else {
                 super.setInfoDisplay("✅ **Yep!** Guess again:");
             }
         } else {
             triesLeft--;
             if (triesLeft == 0) {
-                win(getGameMessage().getGuild().block().getEmojis().filter(e -> e.getName().equals("PepeHands")).collectList().block().get(0).asFormat()
-                        + " **You lose.** The answer was:\n\n```yaml\n" + word.toUpperCase() + "```\n" + getWordInfo());
+                win(BotUtils.getGuildEmojiString(super.getGameMessage().getGuild().block(), "PepeHands")
+                        + " **You lose.** The answer was:\n\n" + getFullWordAndInfo());
             } else {
                 super.setInfoDisplay("❌ **Nope!** Guess again:");
             }
@@ -148,27 +167,9 @@ public class GameHangman extends TypeGame {
 
     @Override
     protected String getBoard() {
-        return getWordGuessBox() + "\n" + getWordInfo()
+        return getWordGuessAndInfo()
                 + "\n\n💬 Tries left: `" + triesLeft + "`"
                 + "\n🔠 **Guessed:**\n`" + new String(guesses).toUpperCase() + "`";
-    }
-
-    private String getWordGuessBox() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("```yaml\n");
-        for (char c : wordProgress) {
-            sb.append(c).append(" ");
-        }
-        sb.append("```");
-        return sb.toString();
-    }
-
-    private String getWordInfo() {
-        return "*(" + partOfSpeech + ", " + getLetters() + " Letters)*";
-    }
-
-    private int getLetters() {
-        return word.replace("-", "").replace(" ", "").length();
     }
 
     private boolean hasWon() {
@@ -176,6 +177,39 @@ public class GameHangman extends TypeGame {
             if (c == '_') return false;
         }
         return true;
+    }
+
+    private String getFullWordAndInfo() {
+        return "```yaml\n" + word.toUpperCase() + "```\n" + getWordInfo();
+    }
+
+    private String getWordGuessAndInfo() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("```yaml\n");
+        for (char c : wordProgress) {
+            sb.append(c).append(" ");
+        }
+        sb.append("```\n").append(getWordInfo());
+        return sb.toString();
+    }
+
+    private String getWordInfo() {
+        return "*(" + partOfSpeech + ", " + getLetterCount() + " Letters)*";
+    }
+
+    private int getLetterCount() {
+        return word.replace("-", "").replace(" ", "").length();
+    }
+
+    private int getXPForAnswerType() {
+        int index = 4;
+        for (AnswerType type : AnswerType.values()) {
+            if (this.type.equals(type)) {
+                return index * 5;
+            }
+            index--;
+        }
+        return 0;
     }
 
 }
