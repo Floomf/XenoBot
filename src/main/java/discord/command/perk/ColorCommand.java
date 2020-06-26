@@ -1,5 +1,7 @@
 package discord.command.perk;
 
+import discord.data.ShopManager;
+import discord.data.object.ShopItem;
 import discord.data.object.user.Progress;
 import discord.util.BotUtils;
 import discord.data.ColorManager;
@@ -11,10 +13,10 @@ import discord.data.object.user.DUser;
 import discord.data.object.Unlockable;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Member;
@@ -22,7 +24,6 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.object.entity.Message;
-import reactor.core.publisher.Flux;
 
 public class ColorCommand extends AbstractCommand {
 
@@ -42,26 +43,36 @@ public class ColorCommand extends AbstractCommand {
         //handle special arguments
         if (name.equals("list") || name.equals("choices")) {
             Unlockable[] unlockedColors = ColorManager.getUnlockedColorsForDUser(user);
+            List<String> purchasedColors = user.getPurchases().stream().filter(item -> item.getCategory() == ShopItem.Category.NAME_COLOR)
+                    .map(ShopItem::getName).collect(Collectors.toList());
 
             List<String> defaultColorMentions = message.getGuild().block().getRoles()
                     .filter(role -> ColorManager.isDefaultColor(role.getName())).map(Role::getMention).collectList().block();
             List<String> unlockedColorMentions = message.getGuild().block().getRoles()
                     .filter(role -> ColorManager.colorIsInArray(unlockedColors, role.getName())).map(Role::getMention).collectList().block();
+            List<String> purchasedColorMentions = message.getGuild().block().getRoles()
+                    .filter(role -> purchasedColors.contains(role.getName())).map(Role::getMention).collectList().block();
 
             //We have to reverse them due to the way they are ordered on discord
             Collections.reverse(defaultColorMentions);
             Collections.reverse(unlockedColorMentions);
+            Collections.reverse(purchasedColorMentions);
 
-            channel.createMessage(spec -> spec.setEmbed(MessageUtils.message("Available Colors", "", Color.WHITE)
+            channel.createEmbed(MessageUtils.getEmbed("Available Colors", "", Color.WHITE)
                     .andThen(embed -> {
                         embed.addField("Default", defaultColorMentions.toString().replace("[", "").replace("]", ""), false);
-                        embed.addField("Unlocked [" + unlockedColors.length + "/" + ColorManager.COLORS_UNLOCKS.length + "]",
-                                unlockedColorMentions.toString().replace("[", "").replace("]", ""), false);
+                        if (unlockedColorMentions.size() > 0) {
+                            embed.addField("Unlocked [" + unlockedColors.length + "/" + ColorManager.COLORS_UNLOCKS.length + "]",
+                                    unlockedColorMentions.toString().replace("[", "").replace("]", ""), false);
+                        }
+                            embed.addField("Purchased [" + purchasedColorMentions.size() + "/9]", //hardcoded
+                                    purchasedColorMentions.isEmpty() ? "`!shop`"
+                                            : purchasedColorMentions.toString().replace("[", "").replace("]", ""), false);
                         embed.setFooter(unlockedColors.length == ColorManager.COLORS_UNLOCKS.length
-                                ? "You've unlocked every color. Astounding."
-                                : "You can keep leveling to unlock more colors.", "");
-                    }))).block();
-
+                                ? "You've unlocked every color that's unlockable. Astounding."
+                                : (user.getProg().isMaxLevel() ? "You can prestige to unlock more colors."
+                                : "You can keep leveling to unlock more colors."), "");
+                    })).block();
             return;
         } else if (name.equals("none")) {
             message.getAuthorAsMember().block().edit(spec -> spec.setRoles(ColorManager.getMemberRolesNoColor(message.getAuthorAsMember().block()))).block();
@@ -70,16 +81,20 @@ public class ColorCommand extends AbstractCommand {
         }
 
         //check if color doesnt exist
-        if (!ColorManager.isColor(name)) {
+        if (!(ColorManager.isUnlockedColor(name) || ShopManager.isPurchasedColor(name))) {
             MessageUtils.sendErrorMessage(channel, "That color option does not exist.");
             return;
         }
 
-        Unlockable color = ColorManager.getColor(name);
+        //Unlockable color = ColorManager.getColor(name);
 
-        if (!user.hasUnlocked(color)) {
+        if (ColorManager.isUnlockedColor(name) && !user.hasUnlocked(ColorManager.getColor(name))) {
             MessageUtils.sendErrorMessage(channel, "You haven't unlocked that color yet. "
                     + "You can view your available colors with `!color list`.");
+            return;
+        } else if (ShopManager.isPurchasedColor(name) && !user.hasPurchased(name)) {
+            MessageUtils.sendErrorMessage(channel, "You haven't purchased that color yet. "
+                    + "You can view what colors you can buy using  `!shop`.");
             return;
         }
 
@@ -98,7 +113,7 @@ public class ColorCommand extends AbstractCommand {
 
         //set their roles, the same as before (minus last color role(s)) plus new color role
         member.edit(spec -> spec.setRoles(roles)).block();
-        MessageUtils.sendMessage(channel, "Info", "Painted your name in the color " + color + ".",
+        MessageUtils.sendMessage(channel, "Info", "Painted your name in the color " + colorRole.getMention() + ".",
                 colorRole.getColor());
     }
 

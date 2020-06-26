@@ -20,27 +20,17 @@ public class HangmanCommand extends AbstractCommand {
         super(new String[]{"hangman", "hm"}, 0, CommandCategory.GAME);
     }
 
-    @Override //TODO hacky and bad
+    @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        GameHangman.AnswerType type = GameHangman.AnswerType.MEDIUM;
-        if (args.length > 0) {
-            try {
-                type = GameHangman.AnswerType.valueOf(args[0].toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                MessageUtils.sendUsageMessage(channel, getUsage("hangman"));//eh
-                return;
-            }
-        }
-        Message gameMessage = channel.createMessage(spec -> spec.setEmbed(embed -> embed.setDescription("Ready..."))).block();
-        AbstractGame game = new GameHangman(gameMessage, new Member[] {message.getAuthorAsMember().block(), message.getAuthorAsMember().block()}, type);
-        GameManager.addGame(message, game);
+        Message gameMessage = channel.createEmbed(embed -> embed.setDescription("Ready..")).block();
+        AbstractGame game = new GameHangman(gameMessage, new Member[] {message.getAuthorAsMember().block()});
+        GameManager.addGame(gameMessage, game);
         game.start();
-        //GameManager.processGameCommand(message, channel, "Quick Math", GameMath.class);
     }
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[small/medium/large/huge]", "Play a game of Hangman.");
+        return BotUtils.buildUsage(alias, "", "Play a game of Hangman and earn money.");
     }
 
 }

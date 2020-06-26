@@ -1,8 +1,10 @@
 package discord.core.game;
 
 import discord.Main;
+import discord.data.UserManager;
 import discord4j.core.object.entity.Member;
 
+import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -12,17 +14,19 @@ import discord4j.core.object.entity.Message;
 public abstract class AbstractGame {
 
     private final Message gameMessage;
-
     private final Member[] players;
+    private int betAmount;
+
     private Timer idleTimer;
 
     private boolean active;
     private int turn = 0;
     private Member playerThisTurn;
 
-    public AbstractGame(Message message, Member[] players) {
+    public AbstractGame(Message message, Member[] players, int betAmount) {
         this.gameMessage = message;
         this.players = players;
+        this.betAmount = betAmount;
         this.idleTimer = new Timer();
         this.active = false;
     }
@@ -53,66 +57,139 @@ public abstract class AbstractGame {
         }
     }
 
+    protected final void win(String winMessage, Member winner, int winAmount) {
+        //TODO i cant think correctly clean this later
+        if (winAmount > 0) {
+            if (betAmount == 0 && players.length == 1) { //blackjack has bets but is singleplayer
+                long winnerID = winner.getId().asLong();
+                if (GameManager.usersMoneyEarned.containsKey(winnerID)
+                        && GameManager.usersMoneyEarned.get(winnerID) >= GameManager.EARN_LIMIT) {
+                    winMessage += "\n\n💵 **No money earned.**\n*(Limit resets at 9AM/9PM daily)*";
+                } else {
+                    if (!GameManager.usersMoneyEarned.containsKey(winnerID)) {
+                        GameManager.usersMoneyEarned.put(winnerID, 0);
+                    }
+
+                    if (GameManager.usersMoneyEarned.get(winnerID) + winAmount >= GameManager.EARN_LIMIT) { //shave off extra money to match the limit
+                        winAmount = GameManager.EARN_LIMIT - GameManager.usersMoneyEarned.get(winnerID);
+                        winMessage += "\n\n💵 **$" + winAmount + " earned.**\n(Earning limit reached)";
+                    } else {
+                        winMessage += "\n\n💵 **$" + winAmount + " earned.**";
+                    }
+                    GameManager.usersMoneyEarned.put(winnerID, GameManager.usersMoneyEarned.get(winnerID) + winAmount);
+                    UserManager.getDUserFromMember(winner).addBalance(winAmount);
+                }
+            } else {
+                UserManager.getDUserFromMember(winner).addBalance(winAmount);
+                winMessage += "\n\n💵 **$" + winAmount + " won.**";
+            }
+        }
+
+        //some games don't want getBoard() to display at end, so don't use setInfoDisplay()
+        setGameDisplay(winMessage, Color.decode("#43B581")); //discord online color
+        end();
+    }
+
+    protected final void win(String winMessage, Member winner) {
+        UserManager.getDUserFromUser(getOtherPlayer(winner)).addBalance(-betAmount); //will still fire if betAmount is 0
+        win(winMessage, winner, betAmount);
+    }
+
+    //used for single player games
     protected final void win(String winMessage) {
-        //some games don't want the board to display at end, so don't call updateMessageDisplay()
-        gameMessage.edit(spec -> spec.setEmbed(embed -> {
-            embed.setDescription(winMessage);
-            embed.setAuthor(getGameTitle(), "", Main.BOT_AVATAR_URL);
-        })).block();
+        win(winMessage + "\n\n" + getBoard(), getPThisTurn(), betAmount);
+    }
+
+    //used for single player games
+    protected final void lose(String loseMessage) {
+        if (betAmount > 0) {
+            UserManager.getDUserFromMember(getPThisTurn()).addBalance(-betAmount);
+            loseMessage += "\n\n💵 **$" + betAmount + " lost.**";
+        }
+        setGameDisplay(loseMessage, Color.decode("#F04747")); //discord dnd color
         end();
     }
 
     protected final void tie(String tieMessage) {
+        //bets are taken only when someone wins
         setInfoDisplay(tieMessage);
         end();
     }
 
-    private final void end() {
+    private void end() {
         if (active) { //is this necessary?
             idleTimer.cancel();
             active = false;
-            onEnd();
             GameManager.removeGame(gameMessage);
+            onEnd();
         }
+    }
+
+    protected void setBetAmount(int betAmount) {
+        this.betAmount = betAmount;
+    }
+
+    private void setEntireMessage(String outside, String embedText, Color color) {
+        gameMessage.edit(spec -> {
+            spec.setContent(outside);
+            spec.setEmbed(embed -> {
+                embed.setDescription(embedText);
+                embed.setAuthor(getGameTitle(), "", Main.BOT_AVATAR_URL);
+                embed.setColor(color);
+            });
+        }).block();
+    }
+
+    private void setEntireMessage(String outside, String embedText) {
+        setEntireMessage(outside, embedText, Color.WHITE);
+    }
+
+    protected final void setGameDisplay(String text) {
+        setEntireMessage("", text);
+    }
+
+    protected final void setGameDisplay(String text, Color color) {
+        setEntireMessage("", text, color);
+    }
+
+    protected final void setInfoDisplay(Member memberToPing, String info) {
+        setEntireMessage(memberToPing.getMention(), info + "\n\n" + getBoard());
+    }
+
+    protected final void setInfoDisplay(String info) {
+        setGameDisplay(info + "\n\n" + getBoard());
     }
 
     public final boolean isActive() {
         return active;
     }
 
-    protected final void setGameDisplay(String text) {
-        gameMessage.edit(spec -> spec.setEmbed(embed -> {
-            embed.setDescription(text);
-            embed.setAuthor(getGameTitle(), "", Main.BOT_AVATAR_URL);
-        })).block();
-    }
-
-    protected final void setInfoDisplay(String info) {
-         setGameDisplay(info + "\n\n" + getBoard());
-    }
-
     protected final Message getGameMessage() {
         return gameMessage;
     }
 
-    protected final Member getPlayerNextTurn() {
+    protected final int getBetAmount() {
+        return betAmount;
+    }
+
+    protected final Member getPNextTurn() {
         return players[(turn + 1) % players.length];
     }
 
-    protected final Member getPlayerThisTurn() {
+    protected final Member getPThisTurn() {
         return playerThisTurn;
     }
 
-    //Only works with 2 player games
-    protected final Member getOtherUser(Member player) {
-        if (player.equals(players[0])) {
-            return players[1];
+    //Works with 1-2 player games
+    protected final Member getOtherPlayer(Member player) {
+        if (player.equals(playerThisTurn)) {
+            return getPNextTurn();
         } else {
-            return players[0];
+            return playerThisTurn;
         }
     }
 
-    protected final boolean playerIsInGame(Member player) {
+    public final boolean playerIsInGame(Member player) {
         for (Member p : players) {
             if (p.equals(player)) return true;
         }
@@ -120,7 +197,7 @@ public abstract class AbstractGame {
     }
 
     protected final void setupNextTurn() {
-        playerThisTurn = getPlayerNextTurn();
+        playerThisTurn = getPNextTurn();
         turn++;
         startIdleTimer(playerThisTurn);
     }
@@ -129,12 +206,16 @@ public abstract class AbstractGame {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                win(getIdleMessage(player));
+                if (players.length == 1) {
+                    lose(getIdleMessage(player));
+                } else {
+                    win(getIdleMessage(player), getOtherPlayer(player));
+                }
             }
         };
         idleTimer.cancel();
         idleTimer = new Timer();
-        idleTimer.schedule(task, TimeUnit.MINUTES.toMillis(15));
+        idleTimer.schedule(task, TimeUnit.MINUTES.toMillis(10));
     }
     
 }

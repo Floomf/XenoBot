@@ -105,13 +105,13 @@ public class ColorManager {
         return colorIsInArray(COLORS_DEFAULT, name);
     }
 
-    public static boolean isColor(String name) {
+    public static boolean isUnlockedColor(String name) {
         return isDefaultColor(name) || colorIsInArray(COLORS_UNLOCKS, name);
     }
 
     public static Set<Snowflake> getMemberRolesNoColor(Member member) {
         return new HashSet<>(member.getRoles()
-                .filter(role -> !ColorManager.isColor(role.getName()))
+                .filter(role -> !(ColorManager.isUnlockedColor(role.getName()) || ShopManager.isPurchasedColor(role.getName())))
                 .map(Role::getId).collectList().block());
     }
 

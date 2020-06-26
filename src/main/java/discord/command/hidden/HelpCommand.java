@@ -38,8 +38,7 @@ public class HelpCommand extends AbstractCommand {
                     || (command.getCategory() == CommandCategory.ADMIN //take out admin if not owner
                     && !message.getAuthorAsMember().block().equals(message.getGuild().block().getOwner().block())));
 
-            channel.createMessage(spec -> spec.setEmbed(MessageUtils.message("Available Commands",
-                    "*For info on a command, use* **`!help [command]`**", Color.CYAN)
+            channel.createEmbed(MessageUtils.getEmbed("Available Commands", "*For info on a command, use* **`!help [command]`**", Color.CYAN)
                     .andThen(embed -> {
                         for (CommandCategory c : CommandCategory.values()) {
                             StringBuilder sb = new StringBuilder();
@@ -49,7 +48,7 @@ public class HelpCommand extends AbstractCommand {
                                 embed.addField(c.toString(), sb.toString(), false);
                             }
                         }
-                    }))).block();
+                    })).block();
 
         }
     }

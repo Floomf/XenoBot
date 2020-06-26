@@ -7,7 +7,7 @@ import discord4j.core.object.entity.Message;
 
 public class GameReversi extends TypeGame {
 
-    private static final int HEIGHT = 8, LENGTH = 8;
+    private static final int HEIGHT = 6, LENGTH = 6;
 
     private static final int RED = 1, BLUE = -1, EMPTY = 0, VALID = 2;
 
@@ -18,8 +18,8 @@ public class GameReversi extends TypeGame {
     private Member redPlayer;
     private Member bluePlayer;
 
-    public GameReversi(Message message, Member[] players) {
-        super(message, players);
+    public GameReversi(Message message, Member[] players, int betAmount) {
+        super(message, players, betAmount);
     }
 
     @Override
@@ -29,42 +29,43 @@ public class GameReversi extends TypeGame {
 
     @Override
     protected String getForfeitMessage(Member forfeiter) {
-        return forfeiter.getMention() + " forfeited. " + super.getOtherUser(forfeiter).getMention() + " wins!\n\n" + getBoard();
+        return forfeiter.getMention() + " forfeited.\n" + super.getOtherPlayer(forfeiter).getMention() + " wins!\n\n" + getBoard();
     }
 
     @Override
     protected String getIdleMessage(Member idler) {
-        return idler.getMention() + " failed to go in time. " + super.getOtherUser(idler).getMention() + " wins!\n\n" + getBoard();
+        return idler.getMention() + " failed to go in time.\n" + super.getOtherPlayer(idler).getMention() + " wins!\n\n" + getBoard();
     }
 
     @Override
     protected void onStart() {
-        //Starting pieces
-        board[3][3] = BLUE;
-        board[3][4] = RED;
-        board[4][3] = RED;
-        board[4][4] = BLUE;
-        redPlayer = super.getPlayerThisTurn();
-        bluePlayer = super.getPlayerNextTurn();
+        //Assign starting pieces
+        board[HEIGHT / 2 - 1][LENGTH / 2 - 1] = BLUE;
+        board[HEIGHT / 2 - 1][LENGTH / 2] = RED;
+        board[HEIGHT / 2][LENGTH / 2 - 1] = RED;
+        board[HEIGHT / 2][LENGTH / 2] = BLUE;
+        redPlayer = super.getPThisTurn();
+        bluePlayer = super.getPNextTurn();
         updateValidChoices(RED);
-        super.setInfoDisplay(formatMessage(redPlayer, "You start off, " + redPlayer.getMention()
+        super.setInfoDisplay(redPlayer, formatMessage(redPlayer, "You start off, " + redPlayer.getMention()
                 + "\nEnter a grid position to place your piece (like \"f4\"):"));
     }
 
     @Override
     protected void onTurn(String input) {
-        placePiece(getPieceForPlayer(super.getPlayerThisTurn()),
+        placePiece(getPieceForPlayer(super.getPThisTurn()),
                 getRowForGridNumber(input.charAt(1)), getColForGridLetter(input.charAt(0)));
 
-        if (updateValidChoices(getPieceForPlayer(super.getPlayerNextTurn()))) {
-            super.setInfoDisplay(super.getPlayerThisTurn().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
-                    + formatMessage(super.getPlayerNextTurn(), "Your turn, " + super.getPlayerNextTurn().getMention()));
+        if (updateValidChoices(getPieceForPlayer(super.getPNextTurn()))) {
+            super.setInfoDisplay(super.getPNextTurn(),
+                    super.getPThisTurn().getMention() + " went at **" + input.toUpperCase() + "**\n"
+                    + formatMessage(super.getPNextTurn(), "Your turn, " + super.getPNextTurn().getMention()));
         } else { //One player couldn't go
             super.setupNextTurn(); //Skip over their turn
-            if (updateValidChoices(getPieceForPlayer(super.getPlayerNextTurn()))) {
-                super.setInfoDisplay(super.getPlayerThisTurn().getDisplayName() + " went at `" + input.toUpperCase() + "`\n"
-                        + formatMessage(super.getPlayerNextTurn(), super.getPlayerThisTurn().getDisplayName()
-                        + " doesn't have a valid move. Your turn again, " + super.getPlayerNextTurn().getMention()));
+            if (updateValidChoices(getPieceForPlayer(super.getPNextTurn()))) {
+                super.setInfoDisplay(super.getPNextTurn(), super.getPThisTurn().getDisplayName() + " went at **" + input.toUpperCase() + "**\n"
+                        + formatMessage(super.getPNextTurn(), super.getPThisTurn().getDisplayName()
+                        + " doesn't have a valid move. Your turn again, " + super.getPNextTurn().getMention()));
             } else { //Both players couldn't go, so game is over
                 findWinner();
             }
@@ -73,7 +74,7 @@ public class GameReversi extends TypeGame {
 
     @Override
     protected boolean isValidInput(String input) {
-        if (input.matches("[a-h]\\d")) {  //regex for valid position on our grid
+        if (input.matches("[a-f]\\d")) {  //regex for valid position on our grid
             int row = getRowForGridNumber(input.charAt(1));
             int col = getColForGridLetter(input.charAt(0));
             return (row > -1 && row < HEIGHT && col > -1 && col < LENGTH && positionIsValidAt(row, col));
@@ -89,9 +90,9 @@ public class GameReversi extends TypeGame {
             }
         }
         if (sum > 0) {
-            super.win(formatMessage(redPlayer, redPlayer.getDisplayName() + " wins by " + sum + " pieces!") + "\n\n" + getBoard());
+            super.win(formatMessage(redPlayer, redPlayer.getMention() + " wins by **" + sum + "** pieces!") + "\n\n" + getBoard(), redPlayer);
         } else if (sum < 0) {
-            super.win(formatMessage(bluePlayer, bluePlayer.getDisplayName() + " wins by " + (-sum) + " pieces!") + "\n\n" + getBoard());
+            super.win(formatMessage(bluePlayer, bluePlayer.getMention() + " wins by **" + (-sum) + "** pieces!") + "\n\n" + getBoard(), bluePlayer);
         } else {
             super.tie("Even split of captures! The game is a tie.");
         }
@@ -179,7 +180,8 @@ public class GameReversi extends TypeGame {
             }
             sb.append("\n");
         }
-        sb.append("⏺🇦\u200B🇧\u200B🇨\u200B🇩\u200B🇪\u200B🇫\u200B🇬\u200B🇭"); //Theres some zero width spaces in here to prevent flag emojis
+        //sb.append("⏺🇦\u200B🇧\u200B🇨\u200B🇩\u200B🇪\u200B🇫\u200B🇬\u200B🇭"); //Theres some zero width spaces in here to prevent flag emojis
+        sb.append("⏺🇦\u200B🇧\u200B🇨\u200B🇩\u200B🇪\u200B🇫"); //Theres some zero width spaces in here to prevent flag emojis
 
         return sb.toString();
     }

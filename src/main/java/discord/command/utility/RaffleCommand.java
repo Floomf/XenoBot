@@ -50,8 +50,8 @@ public class RaffleCommand extends AbstractCommand {
         }
 
         Member winner = raffleUsers.get((int) (Math.random() * raffleUsers.size())).asMember(message.getGuild().block().getId()).block();
-        channel.createMessage(spec -> spec.setEmbed(MessageUtils.message("Winner! 🎉", winner.getMention(), winner.getColor().block())
-                .andThen(embed -> embed.setImage(winner.getAvatarUrl())))).block();
+        channel.createEmbed(MessageUtils.getEmbed("Winner! 🎉", winner.getMention(), winner.getColor().block())
+                .andThen(embed -> embed.setImage(winner.getAvatarUrl()))).block();
     }
 
     @Override

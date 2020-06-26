@@ -8,6 +8,7 @@ import discord.command.perk.DescCommand;
 import discord.command.perk.EmojiCommand;
 import discord.command.perk.NickCommand;
 import discord.data.ColorManager;
+import discord.data.object.TempShopItem;
 import discord.data.object.Unlockable;
 import discord.util.BotUtils;
 import discord.util.MessageUtils;
@@ -15,6 +16,7 @@ import discord4j.core.object.entity.Role;
 
 import java.awt.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Progress {
@@ -36,6 +38,8 @@ public class Progress {
     private Rank rank;
     private Prestige prestige;
     private Reincarnation reincarnation;
+    @JsonIgnore
+    private double xpMultiplier;
 
     @JsonCreator
     protected Progress(@JsonProperty("level") int level,
@@ -49,11 +53,13 @@ public class Progress {
         this.prestige = prestige;
         this.reincarnation = reincarnation;
         this.rank = prestige.isMax() ? Rank.getMaxRank() : Rank.getRankForLevel(level);
+        this.xpMultiplier = 1.0;
     }
 
     protected Progress() {
         setDefaultStats();
-        reincarnation = new Reincarnation(0);
+        this.reincarnation = new Reincarnation(0);
+        this.xpMultiplier = 1.0;
     }
 
     public int getLevel() {
@@ -82,7 +88,7 @@ public class Progress {
 
     @JsonIgnore
     public double getXPMultiplier() {
-        return GLOBAL_XP_MULTIPLIER * (0.5 * reincarnation.getNumber() + 1.0);
+        return GLOBAL_XP_MULTIPLIER * xpMultiplier * (0.5 * reincarnation.getNumber() + 1.0);
     }
 
     @JsonIgnore
@@ -240,7 +246,7 @@ public class Progress {
         user.getName().verifyOnGuild();
         BotUtils.getGuildTextChannel("log", user.asGuildMember().getGuild().block()).createMessage(spec -> {
             spec.setContent(user.asGuildMember().getMention());
-            spec.setEmbed(MessageUtils.message("PRESTIGE UP!", String.format("**%d → %d**",
+            spec.setEmbed(MessageUtils.getEmbed("PRESTIGE UP!", String.format("**%d → %d**",
                     prestige.getNumber() - 1, prestige.getNumber()), Color.BLACK));
         }).block();
 
@@ -275,7 +281,7 @@ public class Progress {
         reincarnation = reincarnation.reincarnate();
         BotUtils.getGuildTextChannel("log", user.asGuildMember().getGuild().block()).createMessage(spec -> {
             spec.setContent(user.asGuildMember().getMention());
-            spec.setEmbed(MessageUtils.message("REINCARNATION", "**" + reincarnation.getRomaji() + "**", Color.PINK));
+            spec.setEmbed(MessageUtils.getEmbed("REINCARNATION", "**" + reincarnation.getRomaji() + "**", Color.PINK));
         }).block();
 
         int carryXP = getTotalXPThisLife() - getTotalXPToPrestige(Prestige.MAX_PRESTIGE); //need to store
@@ -296,7 +302,7 @@ public class Progress {
             final int p = i;
             BotUtils.getGuildTextChannel("log", user.asGuildMember().getGuild().block()).createMessage(spec -> {
                 spec.setContent(user.asGuildMember().getMention());
-                spec.setEmbed(MessageUtils.message("PRESTIGE UP!", String.format("**%d → %d**", p - 1, p), Color.BLACK));
+                spec.setEmbed(MessageUtils.getEmbed("PRESTIGE UP!", String.format("**%d → %d**", p - 1, p), Color.BLACK));
             }).block();
         }
 
@@ -358,7 +364,7 @@ public class Progress {
                 if (user.getPrefs().get(Pref.MENTION_RANKUP)) { //TODO clean up this up
                     BotUtils.getGuildTextChannel("log", user.asGuildMember().getGuild().block()).createMessage(spec -> {
                         spec.setContent(user.asGuildMember().getMention());
-                        spec.setEmbed(MessageUtils.message("Rank up!", "**" + rank.getName() + " → " + rankNeeded.getName() + "**",
+                        spec.setEmbed(MessageUtils.getEmbed("Rank up!", "**" + rank.getName() + " → " + rankNeeded.getName() + "**",
                                 user.asGuildMember().getColor().block()));
                     }).block();
                 } else {
@@ -394,6 +400,30 @@ public class Progress {
         }
     }
 
+    protected void onPurchaseMultiplier(TempShopItem item) {
+        double tempMultiplier;
+        if (item.getName().toLowerCase().startsWith("triple")) { //little hacky
+            tempMultiplier = 3.0;
+        } else {
+            tempMultiplier = 2.0;
+        }
+        xpMultiplier = tempMultiplier;
+        user.asGuildMember().getPrivateChannel().block().createEmbed(MessageUtils.getEmbed("Info",
+                "You will now receive **" + tempMultiplier + "x** XP for the next **" + item.getHours() + "h**.", Color.CYAN)).block();
+
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        xpMultiplier = 1.0;
+                        user.asGuildMember().getPrivateChannel().block().createEmbed(MessageUtils.getEmbed("Info",
+                                "Your purchased XP boost has run out.", Color.CYAN)).block();
+                        user.getPurchases().remove(item);
+                    }
+                }, TimeUnit.HOURS.toMillis(item.getHours())
+        );
+    }
+
     private void setDefaultStats() {
         level = 1;
         xp = 0;
@@ -405,5 +435,4 @@ public class Progress {
     private void genXPTotalForLevelUp() {
         xpTotalForLevelUp = level * XP_SCALE + XP_FLAT;
     }
-
 }

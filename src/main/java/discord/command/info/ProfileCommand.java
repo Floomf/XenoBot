@@ -22,7 +22,7 @@ import discord4j.core.object.entity.Message;
 public class ProfileCommand extends AbstractCommand {
 
     public ProfileCommand() {
-        super(new String[]{"profile", "prof"}, 0, CommandCategory.INFO);
+        super(new String[]{"profile", "prof", "bal", "balance"}, 0, CommandCategory.INFO);
     }
 
     //code copy and paste
@@ -32,7 +32,7 @@ public class ProfileCommand extends AbstractCommand {
             List<User> mentions = message.getUserMentions().onErrorResume(e -> Flux.empty()).collectList().block();
             if (!mentions.isEmpty()) {
                 if (UserManager.databaseContainsUser(mentions.get(0))) {
-                    channel.createMessage(spec -> spec.setEmbed(buildProfileInfo(UserManager.getDUserFromID(mentions.get(0).getId().asLong())))).block();
+                    channel.createEmbed(buildProfileInfo(UserManager.getDUserFromID(mentions.get(0).getId().asLong()))).block();
                 } else {
                     MessageUtils.sendErrorMessage(channel, "Couldn't find that user in the database. Are they a bot?");
                 }
@@ -40,7 +40,7 @@ public class ProfileCommand extends AbstractCommand {
                 MessageUtils.sendErrorMessage(channel, "Couldn't parse a user. Please @mention them.");
             }
         } else {
-            channel.createMessage(spec -> spec.setEmbed(buildProfileInfo(UserManager.getDUserFromMessage(message)))).block();
+            channel.createEmbed(buildProfileInfo(UserManager.getDUserFromMessage(message))).block();
         }
     }
 
@@ -69,12 +69,10 @@ public class ProfileCommand extends AbstractCommand {
         builder.addTotalXP();
         if (prestige.isPrestiged() || reincarnation.isReincarnated()) {
             builder.addTotalLevel();
-            if (prestige.isPrestiged()) {
-                builder.addBadgeCase();
-            }
         }
-        if (user.getProg().isNotMaxLevel() && !user.getProg().getPrestige().isMax()) {
-            builder.addBarProgressToMaxLevel();
+        builder.addBalance();
+        if (prestige.isPrestiged()) {
+            builder.addBadgeCase();
         }
         return builder.build();
     }

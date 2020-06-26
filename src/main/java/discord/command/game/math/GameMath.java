@@ -3,8 +3,6 @@ package discord.command.game.math;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.core.game.Highscore;
 import discord.core.game.TypeGame;
-import discord.data.UserManager;
-import discord.data.object.user.DUser;
 import discord.util.ProfileBuilder;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -17,16 +15,16 @@ import java.util.concurrent.TimeUnit;
 
 public class GameMath extends TypeGame {
 
-    private Timer gameTimer = new Timer();
-    private Random rand = new Random();
+    private final Timer gameTimer = new Timer();
+    private final Random rand = new Random();
 
-    private int[] elements = new int[2];
+    private final int[] elements = new int[2];
     private char operation;
 
     private int score = 0;
 
     //tried using TreeMap but it sorts the keys not the values
-    private static HashMap<Snowflake, Highscore> highScores = new HashMap<>();
+    private static final HashMap<Snowflake, Highscore> highScores = new HashMap<>();
 
     static {
         try {
@@ -38,7 +36,7 @@ public class GameMath extends TypeGame {
     }
 
     public GameMath(Message message, Member[] players) {
-        super(message, players);
+        super(message, players, 0);
     }
 
     @Override
@@ -88,27 +86,20 @@ public class GameMath extends TypeGame {
     }
 
     private void endGame() {
-        String endMessage = "🛑 **Time's up!**\nYour score: `" + score + "`\n";
+        String endMessage = "🛑 *Time's up!*\nYour score: **" + score + "**\n";
 
-        if (!highScores.containsKey(super.getPlayerThisTurn().getId())) {
-            highScores.put(super.getPlayerThisTurn().getId(), new Highscore(super.getPlayerThisTurn().getId().asLong(), score));
+        if (!highScores.containsKey(super.getPThisTurn().getId())) {
+            highScores.put(super.getPThisTurn().getId(), new Highscore(super.getPThisTurn().getId().asLong(), score));
             endMessage += "\n**NEW HIGH SCORE!**\n\n";
             saveScores();
-        } else if (highScores.get(super.getPlayerThisTurn().getId()).validateNewScore(score)) {
+        } else if (highScores.get(super.getPThisTurn().getId()).validateNewScore(score)) {
             endMessage += "\n**NEW HIGH SCORE!**\n\n";
             saveScores();
         }
 
-        endMessage += "Your best: `" + highScores.get(getPlayerThisTurn().getId()).getHighscore() + "`\n\n";
-
-        DUser user = UserManager.getDUserFromMember(super.getPlayerThisTurn());
-        if (user.getProg().isNotMaxLevel() && score > 0) {
-            user.getProg().addXP(score);
-            endMessage += "`+"  + score + " XP`\n\n";
-        }
-
+        endMessage += "Your best: **" + highScores.get(getPThisTurn().getId()).getHighscore() + "**\n\n";
         endMessage += getHighscores();
-        super.win(endMessage);
+        super.win(endMessage, super.getPThisTurn(), 3 * score);
     }
 
     @Override
@@ -118,7 +109,7 @@ public class GameMath extends TypeGame {
 
     @Override
     protected String getBoard() {
-        return "`" + elements[0] + " " + operation + " " + elements[1] + "`\n\nScore: " + score;
+        return "```" + elements[0] + " " + operation + " " + elements[1] + "```\n\nScore: " + score;
     }
 
     private boolean isCorrect(int answer) {
@@ -148,7 +139,7 @@ public class GameMath extends TypeGame {
         int currPlace = 1;
         int lastScore = -1;
         for (Highscore score : sortedScores) {
-            if (currPlace > 10) { //Only show top 10
+            if (currPlace > 5) { //Only show top 5
                 break;
             }
 
@@ -166,9 +157,9 @@ public class GameMath extends TypeGame {
     }
 
     private static String getFormattedPlace(int place) {
-        if (place == 1) return "🥇   ";
-        else if (place == 2) return "🥈   ";
-        else if (place == 3) return "🥉   ";
+        if (place == 1) return "🥇 ";
+        else if (place == 2) return "🥈 ";
+        else if (place == 3) return "🥉 ";
         else return "**" + ProfileBuilder.getOrdinal(place) + ")**";
     }
 

@@ -15,12 +15,13 @@ public class ConnectFourCommand extends AbstractCommand {
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        GameManager.processGameCommand(message, channel, "Connect 4", GameConnectFour.class);
+        GameManager.processGameCommand(message, channel, args, "Connect 4", GameConnectFour.class);
     }
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "@mention", "Play a game of Connect 4 with someone.");
+        return BotUtils.buildUsage(alias, "@mention [bet]", "Play a game of Connect 4 with someone. " +
+                "You can also specify a bet for a money match.");
     }
 
 }

@@ -8,7 +8,6 @@ import discord.util.BotUtils;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import discord.util.MessageUtils;
@@ -18,11 +17,19 @@ import discord4j.core.object.entity.TextChannel;
 public class TopCommand extends AbstractCommand {
 
     public TopCommand() {
-        super(new String[]{"top", "leaderboard", "rankings"}, 0, CommandCategory.INFO);
+        super(new String[]{"top", "leaderboard", "rankings"}, 1, CommandCategory.INFO);
     }
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
+        final int amount = 10;
+        String type = args[0].toLowerCase();
+        if (!type.matches("xp|bal|balance")) {
+            MessageUtils.sendUsageMessage(channel, getUsage(super.getName()));
+            return;
+        }
+
+        /*
         if (args.length > 0 && args[0].matches("\\D+")) {
             MessageUtils.sendErrorMessage(channel, "Couldn't parse a valid amount of users to display.");
             return;
@@ -37,37 +44,50 @@ public class TopCommand extends AbstractCommand {
                 MessageUtils.sendErrorMessage(channel, "Please specify a valid amount of users (1-25) to display.");
                 return;
             }
-        }
+        }*/
 
         List<DUser> users = new ArrayList<>(UserManager.getDUsers());
         users.removeIf(user -> user.asGuildMember() == null);
-        users.sort((DUser user1, DUser user2) -> user1.getProg().getTotalXP() - user2.getProg().getTotalXP());
-        Collections.reverse(users);
+
+        if (type.equals("xp")) {
+            users.sort((DUser user1, DUser user2) -> user2.getProg().getTotalXP() - user1.getProg().getTotalXP());
+        } else {
+            users.sort((DUser user1, DUser user2) -> user2.getBalance() - user1.getBalance());
+        }
+
         StringBuilder desc = new StringBuilder();
         for (int i = 0; i < amount; i++) {
             DUser user = users.get(i);
-            desc.append(String.format("**%d)** %s `Lvl `**`%,d`**`  -  `**`%,d`**` XP`\n",
-                    i + 1,
-                    user.asGuildMember().getMention(),
-                    user.getProg().getTotalLevel(),
-                    user.getProg().getTotalXP()));
+            if (type.equals("xp")) {
+                desc.append(String.format("**%d)** %s Lvl **%,d** ― **%,d** XP\n",
+                        i + 1,
+                        user.asGuildMember().getMention(),
+                        user.getProg().getTotalLevel(),
+                        user.getProg().getTotalXP()));
+            } else {
+                desc.append(String.format("**%d)** %s ― **$%,d**\n",
+                        i + 1,
+                        user.asGuildMember().getMention(),
+                        user.getBalance()));
+            }
         }
 
-        int totalXP = 0;
-        for (DUser user : users) {
-            totalXP += user.getProg().getTotalXP();
+        if (type.equals("xp")) {
+            int totalXP = 0;
+            for (DUser user : users) {
+                totalXP += user.getProg().getTotalXP();
+            }
+            int finalTotalXP = totalXP; //peepoo
+            channel.createEmbed(MessageUtils.getEmbed("Top " + amount + " Progressed Users 📈", desc.toString(), Color.CYAN)
+                    .andThen(embed -> embed.setFooter(String.format("%,d", finalTotalXP) + " XP has been earned on this guild.", ""))).block();
+        } else {
+            channel.createEmbed(MessageUtils.getEmbed("Top " + amount + " Richest Users 💰", desc.toString(), Color.CYAN)).block();
         }
-
-        int finalAmount = amount; //poooopeee
-        int finalTotalXP = totalXP; //peepoo
-        channel.createMessage(spec -> spec.setEmbed(MessageUtils.message("Top " + finalAmount + " Users", desc.toString(), Color.CYAN)
-                .andThen(embed -> embed.setFooter(String.format("%,d", finalTotalXP) + " XP has been earned on this guild.", "")))).block();
     }
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "", "View the top users progressed on this guild."
-                + "\n\nOptionally, you can specify a number (1-25) of users to display as an argument.");
+        return BotUtils.buildUsage(alias, "[xp/balance]", "View the top users on this guild, sorted by total XP or current balance.");
     }
 
 }

@@ -8,8 +8,8 @@ public abstract class ButtonGame extends AbstractGame {
 
     private final ButtonManager buttonManager;
 
-    public ButtonGame(Message message, Member[] players) {
-        super(message, players);
+    public ButtonGame(Message message, Member[] players, int betAmount) {
+        super(message, players, betAmount);
         this.buttonManager = new ButtonManager();
     }
 
@@ -20,7 +20,9 @@ public abstract class ButtonGame extends AbstractGame {
 
     @Override
     protected final void setup() {
-        buttonManager.addButton(super.getGameMessage(), Button.EXIT);
+        if (!super.getPThisTurn().equals(super.getPNextTurn())) { //hack to check for multi player game
+            buttonManager.addButton(super.getGameMessage(), Button.EXIT);
+        }
     }
 
     @Override
@@ -33,8 +35,8 @@ public abstract class ButtonGame extends AbstractGame {
             Button button = buttonManager.getButton(reaction);
             if (button != null) {
                 if (button.equals(Button.EXIT) && super.playerIsInGame(fromUser)) {
-                    win(getForfeitMessage(fromUser));
-                } else if (isValidInput(button.getNumValue()) && fromUser.equals(super.getPlayerThisTurn())) {
+                    win(getForfeitMessage(fromUser), super.getOtherPlayer(fromUser));
+                } else if (isValidInput(button.getNumValue()) && fromUser.equals(super.getPThisTurn())) {
                     onTurn(button.getNumValue());
                     if (super.isActive()) {
                         super.setupNextTurn();

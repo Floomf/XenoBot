@@ -32,7 +32,7 @@ public class ProgressCommand extends AbstractCommand {
             List<User> mentions = message.getUserMentions().onErrorResume(e -> Flux.empty()).collectList().block();
             if (!mentions.isEmpty()) {
                 if (UserManager.databaseContainsUser(mentions.get(0))) {
-                    channel.createMessage(spec -> spec.setEmbed(buildProgressInfo(UserManager.getDUserFromID(mentions.get(0).getId().asLong())))).block();
+                    channel.createEmbed(buildProgressInfo(UserManager.getDUserFromID(mentions.get(0).getId().asLong()))).block();
                 } else {
                     MessageUtils.sendErrorMessage(channel, "Couldn't find that user in the database. Are they a bot?");
                 }
@@ -40,7 +40,7 @@ public class ProgressCommand extends AbstractCommand {
                 MessageUtils.sendErrorMessage(channel, "Couldn't parse a user. Please @mention them.");
             }
         } else {
-            channel.createMessage(spec -> spec.setEmbed(buildProgressInfo(UserManager.getDUserFromMessage(message)))).block();
+            channel.createEmbed(buildProgressInfo(UserManager.getDUserFromMessage(message))).block();
         }
     }
 

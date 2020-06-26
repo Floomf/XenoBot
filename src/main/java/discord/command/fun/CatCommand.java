@@ -16,10 +16,10 @@ public class CatCommand extends AbstractCommand {
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        channel.createMessage(spec -> spec.setEmbed(embed -> embed.setImage(
+        channel.createEmbed(embed -> embed.setImage(
                 Unirest.get("https://api.thecatapi.com/v1/images/search")
                         .header("x-api-key", "82ac98b9-6bc2-4e04-9401-9949905f1f92") //shhh
-                        .asJson().getBody().getArray().getJSONObject(0).getString("url")))).block();
+                        .asJson().getBody().getArray().getJSONObject(0).getString("url"))).block();
     }
 
     @Override

@@ -15,23 +15,23 @@ public class MathCommand extends AbstractCommand {
         super(new String[]{"math"}, 0, CommandCategory.GAME);
     }
 
-    @Override //TODO hacky and bad
+    @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        Message gameMessage = channel.createMessage(spec -> spec.setEmbed(embed -> embed.setDescription("Ready..."))).block();
+        Message gameMessage = channel.createEmbed(embed -> embed.setDescription("Ready..")).block();
         try {
-            Thread.sleep(2000L);
+            Thread.sleep(1500L);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        AbstractGame game = new GameMath(gameMessage, new Member[] {message.getAuthorAsMember().block(), message.getAuthorAsMember().block()});
-        GameManager.addGame(message, game);
+        AbstractGame game = new GameMath(gameMessage, new Member[] {message.getAuthorAsMember().block()});
+        GameManager.addGame(gameMessage, game);
         game.start();
         //GameManager.processGameCommand(message, channel, "Quick Math", GameMath.class);
     }
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "", "Play a game of Quick Math.");
+        return BotUtils.buildUsage(alias, "", "Play a game of Quick Math and earn money.");
     }
 
 }

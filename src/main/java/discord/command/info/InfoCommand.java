@@ -47,17 +47,17 @@ public class InfoCommand extends AbstractCommand {
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        channel.createMessage(spec -> spec.setEmbed(embed -> {
+        channel.createEmbed(embed -> {
             embed.setAuthor(message.getClient().getSelf().block().getUsername(), "", "");
             embed.setThumbnail(message.getClient().getSelf().block().getAvatarUrl());
             embed.setColor(Color.CYAN);
 
-            embed.addField("Version 🏷", "`" + BotUtils.getVersion() + "`", true);
-            embed.addField("Uptime 🕓", "`" + formatElapsedTime(System.currentTimeMillis() - START_TIME) + "`", true);
-            embed.addField("Guilds 🏘", "`" + message.getClient().getGuilds().collectList().block().size() + "`", true);
-            embed.addField("Users 🚹", "`" + UserManager.size() + "`", true);
-            embed.addField("Commands ⌨", "`" + CommandManager.getAllCommands().size() + "`", true);
-        })).block();
+            embed.addField("Version 🏷", BotUtils.getVersion(), true);
+            embed.addField("Uptime 🕓", formatElapsedTime(System.currentTimeMillis() - START_TIME), true);
+            embed.addField("Guilds 🏘", String.valueOf(message.getClient().getGuilds().collectList().block().size()), true);
+            embed.addField("Users 🚹", String.valueOf(UserManager.getDUsers().size()), true);
+            embed.addField("Commands ⌨", String.valueOf(CommandManager.getAllCommands().size()), true);
+        }).block();
     }
 
     @Override

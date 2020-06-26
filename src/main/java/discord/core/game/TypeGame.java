@@ -6,8 +6,8 @@ import discord4j.core.object.entity.Message;
 
 public abstract class TypeGame extends AbstractGame {
 
-    public TypeGame(Message message, Member[] players) {
-        super(message, players);
+    public TypeGame(Message message, Member[] players, int betAmount) {
+        super(message, players, betAmount);
     }
 
     //Games are responsible for calling updateMessageDisplay() each turn
@@ -33,11 +33,11 @@ public abstract class TypeGame extends AbstractGame {
                 if (userMessage.getContent().orElse("").equalsIgnoreCase("forfeit")
                     || userMessage.getContent().orElse("").equalsIgnoreCase("ff")) {
                     userMessage.delete().block();
-                    win(getForfeitMessage(fromMember));
+                    win(getForfeitMessage(fromMember), super.getOtherPlayer(fromMember));
                     return;
                 }
 
-                if (fromMember.equals(super.getPlayerThisTurn())) {
+                if (fromMember.equals(super.getPThisTurn())) {
                     String input = userMessage.getContent().orElse("").toLowerCase().trim();
                     userMessage.delete().block();
                     if (isValidInput(input)) {

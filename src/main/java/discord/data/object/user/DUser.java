@@ -3,19 +3,25 @@ package discord.data.object.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord.command.admin.MultiplierCommand;
+import discord.data.object.ShopItem;
+import discord.data.object.TempShopItem;
 import discord.data.object.Unlockable;
 import discord4j.core.object.entity.Member;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DUser {
 
     private final long discordID;
     private final Name name;
+    private String desc;
     private final Progress prog;
     private final HashMap<Pref, Boolean> prefs;
 
-    private String desc;
+    private int balance;
+    private final ArrayList<ShopItem> purchases;
 
     //we want this final but can't deserialize it?
     @JsonIgnore
@@ -26,12 +32,16 @@ public class DUser {
                  @JsonProperty("name") Name name,
                  @JsonProperty("desc") String desc,
                  @JsonProperty("prog") Progress progress,
-                 @JsonProperty("prefs") HashMap<Pref, Boolean> prefs) {
+                 @JsonProperty("prefs") HashMap<Pref, Boolean> prefs,
+                 @JsonProperty("balance") int balance,
+                 @JsonProperty("purchases") ArrayList<ShopItem> purchases) {
         this.discordID = discordID;
         this.name = name;
         this.prog = progress;
         this.desc = desc;
         this.prefs = prefs;
+        this.balance = balance;
+        this.purchases = purchases;
         this.name.setUser(this);
         this.prog.setUser(this);
     }
@@ -46,6 +56,8 @@ public class DUser {
         this.prefs.put(Pref.MENTION_RANKUP, true);
         this.prefs.put(Pref.NOTIFY_UNLOCK, true);
         this.prefs.put(Pref.AUTO_PRESTIGE, false);
+        this.balance = 100;
+        this.purchases = new ArrayList<>();
         this.name.setUser(this);
         this.prog.setUser(this);
         verifyOnGuild();
@@ -79,9 +91,42 @@ public class DUser {
         return prefs;
     }
 
+    public int getBalance() {
+        return balance;
+    }
+
+    //for jackson only, don't know how else to save it
+    public ArrayList<ShopItem> getPurchases() {
+        return purchases;
+    }
+
     @JsonIgnore
     public void setGuildMember(Member guildMember) {
         this.guildMember = guildMember;
+    }
+
+    public void addBalance(int balToAdd) {
+        balance += balToAdd;
+    }
+
+    public void purchase(ShopItem item) {
+        balance -= item.getPrice();
+        purchases.add(item);
+        if (item.getCategory() == ShopItem.Category.XP_MULTIPLIER) {
+            prog.onPurchaseMultiplier((TempShopItem) item);
+        }
+    }
+
+    public boolean canPurchase(ShopItem item) {
+        return balance >= item.getPrice();
+    }
+
+    public boolean hasPurchased(ShopItem item) {
+        return hasPurchased(item.getName());
+    }
+
+    public boolean hasPurchased(String name) {
+        return purchases.stream().anyMatch(item -> item.getName().equalsIgnoreCase(name));
     }
 
     public boolean hasUnlocked(Unlockable unlockable) {

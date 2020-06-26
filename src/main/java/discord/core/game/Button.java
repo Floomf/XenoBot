@@ -13,6 +13,10 @@ public enum Button {
     SEVEN(ReactionEmoji.unicode("\u0037\u20E3"), 7),
     EIGHT(ReactionEmoji.unicode("\u0038\u20E3"), 8),
 
+    H(ReactionEmoji.unicode("\uD83C\uDDED"), 1),
+    S(ReactionEmoji.unicode("🇸"), 2),
+    D(ReactionEmoji.unicode("\uD83C\uDDE9"), 3),
+
     CHECKMARK(ReactionEmoji.unicode("\u2705"), 0),
     EXIT(ReactionEmoji.unicode("\uD83D\uDEAB"), 0);
 

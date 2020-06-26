@@ -30,40 +30,40 @@ public class ProfileBuilder {
     }
 
     public ProfileBuilder addDesc() {
-        embed = embed.andThen(embed -> embed.setDescription("*`" + user.getDesc() + "`*"));
+        embed = embed.andThen(embed -> embed.setDescription("***" + user.getDesc() + "***"));
         return this;
     }
 
     public ProfileBuilder addRank() {
-        embed = embed.andThen(embed -> embed.addField("Rank :trident:", "`" + prog.getRank().getName()
-                + (prog.getRank().isMax() ? "` (Max)" : "`"), true));
+        embed = embed.andThen(embed -> embed.addField("Rank :trident:", "" + prog.getRank().getName()
+                + (prog.getRank().isMax() ? " *(Max)*" : ""), true));
         return this;
     }
 
     public ProfileBuilder addLevel() {
-        embed = embed.andThen(embed -> embed.addField("Level :gem:", "`" + prog.getLevel()
-                + (prog.isMaxLevel() ? "` (Max)" : "`"), true));
+        embed = embed.andThen(embed -> embed.addField("Level :gem:", "" + prog.getLevel()
+                + (prog.isMaxLevel() ? " *(Max)*" : ""), true));
         return this;
     }
 
     public ProfileBuilder addXPProgress() {
         DecimalFormat formatter = new DecimalFormat("#.###");
-        embed = embed.andThen(embed -> embed.addField("XP :diamond_shape_with_a_dot_inside:", "`"
-                + formatter.format(prog.getXP()) + " / " + prog.getXpTotalForLevelUp() + "`", true));
+        embed = embed.andThen(embed -> embed.addField("XP :diamond_shape_with_a_dot_inside:", ""
+                + formatter.format(prog.getXP()) + " / " + prog.getXpTotalForLevelUp() + "", true));
         return this;
     }
 
     public ProfileBuilder addPrestige() {
-        embed = embed.andThen(embed -> embed.addField("Prestige :trophy:", "`" + getOrdinal(prog.getPrestige().getNumber()) + "`"
+        embed = embed.andThen(embed -> embed.addField("Prestige :trophy:", "" + getOrdinal(prog.getPrestige().getNumber()) + ""
                 + " (" + prog.getPrestige().getBadge() + ")"
-                + (prog.getPrestige().isMax() ? " (Max)" : ""), true));
+                + (prog.getPrestige().isMax() ? " *(Max)*" : ""), true));
         return this;
     }
 
     public ProfileBuilder addReincarnation() {
-        embed = embed.andThen(embed -> embed.addField("Reincarnation :white_flower:", "`" + getOrdinal(prog.getReincarnation().getNumber())
-                + " (" + prog.getReincarnation().getKanji()
-                + "-" + prog.getReincarnation().getRomaji() + ")`", true));
+        embed = embed.andThen(embed -> embed.addField("Reincarnation :white_flower:", "" + getOrdinal(prog.getReincarnation().getNumber())
+                + " *(" + prog.getReincarnation().getKanji()
+                + "-" + prog.getReincarnation().getRomaji() + ")*", true));
         return this;
     }
 
@@ -85,12 +85,12 @@ public class ProfileBuilder {
 
     public ProfileBuilder addTotalLevel() {
         embed = embed.andThen(embed -> embed.addField("Total Level :arrows_counterclockwise:",
-                "`" + String.format("%,d", prog.getTotalLevel()) + "`", true));
+                "" + String.format("%,d", prog.getTotalLevel()) + "", true));
         return this;
     }
 
     public ProfileBuilder addTotalXP() {
-        embed = embed.andThen(embed -> embed.addField("Total XP :clock4:", "`" + String.format("%,d", prog.getTotalXP()) + "`", true));
+        embed = embed.andThen(embed -> embed.addField("Total XP :clock4:", "" + String.format("%,d", prog.getTotalXP()) + "", true));
         return this;
     }
 
@@ -100,13 +100,18 @@ public class ProfileBuilder {
     }
 
     public ProfileBuilder addXPBoost() {
-        embed = embed.andThen(embed -> embed.addField("XP Boost :rocket:", "`" + (int) ((prog.getXPMultiplier() - 1) * 100)
-                + "% (" + prog.getXPMultiplier() + "x)`", true)); //multiplier to percent
+        embed = embed.andThen(embed -> embed.addField("XP Boost :rocket:", "" + (int) ((prog.getXPMultiplier() - 1) * 100)
+                + "% (" + prog.getXPMultiplier() + "x)", true)); //multiplier to percent
         return this;
     }
 
     public ProfileBuilder addXPRate(int users) {
-        embed = embed.andThen(embed -> embed.addField("Current Rate :hourglass_flowing_sand:", "`" + prog.getXPRate(users) + " XP/min`", true));
+        embed = embed.andThen(embed -> embed.addField("Current Rate :hourglass_flowing_sand:", "" + prog.getXPRate(users) + " XP/min", true));
+        return this;
+    }
+
+    public ProfileBuilder addBalance() {
+        embed = embed.andThen(embed -> embed.addField("Balance :moneybag:", "$" + String.format("%,d", user.getBalance()) + "", true));
         return this;
     }
 

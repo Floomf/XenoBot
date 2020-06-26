@@ -31,10 +31,8 @@ public class PollCommand extends AbstractCommand {
             sb.append(EMOJI_LETTERS[i]).append("  ").append(args[i + 1]).append("\n");
         }
         TextChannel pollChannel = BotUtils.getGuildTextChannel("general", message.getGuild().block());
-        Message pollMessage = pollChannel.createMessage(spec -> spec.setEmbed(
-                MessageUtils.message(args[0], sb.toString(), Color.ORANGE).andThen(embed ->
-                        embed.setFooter("Poll created by " + message.getAuthorAsMember().block().getDisplayName(), "")
-                ))).block();
+        Message pollMessage = pollChannel.createEmbed(MessageUtils.getEmbed(args[0], sb.toString(), Color.ORANGE)
+                .andThen(embed -> embed.setFooter("Poll created by " + message.getAuthorAsMember().block().getDisplayName(), ""))).block();
 
         for (int i = 0; i < options; i++) {
             pollMessage.addReaction(ReactionEmoji.unicode(EMOJI_LETTERS[i])).block();

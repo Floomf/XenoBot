@@ -15,10 +15,10 @@ public class DogCommand extends AbstractCommand {
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        channel.createMessage(spec -> spec.setEmbed(embed -> embed.setImage(
+        channel.createEmbed(embed -> embed.setImage(
                 Unirest.get("https://api.thedogapi.com/v1/images/search")
                         .header("x-api-key", "b0686b3c-1b19-448a-812a-a04c7ca7124d") //shhh
-                        .asJson().getBody().getArray().getJSONObject(0).getString("url")))).block();
+                        .asJson().getBody().getArray().getJSONObject(0).getString("url"))).block();
     }
 
     @Override

@@ -23,8 +23,8 @@ public class GameConnectFour extends ButtonGame {
     private String player1piece;
     private String player2piece;
 
-    public GameConnectFour(Message message, Member[] players) {
-        super(message, players);
+    public GameConnectFour(Message message, Member[] players, int betAmount) {
+        super(message, players, betAmount);
         super.getButtonManager().addNumButtons(message, LENGTH);
         assignPieces();
     }
@@ -36,12 +36,12 @@ public class GameConnectFour extends ButtonGame {
 
     @Override
     protected String getForfeitMessage(Member forfeiter) {
-        return forfeiter.getMention() + " forfeited. " + super.getOtherUser(forfeiter).getMention() + " wins!\n\n" + getBoard();
+        return forfeiter.getMention() + " forfeited.\n" + super.getOtherPlayer(forfeiter).getMention() + " wins!\n\n" + getBoard();
     }
 
     @Override
     protected String getIdleMessage(Member idler) {
-        return idler.getMention() + " failed to go in time. " + super.getOtherUser(idler).getMention() + " wins!\n\n" + getBoard();
+        return idler.getMention() + " failed to go in time.\n" + super.getOtherPlayer(idler).getMention() + " wins!\n\n" + getBoard();
     }
 
     private void assignPieces() {
@@ -57,22 +57,24 @@ public class GameConnectFour extends ButtonGame {
 
     @Override
     protected void onStart() {
-        player1 = super.getPlayerThisTurn();
-        player2 = super.getPlayerNextTurn();
-        super.setInfoDisplay(formatMessage(player1, "You start off, " + player1.getMention()));
+        player1 = super.getPThisTurn();
+        player2 = super.getPNextTurn();
+        super.setInfoDisplay(player1, withPiece(player1, "You start off, " + player1.getMention()));
     }
 
     @Override
     protected void onTurn(int input) {
-        placePiece(super.getPlayerThisTurn(), input - 1);
-        if (playerHasWon(super.getPlayerThisTurn())) {
-            Member winner = super.getPlayerThisTurn();
-            super.win(formatMessage(winner, winner.getMention() + " wins!\n\n" + getBoard()));
+        placePiece(super.getPThisTurn(), input - 1);
+        if (playerHasWon(super.getPThisTurn())) {
+            Member winner = super.getPThisTurn();
+            super.win(withPiece(winner, winner.getMention() + " wins!\n\n" + getBoard()), winner);
         } else if (boardIsFull()) {
             super.tie("Board is full. Tie!");
         } else {
-            super.setInfoDisplay(super.getPlayerThisTurn().getMention() + " went in slot `" + input + "`\n"
-                    + formatMessage(super.getPlayerNextTurn(), "Your turn, " + super.getPlayerNextTurn().getMention()));
+            super.setInfoDisplay(super.getPNextTurn(),
+                    super.getPThisTurn().getMention() + " went in slot **" + input + "**.\n"
+                            + withPiece(super.getPNextTurn(), "Your turn, " + super.getPNextTurn().getMention())
+            );
         }
     }
 
@@ -92,7 +94,7 @@ public class GameConnectFour extends ButtonGame {
         }
     }
 
-    private String formatMessage(Member player, String message) {
+    private String withPiece(Member player, String message) {
         return getUnicodeForPiece(getPieceForPlayer(player)) + " " + message;
     }
 

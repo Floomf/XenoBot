@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 
 public class MessageUtils {
 
-    public static Consumer<EmbedCreateSpec> message(String title, String desc, Color color) {
+    public static Consumer<EmbedCreateSpec> getEmbed(String title, String desc, Color color) {
         return embed -> {
             embed.setAuthor(title, "", Main.BOT_AVATAR_URL);
             embed.setDescription(desc);
@@ -18,16 +18,16 @@ public class MessageUtils {
         };
     }
 
-    public static Consumer<EmbedCreateSpec> message(String title, String desc) {
-        return message(title, desc, Color.WHITE);
+    public static Consumer<EmbedCreateSpec> getEmbed(String title, String desc) {
+        return getEmbed(title, desc, Color.WHITE);
     }
 
     public static void sendMessage(PrivateChannel channel, String title, String desc, Color color) {
-        channel.createMessage(spec -> spec.setEmbed(message(title, desc, color))).block();
+        channel.createEmbed(getEmbed(title, desc, color)).block();
     }
 
     public static void sendMessage(TextChannel channel, String title, String desc, Color color) {
-        channel.createMessage(spec -> spec.setEmbed(message(title, desc, color))).block();
+        channel.createEmbed(getEmbed(title, desc, color)).block();
     }
 
     public static void sendMessage(TextChannel channel, String title, String desc) {

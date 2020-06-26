@@ -2,11 +2,14 @@ package discord.core.command;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.core.game.GameManager;
+import discord.core.game.TypeGame;
 import discord.data.UserManager;
 import discord.data.object.user.Progress;
 import discord.util.MessageUtils;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
+import discord4j.core.object.reaction.ReactionEmoji;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -18,8 +21,18 @@ public class CommandHandler {
         Message message = event.getMessage();
         TextChannel channel = message.getChannel().ofType(TextChannel.class).block();
 
-        if (channel == null || !(message.getContent().orElse("").startsWith(CommandManager.CMD_PREFIX)
-                && (channel.getName().equals("commands") || channel.getName().equals("testing")))) {
+        if (channel == null || !(message.getContent().orElse("").startsWith(CommandManager.CMD_PREFIX))) {
+            return;
+        }
+
+        if (!(channel.getName().equals("commands") || channel.getName().equals("testing"))) {
+            event.getMessage().addReaction(ReactionEmoji.unicode("❌")).block();
+            return;
+        }
+
+        //block starting new games when in type game
+        if (GameManager.getGames().stream().anyMatch(game -> game.isActive() && //TEMPORARY
+                game instanceof TypeGame && game.playerIsInGame(message.getAuthorAsMember().block()))) {
             return;
         }
 
@@ -60,6 +73,7 @@ public class CommandHandler {
         //make sure command exists
         if (command == null) {
             //MessageUtils.sendErrorMessage(channel,"Unknown command. Type `!help` for available commands.");
+            event.getMessage().addReaction(ReactionEmoji.unicode("❔")).block();
             return;
         }
 
@@ -75,8 +89,8 @@ public class CommandHandler {
         //check if command requires certain level
         Progress progress = UserManager.getDUserFromMessage(message).getProg();
         if (command.getLevelRequired() > progress.getTotalLevelThisLife()) {
-            MessageUtils.sendErrorMessage(channel, "You must be level `" + command.getLevelRequired()
-                    + "` to use this command! You can use `!prog` to view your progress.");
+            MessageUtils.sendErrorMessage(channel, "You must be level **" + command.getLevelRequired()
+                    + "** to use this command! You can use `!prog` to view your progress.");
             return;
         }
 
