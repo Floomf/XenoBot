@@ -12,6 +12,9 @@ import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.TextChannel;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 public class EmojiCommand extends AbstractCommand {
 
     public static final int LEVEL_REQUIRED = 60;
@@ -26,11 +29,11 @@ public class EmojiCommand extends AbstractCommand {
         String emojis = CommandHandler.combineArgs(0, args).replace(" ", "");
         //EmojiManager makes it easy to check for emoji
         if (EmojiManager.isOnlyEmojis(emojis)) {
-            name.setEmojis(EmojiParser.extractEmojis(emojis).stream().limit(3).toArray(String[]::new));
+            name.setEmojis(EmojiParser.extractEmojis(emojis).stream().limit(3).collect(Collectors.toList()));
             MessageUtils.sendInfoMessage(channel, "Splendid choice. Updated your name emoji(s) accordingly.");
             UserManager.saveDatabase();
         } else if (emojis.toLowerCase().equals("none")) {
-            name.setEmojis(new String[0]);
+            name.setEmojis(new ArrayList<String>());
             MessageUtils.sendInfoMessage(channel, "Your name emojis have been removed.");
             UserManager.saveDatabase();
         } else {

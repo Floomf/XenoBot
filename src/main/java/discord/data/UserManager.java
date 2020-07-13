@@ -1,5 +1,6 @@
 package discord.data;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import discord.data.object.user.DUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.util.BotUtils;
@@ -45,7 +46,7 @@ public class UserManager {
 
     private static void loadDatabase(Guild guild) {
         ObjectMapper mapper = new ObjectMapper();
-        //mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             System.out.println("Loading database...");
             DUser[] dUsersToLoad = mapper.readValue(new File("users.json"), DUser[].class);

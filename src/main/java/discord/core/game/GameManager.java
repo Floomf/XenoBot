@@ -30,7 +30,7 @@ public class GameManager {
     private static final HashMap<Message, GameRequest> REQUESTS = new HashMap<>();
     private static final HashMap<Message, AbstractGame> GAMES = new HashMap<>();
 
-    public static final int EARN_LIMIT = 500;
+    public static final int EARN_LIMIT = 1000;
     public static HashMap<Long, Integer> usersMoneyEarned = new HashMap<>();
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -38,21 +38,16 @@ public class GameManager {
         loadEarningLimits();
 
         //TODO rewrite this without if statements (it has to be possible)
-        if (LocalDateTime.now().getHour() < 9) { //Schedule for this morning
-            System.out.println("Scheduled for 9AM");
+        if (LocalDateTime.now().getHour() < 8) { //Schedule for this morning
+            System.out.println("Scheduled for 8AM today");
             scheduler.scheduleAtFixedRate(usersMoneyEarned::clear,
-                    LocalDateTime.now().until(LocalDate.now().atStartOfDay().plusHours(9), ChronoUnit.MINUTES),
-                    TimeUnit.HOURS.toMinutes(12), TimeUnit.MINUTES);
-        } else if (LocalDateTime.now().getHour() >= 21) { //Schedule for tomorrow morning
-            System.out.println("Scheduled for 9AM tomorrow");
+                    LocalDateTime.now().until(LocalDate.now().atStartOfDay().plusHours(8), ChronoUnit.MINUTES),
+                    TimeUnit.HOURS.toMinutes(24), TimeUnit.MINUTES);
+        } else { //Schedule for tomorrow morning
+            System.out.println("Scheduled for 8AM tomorrow");
             scheduler.scheduleAtFixedRate(usersMoneyEarned::clear,
-                    LocalDateTime.now().until(LocalDate.now().plusDays(1).atStartOfDay().plusHours(9), ChronoUnit.MINUTES)
-                    , TimeUnit.HOURS.toMinutes(12), TimeUnit.MINUTES);
-        } else { //Schedule for tonight
-            System.out.println("Scheduled for 9PM");
-            scheduler.scheduleAtFixedRate(usersMoneyEarned::clear,
-                    LocalDateTime.now().until(LocalDate.now().atStartOfDay().plusHours(21), ChronoUnit.MINUTES),
-                    TimeUnit.HOURS.toMinutes(12), TimeUnit.MINUTES);
+                    LocalDateTime.now().until(LocalDate.now().plusDays(1).atStartOfDay().plusHours(8), ChronoUnit.MINUTES),
+                    TimeUnit.HOURS.toMinutes(24), TimeUnit.MINUTES);
         }
     }
 

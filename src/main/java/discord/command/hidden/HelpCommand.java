@@ -9,6 +9,7 @@ import discord.command.CommandCategory;
 import java.awt.*;
 import java.util.HashSet;
 
+import discord.util.DiscordColor;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.Message;
@@ -38,7 +39,8 @@ public class HelpCommand extends AbstractCommand {
                     || (command.getCategory() == CommandCategory.ADMIN //take out admin if not owner
                     && !message.getAuthorAsMember().block().equals(message.getGuild().block().getOwner().block())));
 
-            channel.createEmbed(MessageUtils.getEmbed("Available Commands", "*For info on a command, use* **`!help [command]`**", Color.CYAN)
+            channel.createEmbed(MessageUtils.getEmbed("Available Commands", "*For info on a command, use* **`!help [command]`**",
+                    DiscordColor.PURPLE.getColor())
                     .andThen(embed -> {
                         for (CommandCategory c : CommandCategory.values()) {
                             StringBuilder sb = new StringBuilder();

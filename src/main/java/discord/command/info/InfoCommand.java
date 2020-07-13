@@ -8,6 +8,7 @@ import discord.command.CommandCategory;
 
 import java.awt.Color;
 
+import discord.util.DiscordColor;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.TextChannel;
 
@@ -50,7 +51,7 @@ public class InfoCommand extends AbstractCommand {
         channel.createEmbed(embed -> {
             embed.setAuthor(message.getClient().getSelf().block().getUsername(), "", "");
             embed.setThumbnail(message.getClient().getSelf().block().getAvatarUrl());
-            embed.setColor(Color.CYAN);
+            embed.setColor(DiscordColor.CYAN.getColor());
 
             embed.addField("Version 🏷", BotUtils.getVersion(), true);
             embed.addField("Uptime 🕓", formatElapsedTime(System.currentTimeMillis() - START_TIME), true);

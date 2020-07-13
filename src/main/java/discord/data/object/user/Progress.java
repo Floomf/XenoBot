@@ -11,6 +11,7 @@ import discord.data.ColorManager;
 import discord.data.object.TempShopItem;
 import discord.data.object.Unlockable;
 import discord.util.BotUtils;
+import discord.util.DiscordColor;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Role;
 
@@ -223,14 +224,14 @@ public class Progress {
         if (prestige.getNumber() == 0 && !reincarnation.isReincarnated()) { //max level for the first time
             MessageUtils.sendMessage(user.asGuildMember().getPrivateChannel().block(), "Well done!", "You have reached the maximum level for the first time. "
                     + "If you choose to, you may now prestige and carry back over to level one with `!prestige`."
-                    + "\n\nYou will keep all perks, and earn your first badge.", Color.GREEN);
+                    + "\n\nYou will keep all perks, and earn your first badge.", DiscordColor.GREEN.getColor());
         } else if (getTotalLevelThisLife() == MAX_LEVEL * Prestige.MAX_PRESTIGE) {
             MessageUtils.sendMessage(user.asGuildMember().getPrivateChannel().block(), "Incredible!", "You have reached the maximum level for the last time "
-                    + "and may now move onto the final prestige with `!prestige`.", Color.RED);
+                    + "and may now move onto the final prestige with `!prestige`.", DiscordColor.RED.getColor());
         } else {
             MessageUtils.sendMessage(user.asGuildMember().getPrivateChannel().block(), "Max Level Reached!",
                     "You may now prestige and carry over back to level one with `!prestige`."
-                            + "\n\nYou will keep all perks, and unlock new name colors as you level again.", Color.CYAN);
+                            + "\n\nYou will keep all perks, and unlock new name colors as you level again.", DiscordColor.GREEN.getColor());
         }
     }
 
@@ -281,7 +282,7 @@ public class Progress {
         reincarnation = reincarnation.reincarnate();
         BotUtils.getGuildTextChannel("log", user.asGuildMember().getGuild().block()).createMessage(spec -> {
             spec.setContent(user.asGuildMember().getMention());
-            spec.setEmbed(MessageUtils.getEmbed("REINCARNATION", "**" + reincarnation.getRomaji() + "**", Color.PINK));
+            spec.setEmbed(MessageUtils.getEmbed("REINCARNATION", "**" + reincarnation.getRomaji() + "**", DiscordColor.PINK.getColor()));
         }).block();
 
         int carryXP = getTotalXPThisLife() - getTotalXPToPrestige(Prestige.MAX_PRESTIGE); //need to store
@@ -340,7 +341,7 @@ public class Progress {
                 }
                 MessageUtils.sendMessage(user.asGuildMember().getPrivateChannel().block(), "Perk Unlocked!",
                         "You have unlocked the ability to " + perkDesc + " on " + user.asGuildMember().getGuild().block().getName()
-                                + "!\n\n*You can type `" + perkCommand + "` on the server to get started.*", Color.ORANGE);
+                                + "!\n\n*You can type `" + perkCommand + "` on the server to get started.*", DiscordColor.ORANGE.getColor());
 
             } else { //already prestiged, unlock new color every 20 levels
                 Unlockable color = ColorManager.getUnlockedColor(totalLevel);
@@ -409,7 +410,7 @@ public class Progress {
         }
         xpMultiplier = tempMultiplier;
         user.asGuildMember().getPrivateChannel().block().createEmbed(MessageUtils.getEmbed("Info",
-                "You will now receive **" + tempMultiplier + "x** XP for the next **" + item.getHours() + "h**.", Color.CYAN)).block();
+                "You will now receive **" + tempMultiplier + "x** XP for the next **" + item.getHours() + "h**.", DiscordColor.CYAN.getColor())).block();
 
         new java.util.Timer().schedule(
                 new java.util.TimerTask() {
@@ -417,7 +418,7 @@ public class Progress {
                     public void run() {
                         xpMultiplier = 1.0;
                         user.asGuildMember().getPrivateChannel().block().createEmbed(MessageUtils.getEmbed("Info",
-                                "Your purchased XP boost has run out.", Color.CYAN)).block();
+                                "Your purchased XP boost has run out.", DiscordColor.CYAN.getColor())).block();
                         user.getPurchases().remove(item);
                     }
                 }, TimeUnit.HOURS.toMillis(item.getHours())

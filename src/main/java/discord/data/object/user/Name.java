@@ -14,41 +14,73 @@ public class Name {
     private DUser user;
 
     private String nick;
-    private String[] emojis;
+    //private String[] emojis;
+    private String emojis;
 
     @JsonCreator
     protected Name(@JsonProperty("nick") String nick,
-                   @JsonProperty("emojis") String[] emojis) {
+                   //@JsonProperty("emojis") String[] emojis) {
+                   @JsonProperty("emojis") String emojis) {
         this.nick = nick;
+        /*this.emojis = emojis;
+        String e = "";
+        for (String emoji : emojis) {
+            e += emoji;
+        }*/
         this.emojis = emojis;
     }
 
     protected Name(String nick) {
         this.nick = nick;
-        this.emojis = new String[0];
+        //this.emojis = new String[0];
+        this.emojis= "";
     }
 
     public String getNick() {
         return nick;
     }
 
+    //used for jackson serialization
+    //public String[] getEmojis() {
+      //  return this.emojis;
+    //}
+
+    public String getEmojis() {
+        return emojis;
+    }
+
     public void setNick(String nick) {
         this.nick = nick;
+        if (isOverflowed()) {
+            if (nick.length() >= 29) {
+                emojis = "";
+            } else {
+                emojis = emojis.substring(0, 29 - nick.length());
+            }
+        }
         verifyOnGuild();
     }
 
-    //used for jackson serialization
-    public String[] getEmojis() {
-        return this.emojis;
-    }
+    public void setEmojis(List<String> emojiList) {
+        String emojisToAdd = "";
+        for (String emoji : emojiList) {
+            emojisToAdd += emoji;
+        }
+        emojis = emojisToAdd;
 
-    public void setEmojis(String[] emojis) {
-        this.emojis = emojis;
+        if (isOverflowed()) {
+            nick = nick.substring(0, 29 - emojis.length());
+        }
         verifyOnGuild();
     }
 
     protected void setUser(DUser user) {
         this.user = user;
+    }
+
+    @JsonIgnore
+    private boolean isOverflowed() {
+        return !emojis.isEmpty() && nick.length() + emojis.length() > 29;
     }
 
     public void verifyOnGuild() {
@@ -79,11 +111,16 @@ public class Name {
             sb.append(prestige.getBadge()).append(" ");
         }
         sb.append(nick);
+        /*
         if (emojis.length > 0) {
             sb.append(" ");
             for (String emoji : emojis) {
                 sb.append(emoji);
             }
+        }*/
+        if (emojis.length() > 0) {
+            sb.append(" ");
+            sb.append(emojis);
         }
         return sb.toString();
     }

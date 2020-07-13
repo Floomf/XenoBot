@@ -28,6 +28,10 @@ public class BotUtils {
         return guild.getEmojis().filter(e -> e.getName().equals(emojiName)).collectList().block().get(0).asFormat(); //will break if emoji doesnt exist
     }
 
+    public static String getRandomGuildEmoji(Guild guild, String[] emojiNames) {
+        return getGuildEmojiString(guild, emojiNames[(int) (Math.random() * emojiNames.length)]);
+    }
+
     public static String buildUsage(String alias, String args, String desc) {
         return (String.format("`%s%s%s` \n\n%s", CommandManager.CMD_PREFIX, alias, args.isEmpty() ? "" : " " + args, desc));
     }
@@ -44,8 +48,8 @@ public class BotUtils {
 
     public static String validateNick(String nick) {
         String result = validateString(nick);
-        if (result.length() > 23) { //cant have nick too long to conflict with emojis and prestige symbol
-            result = result.substring(0, 23);
+        if (result.length() > 30) { //cant have nick too long to conflict with prestige symbol
+            result = result.substring(0, 30);
         }
         return result.trim(); //trim in case the string is cut off and the last char is a space
     }

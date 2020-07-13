@@ -2,6 +2,7 @@ package discord.core.game;
 
 import discord.Main;
 import discord.data.UserManager;
+import discord.util.DiscordColor;
 import discord4j.core.object.entity.Member;
 
 import java.awt.*;
@@ -64,7 +65,7 @@ public abstract class AbstractGame {
                 long winnerID = winner.getId().asLong();
                 if (GameManager.usersMoneyEarned.containsKey(winnerID)
                         && GameManager.usersMoneyEarned.get(winnerID) >= GameManager.EARN_LIMIT) {
-                    winMessage += "\n\n💵 **No money earned.**\n*(Limit resets at 9AM/9PM daily)*";
+                    winMessage += "\n\n💵 **No money earned.**\n*(Limit resets at 9AM daily)*";
                 } else {
                     if (!GameManager.usersMoneyEarned.containsKey(winnerID)) {
                         GameManager.usersMoneyEarned.put(winnerID, 0);
@@ -86,7 +87,7 @@ public abstract class AbstractGame {
         }
 
         //some games don't want getBoard() to display at end, so don't use setInfoDisplay()
-        setGameDisplay(winMessage, Color.decode("#43B581")); //discord online color
+        setGameDisplay(winMessage, DiscordColor.GREEN.getColor()); //discord online color
         end();
     }
 
@@ -106,13 +107,13 @@ public abstract class AbstractGame {
             UserManager.getDUserFromMember(getPThisTurn()).addBalance(-betAmount);
             loseMessage += "\n\n💵 **$" + betAmount + " lost.**";
         }
-        setGameDisplay(loseMessage, Color.decode("#F04747")); //discord dnd color
+        setGameDisplay(loseMessage, DiscordColor.RED.getColor());
         end();
     }
 
     protected final void tie(String tieMessage) {
-        //bets are taken only when someone wins
-        setInfoDisplay(tieMessage);
+        //TODO bets are taken only when someone wins
+        setGameDisplay(tieMessage + "\n\n" + getBoard(), DiscordColor.ORANGE.getColor());
         end();
     }
 

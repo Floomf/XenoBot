@@ -125,7 +125,7 @@ public class ColorCommand extends AbstractCommand {
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[name]", "Change the color of your name on this guild. "
-                + "New colors are unlocked by leveling."
+                + "New colors are unlocked by leveling up or purchasing them."
                 + "\n\n**Special Arguments**"
                 + "\n`!color list` - View your available colors."
                 + "\n`!color none` - Remove your current color.");

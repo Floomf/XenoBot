@@ -75,8 +75,8 @@ public class GameBlackjack extends ButtonGame {
                 dealerHand.setHidden(false);
                 super.tie("**Wow!** Double blackjack! **Push.**");
             } else {
-                String randPog = new String[]{"Pog", "PogU", "PogeyU"}[(int)(Math.random() * 3)];
-                super.win("**Blackjack!** " + BotUtils.getGuildEmojiString(getGameMessage().getGuild().block(), randPog)
+                super.win("**Blackjack!** " + BotUtils.getRandomGuildEmoji(getGameMessage().getGuild().block(),
+                        new String[]{"Pog", "PogU", "PogeyU"})
                         + "\n\n" + getBoard(), super.getPThisTurn(), super.getBetAmount() * 3 / 2);
             }
             return;

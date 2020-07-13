@@ -23,7 +23,7 @@ public class ProfileBuilder {
 
     private void setupBase() {
         embed = embed -> {
-            embed.setAuthor(user.getName().getNick(), "", user.asGuildMember().getAvatarUrl());
+            embed.setAuthor(user.getName().getNick() + " " + user.getName().getEmojis(), "", user.asGuildMember().getAvatarUrl());
             embed.setColor(user.asGuildMember().getColor().block());
             embed.setThumbnail(user.asGuildMember().getAvatarUrl());
         };

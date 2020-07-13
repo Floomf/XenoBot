@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import discord.util.DiscordColor;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.TextChannel;
@@ -78,10 +79,10 @@ public class TopCommand extends AbstractCommand {
                 totalXP += user.getProg().getTotalXP();
             }
             int finalTotalXP = totalXP; //peepoo
-            channel.createEmbed(MessageUtils.getEmbed("Top " + amount + " Progressed Users 📈", desc.toString(), Color.CYAN)
+            channel.createEmbed(MessageUtils.getEmbed("Top " + amount + " Progressed Users 📈", desc.toString(), DiscordColor.CYAN.getColor())
                     .andThen(embed -> embed.setFooter(String.format("%,d", finalTotalXP) + " XP has been earned on this guild.", ""))).block();
         } else {
-            channel.createEmbed(MessageUtils.getEmbed("Top " + amount + " Richest Users 💰", desc.toString(), Color.CYAN)).block();
+            channel.createEmbed(MessageUtils.getEmbed("Top " + amount + " Richest Users 💰", desc.toString(), DiscordColor.CYAN.getColor())).block();
         }
     }
 

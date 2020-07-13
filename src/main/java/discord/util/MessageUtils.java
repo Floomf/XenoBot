@@ -35,15 +35,15 @@ public class MessageUtils {
     }
 
     public static void sendInfoMessage(TextChannel channel, String message) {
-        sendMessage(channel, "Info", message, Color.CYAN);
+        sendMessage(channel, "Info", message, DiscordColor.CYAN.getColor());
     }
 
     public static void sendErrorMessage(TextChannel channel, String message) {
-        sendMessage(channel, "Error", message, Color.RED);
+        sendMessage(channel, "Error", message, DiscordColor.RED.getColor());
     }
 
     public static void sendUsageMessage(TextChannel channel, String message) {
-        sendMessage(channel, "Usage", message, Color.ORANGE);
+        sendMessage(channel, "Usage", message, DiscordColor.YELLOW.getColor());
     }
 
 }

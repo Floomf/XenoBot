@@ -18,7 +18,7 @@ public class GameHangman extends TypeGame {
 
     private String word;
     private String partOfSpeech;
-    private final AnswerType type;
+    private AnswerType type;
 
     private final char[] wordProgress;
     private final char[] guesses;
@@ -32,21 +32,13 @@ public class GameHangman extends TypeGame {
     public GameHangman(Message message, Member[] players) {
         super(message, players, 0);
 
-        int rand = new Random().nextInt(6);
-
-        if (rand >= AnswerType.values().length) { //slightly increase chance of medium games
-            this.type = AnswerType.MEDIUM;
-        } else {
-            this.type = AnswerType.values()[rand];
-        }
-
         assignRandomWord();
         wordProgress = new char[word.length()];
         guesses = new char[26];
         Arrays.fill(guesses, '-');
 
         for (int i = 0; i < wordProgress.length; i++) {
-            if (word.charAt(i) == '-' || word.charAt(i) == ' ') {
+            if (word.charAt(i) < 'A' || word.charAt(i) > 'z') {
                 wordProgress[i] = word.charAt(i);
             } else {
                 wordProgress[i] = '_';
@@ -107,7 +99,18 @@ public class GameHangman extends TypeGame {
         }
     }
 
+    private void assignRandomAnswerType() {
+        int rand = new Random().nextInt(6);
+        if (rand >= AnswerType.values().length) { //increase chance of medium games
+            type = AnswerType.MEDIUM;
+        } else {
+            type = AnswerType.values()[rand];
+        }
+    }
+
     private void assignRandomWord() {
+        assignRandomAnswerType();
+
         Random r = new Random();
         String firstLetters = "abcdefghijklmnopqrstuwy";
         String lettersToAdd = "????????????????????????????????"; //up to 33 letters total
@@ -116,10 +119,16 @@ public class GameHangman extends TypeGame {
         url += lettersToAdd.substring(0, getLettersFromType(type) - 1);
 
         JSONArray wordsJson = Unirest.get(url).asJson().getBody().getArray();
+
+        if (wordsJson.isEmpty()) {
+            assignRandomWord();
+            return;
+        }
+
         JSONObject wordJson = wordsJson.getJSONObject(r.nextInt(wordsJson.length()));
 
         word = wordJson.getString("word");
-        System.out.println("Fetched " + word);
+        System.out.println("Fetched " + word + " from " + url);
 
         if (wordJson.isNull("tags")) {
             partOfSpeech = "???";
@@ -160,7 +169,8 @@ public class GameHangman extends TypeGame {
             missesLeft--;
             if (missesLeft == 0) {
                 WIN_STREAKS.remove(super.getPThisTurn());
-                lose(BotUtils.getGuildEmojiString(super.getGameMessage().getGuild().block(), "SadChamp")
+                lose(BotUtils.getRandomGuildEmoji(super.getGameMessage().getGuild().block(),
+                        new String[] {"Sadge", "PepeHands", "peepoSad", "SadChamp"})
                         + " **You lose.** The answer was:\n\n" + getFullWordAndInfo());
             } else {
                 super.setInfoDisplay("❌ **Nope!** Guess again:");
