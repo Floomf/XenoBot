@@ -10,7 +10,7 @@ import discord.command.CommandCategory;
 import discord.data.object.user.Name;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;

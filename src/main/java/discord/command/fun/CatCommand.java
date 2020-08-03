@@ -1,11 +1,11 @@
 package discord.command.fun;
 
+import discord4j.core.object.entity.channel.TextChannel;
 import kong.unirest.Unirest;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 
-import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.Message;
 
 public class CatCommand extends AbstractCommand {

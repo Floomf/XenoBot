@@ -1,7 +1,7 @@
 package discord.command;
 
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public abstract class AbstractCommand {
 

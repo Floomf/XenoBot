@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.Poffers</groupId>
     <artifactId>Xeno</artifactId>
-    <version>6.1.0</version>
+    <version>6.1.1</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -57,7 +57,7 @@
         <dependency>
             <groupId>com.discord4j</groupId><!-- However our packages are all under sx.blah in version 2.x! -->
             <artifactId>discord4j-core</artifactId>
-            <version>3.0.14</version>
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.reflections</groupId>

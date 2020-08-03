@@ -2,7 +2,6 @@ package discord.command.perk;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.command.admin.MultiplierCommand;
 import discord.core.game.GameManager;
 import discord.data.ShopManager;
 import discord.data.UserManager;
@@ -11,7 +10,7 @@ import discord.data.object.user.DUser;
 import discord.util.BotUtils;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class ShopCommand extends AbstractCommand {
 

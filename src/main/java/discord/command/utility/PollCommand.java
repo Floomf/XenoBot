@@ -4,11 +4,9 @@ import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 
-import java.awt.Color;
-
 import discord.util.DiscordColor;
 import discord.util.MessageUtils;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.entity.Message;
 
@@ -32,7 +30,7 @@ public class PollCommand extends AbstractCommand {
             sb.append(EMOJI_LETTERS[i]).append("  ").append(args[i + 1]).append("\n");
         }
         TextChannel pollChannel = BotUtils.getGuildTextChannel("general", message.getGuild().block());
-        Message pollMessage = pollChannel.createEmbed(MessageUtils.getEmbed(args[0], sb.toString(), DiscordColor.ORANGE.getColor())
+        Message pollMessage = pollChannel.createEmbed(MessageUtils.getEmbed(args[0], sb.toString(), DiscordColor.ORANGE)
                 .andThen(embed -> embed.setFooter("(Poll by " + message.getAuthorAsMember().block().getDisplayName() + ")", ""))).block();
 
         for (int i = 0; i < options; i++) {

@@ -5,9 +5,9 @@ import discord.data.object.user.DUser;
 
 import java.util.*;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.util.Snowflake;
 
 public class ColorManager {
 

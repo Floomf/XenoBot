@@ -2,12 +2,12 @@ package discord.command.game.math;
 
 import discord.core.game.AbstractGame;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.TextChannel;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.core.game.GameManager;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class MathCommand extends AbstractCommand {
 

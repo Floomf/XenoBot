@@ -10,8 +10,8 @@ import discord.util.MessageUtils;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.Status;
 
 public class RaffleCommand extends AbstractCommand {

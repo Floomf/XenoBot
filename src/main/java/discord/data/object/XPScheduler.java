@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.object.entity.channel.VoiceChannel;
 
 
 public class XPScheduler {

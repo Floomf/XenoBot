@@ -1,5 +1,6 @@
 package discord.listener;
 
+import discord.util.BotUtils;
 import discord4j.core.event.domain.PresenceUpdateEvent;
 import discord.data.object.XPChecker;
 import discord.core.command.CommandManager;
@@ -24,6 +25,7 @@ public class EventsHandler {
     public static void onReadyEvent(List<GuildCreateEvent> events) {
         Guild guild = events.get(0).getGuild();
         guild.getClient().updatePresence(Presence.online(Activity.listening("!help"))).block();
+        BotUtils.BOT_AVATAR_URL = guild.getClient().getSelf().block().getAvatarUrl();
 
         UserManager.createDatabase(guild);
         CommandManager.createCommands();

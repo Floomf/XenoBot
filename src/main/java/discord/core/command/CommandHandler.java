@@ -9,6 +9,7 @@ import discord.data.object.user.Progress;
 import discord.util.MessageUtils;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class CommandHandler {
         Message message = event.getMessage();
         TextChannel channel = message.getChannel().ofType(TextChannel.class).block();
 
-        if (channel == null || !(message.getContent().orElse("").startsWith(CommandManager.CMD_PREFIX))) {
+        if (channel == null || !(message.getContent().startsWith(CommandManager.CMD_PREFIX))) {
             return;
         }
 
@@ -39,7 +40,7 @@ public class CommandHandler {
         //separate the contents of the message into a list of strings
         //separate by space characters, and group quoted sections into their own element
         ArrayList<String> contents = new ArrayList<>();
-        Matcher m = Pattern.compile("([“\"][^\"”“]+[”\"]|\\S+)").matcher(message.getContent().get().trim());
+        Matcher m = Pattern.compile("([“\"][^\"”“]+[”\"]|\\S+)").matcher(message.getContent().trim());
         while (m.find()) {
             contents.add(m.group(1).replaceAll("[“\"”]", "").trim()); //remove any quote characters
         }
@@ -77,7 +78,7 @@ public class CommandHandler {
             return;
         }
 
-        System.out.println(message.getAuthorAsMember().block().getDisplayName() + " issued " + message.getContent().get());
+        System.out.println(message.getAuthorAsMember().block().getDisplayName() + " issued " + message.getContent());
 
         //check if command requires owner (and if owner is executing it)
         if (command.getCategory().equals(CommandCategory.ADMIN) &&

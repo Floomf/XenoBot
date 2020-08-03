@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class MultiplierCommand extends AbstractCommand {
 
@@ -38,13 +38,13 @@ public class MultiplierCommand extends AbstractCommand {
 
         Progress.GLOBAL_XP_MULTIPLIER = multiplier;
         MessageUtils.sendInfoMessage(BotUtils.getGuildTextChannel("general", message.getGuild().block()),
-                "`" + multiplier + "x` XP is now being given out for the next `" + hours + "h`.");
+                "**" + multiplier + "x** XP is now being given out for the next `" + hours + "h`.");
 
         final ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
         exec.schedule(() -> {
             Progress.GLOBAL_XP_MULTIPLIER = 1.0; //hardcoded
             MessageUtils.sendInfoMessage(BotUtils.getGuildTextChannel("general", message.getGuild().block()),
-                    "Global XP multiplier has returned to `1.0x`");
+                    "Global XP multiplier has returned to **1.0x**");
         }, hours, TimeUnit.HOURS);
     }
 

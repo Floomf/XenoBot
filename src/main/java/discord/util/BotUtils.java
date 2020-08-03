@@ -10,9 +10,11 @@ import java.util.regex.Pattern;
 
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class BotUtils {
+
+    public static String BOT_AVATAR_URL = "";
 
     public static TextChannel getGuildTextChannel(String name, Guild guild) {
         return guild.getChannels().ofType(TextChannel.class)

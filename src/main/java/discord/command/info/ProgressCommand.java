@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import reactor.core.publisher.Flux;
 import discord4j.core.object.entity.Message;

@@ -4,7 +4,7 @@ import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.util.BotUtils;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import kong.unirest.Unirest;
 
 public class DogCommand extends AbstractCommand {

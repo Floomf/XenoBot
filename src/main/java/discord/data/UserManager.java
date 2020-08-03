@@ -11,13 +11,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.guild.MemberJoinEvent;
 import discord4j.core.event.domain.guild.MemberLeaveEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 public class UserManager {
@@ -59,7 +59,7 @@ public class UserManager {
                 //Only way I know to return null for member not in guild (like the old code)
                 Member member = guild.getMemberById(Snowflake.of(dUser.getDiscordID())).onErrorResume(e -> Mono.empty()).block();
                 if (member == null) {
-                    if (dUser.getProg().getLevel() <= 15) {
+                    if (dUser.getProg().getLevel() < 20) {
                         dUsers.remove(dUser.getDiscordID());
                         System.out.println("Removed " + dUser.getName() + " from the database.");
                     }
@@ -134,7 +134,7 @@ public class UserManager {
         System.out.println("Member " + event.getUser().getUsername() + " left the guild.");
         if (!event.getUser().isBot()) {
             DUser dUser = dUsers.get(event.getUser().getId().asLong());
-            if (dUser.getProg().getTotalLevel() <= 15) {
+            if (dUser.getProg().getTotalLevel() < 20) {
                 dUsers.remove(event.getUser().getId().asLong());
                 System.out.println("Removed " + event.getUser().getUsername() + " from the database.");
                 saveDatabase();

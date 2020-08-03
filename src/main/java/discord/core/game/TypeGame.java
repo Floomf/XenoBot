@@ -30,15 +30,15 @@ public abstract class TypeGame extends AbstractGame {
         if (super.isActive() && userMessage.getChannel().block().equals(super.getGameMessage().getChannel().block())) { //has to be in guild
             Member fromMember = userMessage.getAuthorAsMember().block();
             if (super.playerIsInGame(fromMember)) {
-                if (userMessage.getContent().orElse("").equalsIgnoreCase("forfeit")
-                    || userMessage.getContent().orElse("").equalsIgnoreCase("ff")) {
+                if (userMessage.getContent().equalsIgnoreCase("forfeit")
+                    || userMessage.getContent().equalsIgnoreCase("ff")) {
                     userMessage.delete().block();
                     win(getForfeitMessage(fromMember), super.getOtherPlayer(fromMember));
                     return;
                 }
 
                 if (fromMember.equals(super.getPThisTurn())) {
-                    String input = userMessage.getContent().orElse("").toLowerCase().trim();
+                    String input = userMessage.getContent().toLowerCase().trim();
                     userMessage.delete().block();
                     if (isValidInput(input)) {
                         onTurn(input);

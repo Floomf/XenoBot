@@ -37,7 +37,7 @@ public class ShopManager {
         //there are some temp final variables, but how else to we do it when using lambdas?
         Consumer<EmbedCreateSpec> embed = MessageUtils.getEmbed("The Realm Shop 🛒",
                 "💰 Balance: **" + String.format("$%,d", dUser.getBalance())+"**\n*To buy an item, use* **`!shop buy [number]`**",
-                DiscordColor.PURPLE.getColor());
+                DiscordColor.PURPLE);
         List<Role> roles = dUser.asGuildMember().getGuild().block().getRoles().collectList().block();
 
         ShopItem.Category currentCat = SHOP_ITEMS[0].getCategory();

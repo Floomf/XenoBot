@@ -1,11 +1,11 @@
 package discord.command.game.connectfour;
 
-import discord4j.core.object.entity.TextChannel;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.core.game.GameManager;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class ConnectFourCommand extends AbstractCommand {
 

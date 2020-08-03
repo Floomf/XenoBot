@@ -9,7 +9,7 @@ import discord.util.BotUtils;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class BlackjackCommand extends AbstractCommand {
 

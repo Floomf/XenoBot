@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class PrefCommand extends AbstractCommand {
 

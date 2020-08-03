@@ -1,6 +1,7 @@
 package discord.command.admin;
 
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.TextChannel;
 import reactor.core.publisher.Flux;
 import discord.util.BotUtils;
 import discord.core.command.CommandHandler;
@@ -10,7 +11,6 @@ import discord.command.CommandCategory;
 import discord.data.object.user.DUser;
 
 import discord.util.MessageUtils;
-import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.Message;
 
 import java.util.List;

@@ -1,29 +1,19 @@
 package discord.util;
 
-import java.awt.*;
+import discord4j.rest.util.Color;
 
-public enum DiscordColor {
+public class DiscordColor {
 
-    RED, GREEN, YELLOW, CYAN, ORANGE, PINK, PURPLE;
+    public static final Color RED = Color.of(hexToInt("F04747"));
+    public static final Color GREEN = Color.of(hexToInt("43B581"));
+    public static final Color YELLOW = Color.of(hexToInt("FAA61A"));
+    public static final Color CYAN = Color.of(hexToInt("44DDBF"));
+    public static final Color ORANGE = Color.of(hexToInt("F57731"));
+    public static final Color PINK = Color.of(hexToInt("FF73FA"));
+    public static final Color PURPLE = Color.of(hexToInt("9B84EE"));
 
-    public Color getColor() {
-        switch (this) {
-            case RED:
-                return Color.decode("#F04747"); //DND
-            case GREEN:
-                return Color.decode("#43B581"); //Online
-            case YELLOW:
-                return Color.decode("#FAA61A"); //Idle
-            case CYAN:
-                return Color.decode("#44DDBF"); //Balance
-            case ORANGE:
-                return Color.decode("#F57731"); //High
-            case PINK:
-                return Color.decode("#FF73FA"); //Nitro
-            case PURPLE:
-                return Color.decode("#9B84EE"); //Bravery
-        }
-        return Color.WHITE;
+    private static int hexToInt(String hex) {
+        return Integer.parseInt(hex, 16);
     }
 
 }

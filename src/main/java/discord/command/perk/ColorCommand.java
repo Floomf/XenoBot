@@ -12,18 +12,18 @@ import discord.command.CommandCategory;
 import discord.data.object.user.DUser;
 import discord.data.object.Unlockable;
 
-import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import discord.util.MessageUtils;
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.TextChannel;
-import discord4j.core.object.util.Snowflake;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.entity.Message;
+import discord4j.rest.util.Color;
 
 public class ColorCommand extends AbstractCommand {
 

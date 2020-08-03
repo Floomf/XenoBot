@@ -7,7 +7,7 @@ import discord.command.CommandCategory;
 import discord.data.object.user.Progress;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class PrestigeCommand extends AbstractCommand {
 

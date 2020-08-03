@@ -7,8 +7,8 @@ import discord.util.DiscordColor;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.TextChannel;
 
 import java.util.List;
 import java.util.Timer;
@@ -45,7 +45,7 @@ public class MuteCommand extends AbstractCommand {
         channel.createMessage(spec -> {
             spec.setContent(mutedMember.getMention());
             spec.setEmbed(MessageUtils.getEmbed("Oh no!", "You've been voice muted for **" + seconds + "** seconds.",
-                    DiscordColor.RED.getColor()));
+                    DiscordColor.RED));
         }).block();
 
         new Timer().schedule(
@@ -55,7 +55,7 @@ public class MuteCommand extends AbstractCommand {
                         mutedMember.edit(spec -> spec.setMute(false)).block();
                         channel.createMessage(spec -> {
                             spec.setContent(mutedMember.getMention());
-                            spec.setEmbed(MessageUtils.getEmbed("Nice.", "You've been unmuted!", DiscordColor.GREEN.getColor()));
+                            spec.setEmbed(MessageUtils.getEmbed("Nice.", "You've been unmuted!", DiscordColor.GREEN));
                         }).block();
                     }
                 }, TimeUnit.SECONDS.toMillis(seconds)

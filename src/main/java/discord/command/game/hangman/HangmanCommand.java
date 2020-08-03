@@ -2,17 +2,12 @@ package discord.command.game.hangman;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.command.game.math.GameMath;
 import discord.core.game.AbstractGame;
 import discord.core.game.GameManager;
 import discord.util.BotUtils;
-import discord.util.MessageUtils;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
-
-import java.util.Random;
-
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class HangmanCommand extends AbstractCommand {
 

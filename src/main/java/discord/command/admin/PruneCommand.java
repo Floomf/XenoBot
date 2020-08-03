@@ -1,12 +1,12 @@
 package discord.command.admin;
 
+import discord4j.core.object.entity.channel.TextChannel;
 import reactor.core.publisher.Flux;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
 
 public class PruneCommand extends AbstractCommand {
 

@@ -6,13 +6,12 @@ import discord.data.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 
-import java.awt.*;
 import java.util.HashSet;
 
 import discord.util.DiscordColor;
 import discord.util.MessageUtils;
-import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class HelpCommand extends AbstractCommand {
 
@@ -40,7 +39,7 @@ public class HelpCommand extends AbstractCommand {
                     && !message.getAuthorAsMember().block().equals(message.getGuild().block().getOwner().block())));
 
             channel.createEmbed(MessageUtils.getEmbed("Available Commands", "*For info on a command, use* **`!help [command]`**",
-                    DiscordColor.PURPLE.getColor())
+                    DiscordColor.PURPLE)
                     .andThen(embed -> {
                         for (CommandCategory c : CommandCategory.values()) {
                             StringBuilder sb = new StringBuilder();

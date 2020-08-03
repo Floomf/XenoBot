@@ -13,8 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import discord.util.MessageUtils;
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.*;
-import discord4j.core.object.util.Snowflake;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class TagCommand extends AbstractCommand {
 

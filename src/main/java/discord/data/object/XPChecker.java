@@ -6,7 +6,7 @@ import java.util.List;
 
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.object.entity.channel.VoiceChannel;
 
 public class XPChecker implements Runnable {
 
@@ -23,12 +23,12 @@ public class XPChecker implements Runnable {
 
     @Override
     public void run() {
-        if (guild.getClient().isConnected()) {
+        //if (guild.getClient().on {
             System.out.println("Checking all guild users to add xp");
             checkVoiceChannels();
-        } else {
-            System.out.println("Client isn't ready, won't check users");
-        }
+        //} else {
+            //System.out.println("Client isn't ready, won't check users");
+        //}
     }
 
     private void checkVoiceChannels() {

@@ -7,12 +7,10 @@ import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.data.object.user.DUser;
 
-import java.awt.Color;
-
 import discord.util.DiscordColor;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class ReincarnateCommand extends AbstractCommand {
 
@@ -48,10 +46,10 @@ public class ReincarnateCommand extends AbstractCommand {
         user.getProg().reincarnate();
         if (user.getProg().getReincarnation().isMax()) {
             MessageUtils.sendMessage(channel, "A Final Beginning", "You have been reborn into your last life: **"
-                    + user.getProg().getReincarnation().getRomaji() + "**.", DiscordColor.PINK.getColor());
+                    + user.getProg().getReincarnation().getRomaji() + "**.", DiscordColor.PINK);
         } else {
             MessageUtils.sendMessage(channel, "A New Beginning", "You have been reborn into **"
-                    + user.getProg().getReincarnation().getRomaji() + "**.", DiscordColor.PINK.getColor());
+                    + user.getProg().getReincarnation().getRomaji() + "**.", DiscordColor.PINK);
         }
     }
 

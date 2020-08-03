@@ -6,11 +6,10 @@ import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 
-import java.awt.Color;
 
 import discord.util.DiscordColor;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class InfoCommand extends AbstractCommand {
 
@@ -49,9 +48,9 @@ public class InfoCommand extends AbstractCommand {
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
         channel.createEmbed(embed -> {
-            embed.setAuthor(message.getClient().getSelf().block().getUsername(), "", "");
+            embed.setAuthor(message.getClient().getSelf().block().getUsername(), "", message.getClient().getSelf().block().getAvatarUrl());
             embed.setThumbnail(message.getClient().getSelf().block().getAvatarUrl());
-            embed.setColor(DiscordColor.CYAN.getColor());
+            embed.setColor(DiscordColor.CYAN);
 
             embed.addField("Version 🏷", BotUtils.getVersion(), true);
             embed.addField("Uptime 🕓", formatElapsedTime(System.currentTimeMillis() - START_TIME), true);

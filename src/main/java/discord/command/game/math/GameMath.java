@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.core.game.Highscore;
 import discord.core.game.TypeGame;
 import discord.util.ProfileBuilder;
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
 
 import java.io.File;
 import java.io.IOException;

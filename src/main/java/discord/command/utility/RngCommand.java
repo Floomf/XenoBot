@@ -5,7 +5,7 @@ import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 public class RngCommand extends AbstractCommand {
 

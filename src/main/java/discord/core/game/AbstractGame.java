@@ -5,12 +5,12 @@ import discord.data.UserManager;
 import discord.util.DiscordColor;
 import discord4j.core.object.entity.Member;
 
-import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import discord4j.core.object.entity.Message;
+import discord4j.rest.util.Color;
 
 public abstract class AbstractGame {
 
@@ -87,7 +87,7 @@ public abstract class AbstractGame {
         }
 
         //some games don't want getBoard() to display at end, so don't use setInfoDisplay()
-        setGameDisplay(winMessage, DiscordColor.GREEN.getColor()); //discord online color
+        setGameDisplay(winMessage, DiscordColor.GREEN); //discord online color
         end();
     }
 
@@ -107,13 +107,13 @@ public abstract class AbstractGame {
             UserManager.getDUserFromMember(getPThisTurn()).addBalance(-betAmount);
             loseMessage += "\n\n💵 **$" + betAmount + " lost.**";
         }
-        setGameDisplay(loseMessage, DiscordColor.RED.getColor());
+        setGameDisplay(loseMessage, DiscordColor.RED);
         end();
     }
 
     protected final void tie(String tieMessage) {
         //TODO bets are taken only when someone wins
-        setGameDisplay(tieMessage + "\n\n" + getBoard(), DiscordColor.ORANGE.getColor());
+        setGameDisplay(tieMessage + "\n\n" + getBoard(), DiscordColor.ORANGE);
         end();
     }
 
@@ -135,7 +135,7 @@ public abstract class AbstractGame {
             spec.setContent(outside);
             spec.setEmbed(embed -> {
                 embed.setDescription(embedText);
-                embed.setAuthor(getGameTitle(), "", Main.BOT_AVATAR_URL);
+                embed.setAuthor(getGameTitle(), "", gameMessage.getClient().getSelf().block().getAvatarUrl());
                 embed.setColor(color);
             });
         }).block();
