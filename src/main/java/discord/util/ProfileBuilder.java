@@ -67,13 +67,6 @@ public class ProfileBuilder {
         return this;
     }
 
-    public ProfileBuilder addBarProgressToNextLevel() {
-        int percentage = (int) Math.floor(prog.getXP() / prog.getXpTotalForLevelUp() * 100); //percentage calc
-        embed = embed.andThen(embed -> embed.addField(percentage + "% to Level " + (prog.getLevel() + 1)
-                + " :chart_with_upwards_trend:", drawBarProgress(percentage), false));
-        return this;
-    }
-
     public ProfileBuilder addBarProgressToMaxLevel() {
         int currentTotalXP = Progress.getTotalXPToLevel(prog.getLevel()) + (int) prog.getXP();
         int maxXP = Progress.getTotalXPToLevel(Progress.MAX_LEVEL);

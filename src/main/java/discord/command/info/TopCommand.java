@@ -41,7 +41,7 @@ public class TopCommand extends AbstractCommand {
         StringBuilder desc = new StringBuilder();
         for (int i = 0; i < amount; i++) {
             DUser user = users.get(i);
-            if (type.equals("xp")) {
+            if (type.equals("xp") || type.equals("exp")) {
                 desc.append(String.format("**%d)** %s Lvl **%,d** ― **%,d** XP\n",
                         i + 1,
                         user.asGuildMember().getMention(),
@@ -55,7 +55,7 @@ public class TopCommand extends AbstractCommand {
             }
         }
 
-        if (type.equals("xp")) {
+        if (type.equals("xp") || type.equals("exp")) {
             int totalXP = 0;
             for (DUser user : users) {
                 totalXP += user.getProg().getTotalXP();

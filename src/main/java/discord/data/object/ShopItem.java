@@ -5,18 +5,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ShopItem {
 
     public enum Category {
-        NAME_COLOR, XP_MULTIPLIER, MISC;
+        NAME_COLOR("Name Colors 🌈"), XP_MULTIPLIER("Personal XP Boosts 🚀"), MISC("Miscellaneous ❓");
+
+        private final String name;
+
+        Category(String name) {
+            this.name = name;
+        }
 
         @Override
         public String toString() {
-            if (this == Category.NAME_COLOR) {
-                return "Name Colors 🌈";
-            } else if (this == XP_MULTIPLIER) {
-                return "Personal XP Boosts 🚀";
-            } else if (this == Category.MISC) {
-                return "Miscellaneous ❓";
-            }
-            return "???";
+            return name;
         }
     }
 

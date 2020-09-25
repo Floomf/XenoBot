@@ -156,10 +156,10 @@ public class GameHangman extends TypeGame {
                 if (WIN_STREAKS.containsKey(super.getPThisTurn())) {
                     int streak = WIN_STREAKS.get(super.getPThisTurn()) + 1;
                     win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo() + "\n\n**" + streak + "** win streak!",
-                            super.getPThisTurn(), 2 * (9 + missesLeft + streak));
+                            super.getPThisTurn(), 2 * (10 + missesLeft + streak));
                     WIN_STREAKS.put(super.getPThisTurn(), streak);
                 } else {
-                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo(), super.getPThisTurn(), 2 * (10 + missesLeft));
+                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo(), super.getPThisTurn(), 2 * (11 + missesLeft));
                     WIN_STREAKS.put(super.getPThisTurn(), 1);
                 }
             } else {

@@ -24,6 +24,8 @@ public class DescCommand extends AbstractCommand {
         if (desc.isEmpty()) {
             MessageUtils.sendErrorMessage(channel, "Couldn't parse a valid description. Only basic characters are allowed.");
             return;
+        } else if (desc.equalsIgnoreCase("clear")) {
+            desc = "";
         } else if (desc.length() > 150) {
             desc = desc.substring(0, 150);
         }
@@ -40,7 +42,9 @@ public class DescCommand extends AbstractCommand {
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[text]", "Set a description on your profile.");
+        return BotUtils.buildUsage(alias, "[text]", "Change your description on your profile."
+                + "\n\n**Special Arguments**"
+                + "\n`!" + alias + " clear` - Clear your current description.");
     }
 
 }

@@ -280,6 +280,14 @@ public class Progress {
 
     public void reincarnate() {
         reincarnation = reincarnation.reincarnate();
+
+        if (reincarnation.getNumber() == 1) {
+            user.getPrefs().put(Pref.MENTION_RANKUP, false);
+            user.getPrefs().put(Pref.AUTO_PRESTIGE, true);
+        } else if (reincarnation.getNumber() == 2) {
+            user.getPrefs().put(Pref.NOTIFY_UNLOCK, false);
+        }
+
         BotUtils.getGuildTextChannel("log", user.asGuildMember().getGuild().block()).createMessage(spec -> {
             spec.setContent(user.asGuildMember().getMention());
             spec.setEmbed(MessageUtils.getEmbed("REINCARNATION", "**" + reincarnation.getRomaji() + "**", DiscordColor.PINK));
@@ -381,21 +389,26 @@ public class Progress {
 
     public void verifyRankOnGuild() {
         System.out.println("Verifying rank (" + rank.getName() + ") for " + user.getName());
-        List<Role> roles = user.asGuildMember().getGuild().block().getRoles()
+        Role rankRole = user.asGuildMember().getGuild().block().getRoles()
                 .filter(role -> role.getName().equals(rank.getRoleName()))
-                .collectList().block();
-        if (roles.isEmpty()) {
-            System.out.println("Couldn't find role " + rank.getRoleName() + " for rank " + rank.getName() + " on guild! Please create one.");
-            return;
-        }
-        Role rankRole = roles.get(0);
+                .blockFirst();
+
         List<Role> memberRoles = user.asGuildMember().getRoles().collectList().block();
+
+        for (Role r : memberRoles) {
+            System.out.print(r.getName() + ", ");
+        }
+
+        System.out.println();
 
         if (!memberRoles.contains(rankRole)) {
             for (Rank rank : Rank.RANKS) { //remove all existing rank roles
                 memberRoles.removeIf(role -> role.getName().equals(rank.getRoleName()));
             }
             memberRoles.add(rankRole);
+            for (Role r : memberRoles) {
+                System.out.print(r.getName() + ", ");
+            }
             user.asGuildMember().edit(spec -> spec.setRoles(memberRoles.stream().map(Role::getId).collect(Collectors.toSet()))).block();
             System.out.println("Updated rank role to " + rankRole.getName());
         }

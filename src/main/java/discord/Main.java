@@ -9,7 +9,6 @@ import discord.core.command.CommandHandler;
 
 import java.io.IOException;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.event.domain.guild.GuildCreateEvent;

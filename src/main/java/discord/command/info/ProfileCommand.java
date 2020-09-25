@@ -1,5 +1,6 @@
 package discord.command.info;
 
+import discord.data.object.XPChecker;
 import discord.util.BotUtils;
 import discord.data.UserManager;
 import discord.command.AbstractCommand;
@@ -13,6 +14,7 @@ import discord.data.object.user.DUser;
 import java.util.List;
 import java.util.function.Consumer;
 
+import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -22,10 +24,9 @@ import discord4j.core.object.entity.Message;
 public class ProfileCommand extends AbstractCommand {
 
     public ProfileCommand() {
-        super(new String[]{"profile", "prof", "bal", "balance"}, 0, CommandCategory.INFO);
+        super(new String[]{"profile", "prof", "bal", "balance", "progress", "prog", "level", "lvl", "rank", "xp"}, 0, CommandCategory.INFO);
     }
 
-    //code copy and paste
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
         if (args.length > 0) {
@@ -62,8 +63,16 @@ public class ProfileCommand extends AbstractCommand {
         }
         if (user.getProg().isNotMaxLevel()) {
             builder.addXPProgress();
+            VoiceState vState = user.asGuildMember().getVoiceState().block();
+            if (vState != null && vState.getChannel().block() != null && !XPChecker.voiceStateIsNotTalking(vState)) { //Messy but oh well right?
+                List<VoiceState> states = vState.getChannel().block().getVoiceStates().collectList().block();
+                states.removeIf(state -> state.getUser().block().isBot() || XPChecker.voiceStateIsNotTalking(state));
+                if (states.size() >= 2) {
+                    builder.addXPRate(states.size());
+                }
+            }
         }
-        if (reincarnation.isReincarnated()) {
+        if (user.getProg().getXPMultiplier() > 1.0) {
             builder.addXPBoost();
         }
         builder.addTotalXP();
@@ -80,7 +89,7 @@ public class ProfileCommand extends AbstractCommand {
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "@mention",
-                "View you or another user's detailed profile.");
+                "View you or another user's profile.");
     }
 
 }

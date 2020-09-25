@@ -30,7 +30,7 @@ public class ShopManager {
             new TempShopItem("Triple XP for 5h", 2500, ShopItem.Category.XP_MULTIPLIER, 5),
 
             new ShopItem("Custom Server Emoji", 2000, ShopItem.Category.MISC),
-            new ShopItem("Custom Server Role", 5000, ShopItem.Category.MISC)
+            new ShopItem("hacked item (DONT BUY HAHA)", 696969, ShopItem.Category.MISC)
     };
 
     public static Consumer<EmbedCreateSpec> getShopEmbedFor(DUser dUser) {

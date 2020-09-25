@@ -1,6 +1,7 @@
 package discord.core.game;
 
 import discord.Main;
+import discord.command.game.slide.GameSlide;
 import discord.data.UserManager;
 import discord.util.DiscordColor;
 import discord4j.core.object.entity.Member;
@@ -87,7 +88,7 @@ public abstract class AbstractGame {
         }
 
         //some games don't want getBoard() to display at end, so don't use setInfoDisplay()
-        setGameDisplay(winMessage, DiscordColor.GREEN); //discord online color
+        setGameDisplay(winMessage, DiscordColor.GREEN);
         end();
     }
 
@@ -133,11 +134,17 @@ public abstract class AbstractGame {
     private void setEntireMessage(String outside, String embedText, Color color) {
         gameMessage.edit(spec -> {
             spec.setContent(outside);
-            spec.setEmbed(embed -> {
-                embed.setDescription(embedText);
-                embed.setAuthor(getGameTitle(), "", gameMessage.getClient().getSelf().block().getAvatarUrl());
-                embed.setColor(color);
-            });
+
+            if (this instanceof GameSlide) { //TODO temporary?
+                spec.setContent(embedText);
+                spec.setEmbed(null);
+            } else {
+                spec.setEmbed(embed -> {
+                    embed.setDescription(embedText);
+                    embed.setAuthor(getGameTitle(), "", gameMessage.getClient().getSelf().block().getAvatarUrl());
+                    embed.setColor(color);
+                });
+            }
         }).block();
     }
 
