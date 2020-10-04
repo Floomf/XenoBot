@@ -9,6 +9,7 @@ import discord.data.object.TempShopItem;
 import discord.data.object.Unlockable;
 import discord4j.core.object.entity.Member;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -19,6 +20,8 @@ public class DUser {
     private String desc;
     private final Progress prog;
     private final HashMap<Pref, Boolean> prefs;
+
+    private int[] birthday;
 
     private int balance;
     private final ArrayList<ShopItem> purchases;
@@ -34,7 +37,8 @@ public class DUser {
                  @JsonProperty("prog") Progress progress,
                  @JsonProperty("prefs") HashMap<Pref, Boolean> prefs,
                  @JsonProperty("balance") int balance,
-                 @JsonProperty("purchases") ArrayList<ShopItem> purchases) {
+                 @JsonProperty("purchases") ArrayList<ShopItem> purchases,
+                 @JsonProperty("birthday") int[] birthday) {
         this.discordID = discordID;
         this.name = name;
         this.prog = progress;
@@ -42,6 +46,7 @@ public class DUser {
         this.prefs = prefs;
         this.balance = balance;
         this.purchases = purchases;
+        this.birthday = birthday;
         this.name.setUser(this);
         this.prog.setUser(this);
     }
@@ -58,6 +63,7 @@ public class DUser {
         this.prefs.put(Pref.AUTO_PRESTIGE, false);
         this.balance = 100;
         this.purchases = new ArrayList<>();
+        this.birthday = null;
         this.name.setUser(this);
         this.prog.setUser(this);
         verifyOnGuild();
@@ -100,9 +106,17 @@ public class DUser {
         return purchases;
     }
 
+    public int[] getBirthday() {
+        return birthday;
+    }
+
     @JsonIgnore
     public void setGuildMember(Member guildMember) {
         this.guildMember = guildMember;
+    }
+
+    public void setBirthday(int day, int month, int year) {
+        this.birthday = new int[] {day, month, year};
     }
 
     public void addBalance(int balToAdd) {

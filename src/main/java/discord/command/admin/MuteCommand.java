@@ -26,7 +26,7 @@ public class MuteCommand extends AbstractCommand {
         List<User> users = message.getUserMentions().filter(user -> !user.isBot()).collectList().block();
 
         if (users.isEmpty()) {
-            MessageUtils.sendErrorMessage(channel, "Could not identify any user. Please @mention them.");
+            MessageUtils.sendErrorMessage(channel, "Couldn't identify any user. Please @mention them.");
             return;
         }
 
@@ -35,7 +35,7 @@ public class MuteCommand extends AbstractCommand {
         try {
             seconds = Integer.parseInt(args[1]);
         } catch (NumberFormatException ex) {
-            MessageUtils.sendErrorMessage(channel, "Could not parse a valid amount of seconds.");
+            MessageUtils.sendErrorMessage(channel, "Couldn't parse a valid amount of seconds.");
             return;
         }
 

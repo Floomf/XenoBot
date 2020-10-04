@@ -37,7 +37,7 @@ public class EmojiCommand extends AbstractCommand {
             MessageUtils.sendInfoMessage(channel, "Your name emojis have been removed.");
             UserManager.saveDatabase();
         } else {
-            MessageUtils.sendErrorMessage(channel, "Could not parse a unicode emoji from input.");
+            MessageUtils.sendErrorMessage(channel, "Couldn't parse a unicode emoji from input.");
         }
     }
 

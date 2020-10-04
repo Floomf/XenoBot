@@ -1,5 +1,6 @@
 package discord.listener;
 
+import discord.data.object.BirthdayScheduler;
 import discord.util.BotUtils;
 import discord4j.core.event.domain.PresenceUpdateEvent;
 import discord.data.object.XPChecker;
@@ -21,18 +22,17 @@ public class EventsHandler {
     private static XPScheduler scheduler;
 
     //TODO seperate into different classes?
+    public static void onGuildCreateEvent(GuildCreateEvent event) {
+        event.getClient().updatePresence(Presence.online(Activity.listening("!help"))).block();
+        BotUtils.BOT_AVATAR_URL = event.getClient().getSelf().block().getAvatarUrl(); //TODO bad
 
-    public static void onReadyEvent(List<GuildCreateEvent> events) {
-        Guild guild = events.get(0).getGuild();
-        guild.getClient().updatePresence(Presence.online(Activity.listening("!help"))).block();
-        BotUtils.BOT_AVATAR_URL = guild.getClient().getSelf().block().getAvatarUrl();
-
-        UserManager.createDatabase(guild);
+        UserManager.createDatabase(event.getGuild());
         CommandManager.createCommands();
 
-        scheduler = new XPScheduler(new XPChecker(guild));
+        scheduler = new XPScheduler(new XPChecker(event.getGuild()));
+        scheduler.checkAnyChannelHasEnoughUsers(event.getGuild());
 
-        scheduler.checkAnyChannelHasEnoughUsers(guild);
+        new BirthdayScheduler(event.getGuild());
     }
 
     //if the user changes their discord username, we can force their old name as nickname if not done already
@@ -48,13 +48,5 @@ public class EventsHandler {
     public static void onVoiceStateUpdateEvent(VoiceStateUpdateEvent event) {
         scheduler.checkAnyChannelHasEnoughUsers(event.getCurrent().getGuild().block());
     }
-
-    /*
-    @EventSubscriber
-    public void onReconnectFailureEvent(ReconnectFailureEvent event) {
-        if (event.isShardAbandoned()) {
-            System.exit(1);
-        }
-    }*/
 
 }

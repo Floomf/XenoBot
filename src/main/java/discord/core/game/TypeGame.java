@@ -27,7 +27,7 @@ public abstract class TypeGame extends AbstractGame {
 
     private void onMessageCreateEvent(MessageCreateEvent event) {
         Message userMessage = event.getMessage();
-        if (super.isActive() && userMessage.getChannel().block().equals(super.getGameMessage().getChannel().block())) { //has to be in guild
+        if (super.isActive() && userMessage.getChannelId().equals(super.getGameMessage().getChannelId())) { //has to be in guild
             Member fromMember = userMessage.getAuthorAsMember().block();
             if (super.playerIsInGame(fromMember)) {
                 if (userMessage.getContent().equalsIgnoreCase("forfeit")
@@ -39,7 +39,6 @@ public abstract class TypeGame extends AbstractGame {
 
                 if (fromMember.equals(super.getPThisTurn())) {
                     String input = userMessage.getContent().toLowerCase().trim();
-                    userMessage.delete().block();
                     if (isValidInput(input)) {
                         onTurn(input);
                         if (super.isActive()) { //kinda messy
@@ -55,6 +54,7 @@ public abstract class TypeGame extends AbstractGame {
                         invalidMessage.delete().block();
                     }
                 }
+                userMessage.delete().block();
             }
         }
     }

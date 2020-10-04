@@ -22,7 +22,7 @@ public class ReincarnateCommand extends AbstractCommand {
     public void execute(Message message, TextChannel channel, String[] args) {
         DUser user = UserManager.getDUserFromMessage(message);
         if (user.getProg().getReincarnation().isMax()) {
-            MessageUtils.sendMessage(channel, "No more..", "*This is my last life.*");
+            MessageUtils.sendMessage(channel, "No more.", "*This is my last life.*");
             return;
         } else if (!user.getProg().getPrestige().isMax()) {
             MessageUtils.sendMessage(channel, "Not yet..", "*I still have this life to live.*");

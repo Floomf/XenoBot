@@ -170,7 +170,7 @@ public class GameHangman extends TypeGame {
             if (missesLeft == 0) {
                 WIN_STREAKS.remove(super.getPThisTurn());
                 lose(BotUtils.getRandomGuildEmoji(super.getGameMessage().getGuild().block(),
-                        new String[] {"Sadge", "PepeHands", "peepoSad", "SadChamp"})
+                        new String[] {"Sadge", "PepeHands", "peepoSad"})
                         + " **You lose.** The answer was:\n\n" + getFullWordAndInfo());
             } else {
                 super.setInfoDisplay("❌ **Nope!** Guess again:");

@@ -1,32 +1,62 @@
 package discord.command.game.connectfour;
 
-import discord4j.core.object.entity.Message;
-import discord.core.game.Button;
-import discord.core.game.ButtonGame;
+import discord.core.game.TypeGame;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.MessageChannel;
 
+import java.util.Arrays;
 import java.util.Random;
 
-public class GameConnectFour extends ButtonGame {
+public class GameConnectFour extends TypeGame {
+
+    enum Piece {
+        RED(1, ":red_circle:"), BLUE(-1, ":blue_circle:"), EMPTY(0, ":white_circle:");
+
+        final int val;
+        String emoji;
+
+        Piece(int val, String emoji) {
+            this.val = val;
+            this.emoji = emoji;
+        }
+
+        void setEmoji(String emoji) {
+            this.emoji = emoji;
+        }
+    }
 
     private static final int LENGTH = 7, HEIGHT = 6;
 
-    private static final int RED = 1, BLUE = -1, EMPTY = 0;
-
-    private static final String[] PIECES = {":red_circle:", ":blue_circle:",
+    private static final String[] CIRCLE_EMOJIS = {":red_circle:", ":blue_circle:",
             ":green_circle:", ":purple_circle:", ":yellow_circle:"};
 
-    private final int[][] board = new int[HEIGHT][LENGTH];
+    private final Message[] rowMessages = new Message[HEIGHT];
+    private final Piece[][] board = new Piece[HEIGHT][LENGTH];
     private Member player1;
-    private Member player2;
-
-    private String player1piece;
-    private String player2piece;
 
     public GameConnectFour(Message message, Member[] players, int betAmount) {
         super(message, players, betAmount);
-        super.getButtonManager().addNumButtons(message, LENGTH);
-        assignPieces();
+
+        for (Piece[] pieces : board) {
+            Arrays.fill(pieces, Piece.EMPTY);
+        }
+
+        message.edit(spec -> {
+            spec.setContent(":one: :two: :three: :four: :five: :six: :seven:");
+            spec.setEmbed(null);
+        }).block();
+
+        MessageChannel channel = message.getChannel().block();
+
+        for (int i = 0; i < rowMessages.length; i++) {
+            rowMessages[i] = channel.createMessage(":white_circle: :white_circle: :white_circle: " +
+                    ":white_circle: :white_circle: :white_circle: :white_circle:").block();
+        }
+
+        super.setGameMessage(channel.createMessage("Loading...").block());
+
+        randomizePieceEmojis();
     }
 
     @Override
@@ -44,110 +74,103 @@ public class GameConnectFour extends ButtonGame {
         return idler.getMention() + " failed to go in time.\n" + super.getOtherPlayer(idler).getMention() + " wins!\n\n" + getBoard();
     }
 
-    private void assignPieces() {
+    private void randomizePieceEmojis() {
         Random rand = new Random();
-        int one = rand.nextInt(PIECES.length);
-        int two = rand.nextInt(PIECES.length);
+        int one = rand.nextInt(CIRCLE_EMOJIS.length);
+        int two = rand.nextInt(CIRCLE_EMOJIS.length);
         while (two == one) {
-            two = rand.nextInt(PIECES.length);
+            two = rand.nextInt(CIRCLE_EMOJIS.length);
         }
-        player1piece = PIECES[one];
-        player2piece = PIECES[two];
+        Piece.RED.setEmoji(CIRCLE_EMOJIS[one]);
+        Piece.BLUE.setEmoji(CIRCLE_EMOJIS[two]);
     }
 
     @Override
     protected void onStart() {
         player1 = super.getPThisTurn();
-        player2 = super.getPNextTurn();
-        super.setInfoDisplay(player1, withPiece(player1, "You start off, " + player1.getMention()));
+        super.setGameDisplay("Type a column **[1-7]** to place your piece.\n" + getPiece(player1).emoji + " You start off, " + player1.getMention());
     }
 
     @Override
-    protected void onTurn(int input) {
-        placePiece(super.getPThisTurn(), input - 1);
+    protected void onTurn(String input) {
+        dropPiece(getPiece(super.getPThisTurn()), Integer.parseInt(input) - 1);
         if (playerHasWon(super.getPThisTurn())) {
             Member winner = super.getPThisTurn();
-            super.win(withPiece(winner, winner.getMention() + " wins!\n\n" + getBoard()), winner);
+            super.win(getPiece(super.getPThisTurn()).emoji + " " + winner.getMention() + " wins!", winner);
         } else if (boardIsFull()) {
-            super.tie("Board is full. Tie!");
+            super.tie("Board is full. **Tie!**");
         } else {
-            super.setInfoDisplay(super.getPNextTurn(),
-                    super.getPThisTurn().getMention() + " went in slot **" + input + "**.\n"
-                            + withPiece(super.getPNextTurn(), "Your turn, " + super.getPNextTurn().getMention())
-            );
+            super.setGameDisplay(super.getPThisTurn().getDisplayName() + " went in slot **" + input + "**.\n"
+                    + getPiece(super.getPNextTurn()).emoji + " " + super.getPNextTurn().getMention());
         }
     }
 
     @Override
-    protected boolean isValidInput(int input) {
+    protected boolean isValidInput(String input) {
         //if top slot of column empty, c is still open
-        //remember arrays are 0 based
-        return (board[0][input - 1] == EMPTY);
+        return input.matches("[1-7]") && board[0][Integer.parseInt(input) - 1] == Piece.EMPTY;
     }
 
-    private void placePiece(Member player, int col) {
+    private Piece getPiece(Member player) {
+        if (player.equals(player1)) {
+            return Piece.RED;
+        } else {
+            return Piece.BLUE;
+        }
+    }
+
+    private void dropPiece(Piece piece, int col) {
         for (int row = board.length - 1; row >= 0; row--) {
-            if (board[row][col] == EMPTY) {
-                board[row][col] = getPieceForPlayer(player);
+            if (board[row][col] == Piece.EMPTY) {
+                board[row][col] = piece;
+                final int temp = row;
+                rowMessages[row].edit(spec -> spec.setContent(rowToString(board[temp]))).block();
                 return;
             }
         }
     }
 
-    private String withPiece(Member player, String message) {
-        return getUnicodeForPiece(getPieceForPlayer(player)) + " " + message;
+    private String rowToString(Piece[] row) {
+        String rowString = "";
+        for (Piece index : row) {
+            rowString += index.emoji + " ";
+        }
+        return rowString;
     }
 
-
-    @Override
-    protected String getBoard() {
-        StringBuilder sb = new StringBuilder();
-
-        //Append the row of numbers
-        for (int i = 1; i <= 7; i++) {
-            sb.append(Button.getFromNum(i).getEmoji().asUnicodeEmoji().get().getRaw());
+    private boolean boardIsFull() {
+        for (Piece piece : board[0]) { //only have to check top row
+            if (piece == Piece.EMPTY) return false;
         }
-
-        //Append the actual board
-        for (int row = 0; row < board.length; row++) {
-            sb.append("\n");
-            for (int col = 0; col < board[0].length; col++) {
-                sb.append(getUnicodeForPiece(board[row][col]));
-            }
-        }
-        return sb.toString();
+        return true;
     }
 
     private boolean playerHasWon(Member player) {
-        int winSum = getPieceForPlayer(player) * 4;
+        int winSum = getPiece(player).val * 4;
 
         for (int r = HEIGHT - 1; r >= 0; r--) { //start from bottom row
             for (int c = 0; c < LENGTH; c++) {
-                if (board[r][c] == EMPTY) continue;
+                if (board[r][c] == Piece.EMPTY) continue;
                 //Check up
                 if (r - 3 >= 0) { //if theres 3 more slots up
-                    if (board[r][c] + board[r - 1][c] + board[r - 2][c]
-                            + board[r - 3][c] == winSum) {
+                    if (board[r][c].val + board[r - 1][c].val + board[r - 2][c].val + board[r - 3][c].val == winSum) {
                         return true;
                     }
                 }
                 if (c + 3 < LENGTH) { //if theres 3 more slots to right
                     //Check right
-                    if (board[r][c] + board[r][c + 1] + board[r][c + 2]
-                            + board[r][c + 3] == winSum) {
+                    if (board[r][c].val + board[r][c + 1].val + board[r][c + 2].val + board[r][c + 3].val == winSum) {
                         return true;
                     }
                     //Check diag up right
                     if (r - 3 >= 0) {
-                        if (board[r][c] + board[r - 1][c + 1] + board[r - 2][c + 2]
-                                + board[r - 3][c + 3] == winSum) {
+                        if (board[r][c].val + board[r - 1][c + 1].val + board[r - 2][c + 2].val + board[r - 3][c + 3].val == winSum) {
                             return true;
                         }
                     }
                     //Check diag down right
                     if (r + 3 < HEIGHT) {
-                        if (board[r][c] + board[r + 1][c + 1] + board[r + 2][c + 2]
-                                + board[r + 3][c + 3] == winSum) {
+                        if (board[r][c].val + board[r + 1][c + 1].val + board[r + 2][c + 2].val + board[r + 3][c + 3].val == winSum) {
                             return true;
                         }
                     }
@@ -157,31 +180,9 @@ public class GameConnectFour extends ButtonGame {
         return false;
     }
 
-    private boolean boardIsFull() {
-        for (int piece : board[0]) { //only have to check top row
-            if (piece == EMPTY) return false;
-        }
-        return true;
-    }
-
-    private int getPieceForPlayer(Member player) {
-        if (player.equals(player1)) {
-            return RED;
-        } else if (player.equals(player2)) {
-            return BLUE;
-        }
-        return EMPTY;
-    }
-
-    private String getUnicodeForPiece(int piece) {
-        switch (piece) {
-            case RED:
-                return player1piece;
-            case BLUE:
-                return player2piece;
-            case EMPTY:
-                return "⚪"; //White circle
-        }
+    //TODO redesign this
+    @Override
+    protected String getBoard() {
         return "";
     }
 }

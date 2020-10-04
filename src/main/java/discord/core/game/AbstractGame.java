@@ -1,6 +1,7 @@
 package discord.core.game;
 
-import discord.Main;
+import discord.command.game.checkers.GameCheckers;
+import discord.command.game.connectfour.GameConnectFour;
 import discord.command.game.slide.GameSlide;
 import discord.data.UserManager;
 import discord.util.DiscordColor;
@@ -15,7 +16,7 @@ import discord4j.rest.util.Color;
 
 public abstract class AbstractGame {
 
-    private final Message gameMessage;
+    private Message gameMessage;
     private final Member[] players;
     private int betAmount;
 
@@ -31,6 +32,10 @@ public abstract class AbstractGame {
         this.betAmount = betAmount;
         this.idleTimer = new Timer();
         this.active = false;
+    }
+
+    protected void setGameMessage(Message gameMessage) {
+        this.gameMessage = gameMessage;
     }
 
     abstract protected String getGameTitle();
@@ -135,7 +140,7 @@ public abstract class AbstractGame {
         gameMessage.edit(spec -> {
             spec.setContent(outside);
 
-            if (this instanceof GameSlide) { //TODO temporary?
+            if (this instanceof GameSlide || this instanceof GameConnectFour || this instanceof GameCheckers) { //TODO temporary
                 spec.setContent(embedText);
                 spec.setEmbed(null);
             } else {

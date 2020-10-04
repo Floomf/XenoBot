@@ -22,7 +22,7 @@ public class RngCommand extends AbstractCommand {
                         String.valueOf((int) (Math.random() * limit + 1)));
             }
         } catch (NumberFormatException e) {
-            MessageUtils.sendErrorMessage(channel, "Parameter is not an integer greater than zero.");
+            MessageUtils.sendErrorMessage(channel, "Please supply an integer greater than zero.");
         }
     }
 
