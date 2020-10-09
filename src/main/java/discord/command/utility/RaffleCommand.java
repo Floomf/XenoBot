@@ -64,4 +64,9 @@ public class RaffleCommand extends AbstractCommand {
                         + "\n`voice` - All users in your currently connected voice channel.");
     }
 
+    @Override
+    public boolean isSupportedGlobally() {
+        return true;
+    }
+
 }

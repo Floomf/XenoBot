@@ -65,4 +65,9 @@ public class InfoCommand extends AbstractCommand {
         return BotUtils.buildUsage(alias, "", "View various stats about Xeno.");
     }
 
+    @Override
+    public boolean isSupportedGlobally() {
+        return true;
+    }
+
 }

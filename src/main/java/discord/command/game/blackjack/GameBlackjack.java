@@ -73,10 +73,10 @@ public class GameBlackjack extends ButtonGame {
         if (playerHand.isBlackjack()) {
             if (dealerHand.isBlackjack()) {
                 dealerHand.setHidden(false);
-                super.tie("**Wow!** Double blackjack! **Push.**");
+                super.tie("**WOW!** Double blackjack! **Push.**");
             } else {
                 super.win("**Blackjack!** " + BotUtils.getRandomGuildEmoji(getGameMessage().getGuild().block(),
-                        new String[]{"Pog", "PogU", "PogeyU"})
+                        new String[]{"Pog", "PogU"})
                         + "\n\n" + getBoard(), super.getPThisTurn(), super.getBetAmount() * 3 / 2);
             }
             return;
@@ -90,8 +90,8 @@ public class GameBlackjack extends ButtonGame {
     }
 
     @Override
-    protected void onTurn(int input) {
-        if (input == Button.H.getNumValue()) {
+    protected void onTurn(Button input) {
+        if (input == Button.H) {
             Card card = drawCard();
             playerHand.addCard(card);
             if (playerHand.hasBusted()) {
@@ -99,11 +99,11 @@ public class GameBlackjack extends ButtonGame {
             } else {
                 super.setInfoDisplay("Drew a **" + card.toString() + "**! Hit or stand?");
             }
-        } else if (input == Button.S.getNumValue()) {
+        } else if (input == Button.S) {
             dealerHand.setHidden(false);
             super.setInfoDisplay("You stood.");
             commitStand();
-        } else if (input == Button.D.getNumValue()) {
+        } else if (input == Button.D) {
             super.setBetAmount(super.getBetAmount() * 2);
             Card card = drawCard();
             playerHand.addCard(card);
@@ -148,8 +148,8 @@ public class GameBlackjack extends ButtonGame {
     }
 
     @Override
-    protected boolean isValidInput(int input) {
-        if (input == Button.D.getNumValue()) {
+    protected boolean isValidInput(Button input) {
+        if (input == Button.D) {
             if (gameDeck.size() < 48 || UserManager.getDUserFromMember(super.getPThisTurn()).getBalance() < getBetAmount() * 2) {
                 return false;
             }

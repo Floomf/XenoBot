@@ -28,4 +28,9 @@ public class DadJokeCommand extends AbstractCommand {
         return BotUtils.buildUsage(alias, "", "View a random dad joke.");
     }
 
+    @Override
+    public boolean isSupportedGlobally() {
+        return true;
+    }
+
 }

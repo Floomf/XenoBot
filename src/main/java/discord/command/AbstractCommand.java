@@ -38,4 +38,8 @@ public abstract class AbstractCommand {
     public CommandCategory getCategory() {
         return category;
     }
+
+    public boolean isSupportedGlobally() {
+        return false;
+    }
 }

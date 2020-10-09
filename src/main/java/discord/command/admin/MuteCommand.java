@@ -23,14 +23,13 @@ public class MuteCommand extends AbstractCommand {
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        List<User> users = message.getUserMentions().filter(user -> !user.isBot()).collectList().block();
+        User mention = message.getUserMentions().filter(user -> !user.isBot()).blockFirst();
 
-        if (users.isEmpty()) {
+        if (mention == null) {
             MessageUtils.sendErrorMessage(channel, "Couldn't identify any user. Please @mention them.");
             return;
         }
 
-        //check xp amount
         int seconds;
         try {
             seconds = Integer.parseInt(args[1]);
@@ -39,7 +38,7 @@ public class MuteCommand extends AbstractCommand {
             return;
         }
 
-        Member mutedMember = users.get(0).asMember(message.getGuild().block().getId()).block();
+        Member mutedMember = mention.asMember(message.getGuild().block().getId()).block();
         mutedMember.edit(spec -> spec.setMute(true)).block();
 
         channel.createMessage(spec -> {
@@ -48,8 +47,7 @@ public class MuteCommand extends AbstractCommand {
                     DiscordColor.RED));
         }).block();
 
-        new Timer().schedule(
-                new TimerTask() {
+        new Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {
                         mutedMember.edit(spec -> spec.setMute(false)).block();

@@ -1,5 +1,6 @@
 package discord.command.game.math;
 
+import discord.command.game.akinator.GameAkinator;
 import discord.core.game.AbstractGame;
 import discord4j.core.object.entity.Member;
 import discord.util.BotUtils;
@@ -17,21 +18,17 @@ public class MathCommand extends AbstractCommand {
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        Message gameMessage = channel.createEmbed(embed -> embed.setDescription("Ready..")).block();
-        try {
-            Thread.sleep(1500L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        AbstractGame game = new GameMath(gameMessage, new Member[] {message.getAuthorAsMember().block()});
-        GameManager.addGame(gameMessage, game);
-        game.start();
-        //GameManager.processGameCommand(message, channel, "Quick Math", GameMath.class);
+        GameManager.createSinglePlayerGame(GameMath.class, channel, message.getAuthorAsMember().block(), 0);
     }
 
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "", "Play a game of Quick Math and earn money.");
+    }
+
+    @Override
+    public boolean isSupportedGlobally() {
+        return true;
     }
 
 }

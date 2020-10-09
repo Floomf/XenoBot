@@ -1,8 +1,7 @@
-package discord.command.game.hangman;
+package discord.command.game.akinator;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.command.game.akinator.GameAkinator;
 import discord.core.game.AbstractGame;
 import discord.core.game.GameManager;
 import discord.util.BotUtils;
@@ -10,20 +9,20 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 
-public class HangmanCommand extends AbstractCommand {
+public class AkinatorCommand extends AbstractCommand {
 
-    public HangmanCommand() {
-        super(new String[]{"hangman", "hm"}, 0, CommandCategory.GAME);
+    public AkinatorCommand() {
+        super(new String[]{"akinator", "akin"}, 0, CommandCategory.GAME);
     }
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        GameManager.createSinglePlayerGame(GameHangman.class, channel, message.getAuthorAsMember().block(), 0);
+        GameManager.createSinglePlayerGame(GameAkinator.class, channel, message.getAuthorAsMember().block(), 0);
     }
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "", "Play a game of Hangman and earn money.");
+        return BotUtils.buildUsage(alias, "", "Play a game of Akinator.");
     }
 
     @Override

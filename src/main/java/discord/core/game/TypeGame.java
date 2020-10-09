@@ -6,6 +6,8 @@ import discord4j.core.object.entity.Message;
 
 public abstract class TypeGame extends AbstractGame {
 
+    static long time;
+
     public TypeGame(Message message, Member[] players, int betAmount) {
         super(message, players, betAmount);
     }
@@ -21,11 +23,42 @@ public abstract class TypeGame extends AbstractGame {
     @Override
     protected final void setup() {
         super.getGameMessage().getClient().getEventDispatcher().on(MessageCreateEvent.class)
-                .takeUntil(active -> !super.isActive())
-                .subscribe(this::onMessageCreateEvent);
+                .takeUntil(e -> !super.isActive())
+                .filter(e -> e.getMessage().getChannelId().equals(getGameMessage().getChannelId())
+                        && playerIsInGame(e.getMember().get()))
+                .subscribe(e -> onPlayerMessage(e.getMessage(), e.getMember().get()));
     }
 
-    private void onMessageCreateEvent(MessageCreateEvent event) {
+    private void onPlayerMessage(Message playerMessage, Member player) {
+        if (playerMessage.getContent().equalsIgnoreCase("forfeit")
+                || playerMessage.getContent().equalsIgnoreCase("ff")) {
+            playerMessage.delete().block();
+            win(getForfeitMessage(player), super.getOtherPlayer(player));
+            return;
+        }
+
+        playerMessage.delete().block();
+        if (player.equals(super.getPThisTurn())) {
+            String input = playerMessage.getContent().toLowerCase().trim();
+            if (isValidInput(input)) {
+                onTurn(input);
+                if (super.isActive()) { //kinda messy
+                    setupNextTurn();
+                }
+            } else {
+                Message invalidMessage = playerMessage.getChannel().block().createMessage("**Invalid input.**\n(You can use **ff** to forfeit)").block();
+                try {
+                    Thread.sleep(1250);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                invalidMessage.delete().block();
+            }
+        }
+    }
+
+    /*
+    private void onMessageCreateEvent(Message playerMessage, Member player) {
         Message userMessage = event.getMessage();
         if (super.isActive() && userMessage.getChannelId().equals(super.getGameMessage().getChannelId())) { //has to be in guild
             Member fromMember = userMessage.getAuthorAsMember().block();
@@ -57,7 +90,7 @@ public abstract class TypeGame extends AbstractGame {
                 userMessage.delete().block();
             }
         }
-    }
+    }*/
 
 }
 

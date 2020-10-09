@@ -33,9 +33,9 @@ public class Main {
             client.on(MemberJoinEvent.class).subscribe(UserManager::onMemberJoinEvent);
             client.on(MemberLeaveEvent.class).subscribe(UserManager::onMemberLeaveEvent);
 
-            client.on(ReactionAddEvent.class).subscribe(GameManager::onReactionAddEvent);
+            //client.on(ReactionAddEvent.class).subscribe(GameManager::onReactionAddEvent);
 
-            client.on(VoiceStateUpdateEvent.class).subscribe(EventsHandler::onVoiceStateUpdateEvent);
+            //client.on(VoiceStateUpdateEvent.class).subscribe(EventsHandler::onVoiceStateUpdateEvent);
             client.on(PresenceUpdateEvent.class).subscribe(EventsHandler::onPresenceUpdateEvent);
 
             return client.onDisconnect();

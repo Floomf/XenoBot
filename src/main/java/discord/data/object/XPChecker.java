@@ -37,7 +37,7 @@ public class XPChecker implements Runnable {
         for (VoiceChannel channel : channels) {
             checkUsers(channel.getVoiceStates().collectList().block()); //tested it and it wasn't null with empty voice channels
         }
-        if (saveCounter == 15) {
+        if (saveCounter == 20) {
             UserManager.saveDatabase();
             saveCounter = 1;
         } else {

@@ -3,6 +3,7 @@ package discord.data;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import discord.data.object.user.DUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord.listener.EventsHandler;
 import discord.util.BotUtils;
 
 import java.io.File;
@@ -115,7 +116,11 @@ public class UserManager {
     }
 
     public static void onMemberJoinEvent(MemberJoinEvent event) {
-        System.out.println(event.getMember().getDisplayName() + " joined the guild.");
+        if (!event.getGuildId().equals(EventsHandler.THE_REALM_ID)) {
+            return;
+        }
+
+        System.out.println(event.getMember().getDisplayName() + " joined The Realm.");
         Member member = event.getMember();
         if (!member.isBot()) {
             if (databaseContainsMember(member)) {
@@ -131,7 +136,11 @@ public class UserManager {
     }
 
     public static void onMemberLeaveEvent(MemberLeaveEvent event) {
-        System.out.println("Member " + event.getUser().getUsername() + " left the guild.");
+        if (!event.getGuildId().equals(EventsHandler.THE_REALM_ID)) {
+            return;
+        }
+
+        System.out.println("Member " + event.getUser().getUsername() + " left The Realm.");
         if (!event.getUser().isBot()) {
             DUser dUser = dUsers.get(event.getUser().getId().asLong());
             if (dUser.getProg().getTotalLevel() < 20) {

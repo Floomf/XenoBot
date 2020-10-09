@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import discord.listener.EventsHandler;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -27,7 +28,9 @@ public class BotUtils {
     }
 
     public static String getGuildEmojiString(Guild guild, String emojiName) {
-        return guild.getEmojis().filter(e -> e.getName().equals(emojiName)).collectList().block().get(0).asFormat(); //will break if emoji doesnt exist
+        return guild.getClient().getGuildById(EventsHandler.THE_REALM_ID).block()
+                .getEmojis().filter(e -> e.getName().equals(emojiName))
+                .collectList().block().get(0).asFormat(); //will break if emoji doesnt exist
     }
 
     public static String getRandomGuildEmoji(Guild guild, String[] emojiNames) {

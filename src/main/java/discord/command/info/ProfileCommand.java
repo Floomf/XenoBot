@@ -30,10 +30,10 @@ public class ProfileCommand extends AbstractCommand {
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
         if (args.length > 0) {
-            List<User> mentions = message.getUserMentions().onErrorResume(e -> Flux.empty()).collectList().block();
-            if (!mentions.isEmpty()) {
-                if (UserManager.databaseContainsUser(mentions.get(0))) {
-                    channel.createEmbed(buildProfileInfo(UserManager.getDUserFromID(mentions.get(0).getId().asLong()))).block();
+            User mention = message.getUserMentions().filter(user -> !user.isBot()).blockFirst();
+            if (mention != null) {
+                if (UserManager.databaseContainsUser(mention)) {
+                    channel.createEmbed(buildProfileInfo(UserManager.getDUserFromID(mention.getId().asLong()))).block();
                 } else {
                     MessageUtils.sendErrorMessage(channel, "Couldn't find that user in the database. Are they a bot?");
                 }

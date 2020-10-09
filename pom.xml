@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.Poffers</groupId>
     <artifactId>Xeno</artifactId>
-    <version>6.3.0</version>
+    <version>6.4.0</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -55,14 +55,19 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.discord4j</groupId><!-- However our packages are all under sx.blah in version 2.x! -->
+            <groupId>com.discord4j</groupId>
             <artifactId>discord4j-core</artifactId>
             <version>3.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.11</version>
+            <version>0.9.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java</artifactId>
+            <version>3.11.00</version>
         </dependency>
         <dependency>
             <groupId>com.vdurmont</groupId>
@@ -70,9 +75,15 @@
             <version>5.1.1</version>
         </dependency>
         <dependency>
-            <groupId>com.konghq</groupId>
-            <artifactId>unirest-java</artifactId>
-            <version>3.1.02</version>
+            <groupId>com.github.markozajc</groupId>
+            <artifactId>akiwrapper</artifactId>
+            <version>1.5</version>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+
     </dependencies>
 </project>

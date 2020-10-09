@@ -35,7 +35,7 @@ public class GameMath extends TypeGame {
         }
     }
 
-    public GameMath(Message message, Member[] players) {
+    public GameMath(Message message, Member[] players, int betAmount) {
         super(message, players, 0);
     }
 

@@ -27,12 +27,17 @@ public class SlideCommand extends AbstractCommand {
 
         Message gameMessage = channel.createMessage("Ready..").block();
         AbstractGame game = new GameSlide(gameMessage, new Member[] {message.getAuthorAsMember().block()}, difficulty);
-        GameManager.addGame(gameMessage, game);
+        GameManager.addGame(game);
         game.start();
     }
 
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[easy/medium/hard]", "Solve a slide puzzle.");
+    }
+
+    @Override
+    public boolean isSupportedGlobally() {
+        return true;
     }
 }

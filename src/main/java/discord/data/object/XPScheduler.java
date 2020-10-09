@@ -13,6 +13,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import discord.listener.EventsHandler;
+import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.VoiceChannel;
@@ -22,17 +24,18 @@ public class XPScheduler {
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private final XPChecker checker;
+    private final Guild guild;
     private ScheduledFuture<?> future;
 
-    public XPScheduler(XPChecker checker) {
-        this.checker = checker;
+    public XPScheduler(Guild guild) {
+        this.checker = new XPChecker(guild);
+        this.guild = guild;
+        guild.getClient().on(VoiceStateUpdateEvent.class)
+                .filter(e -> e.getCurrent().getGuildId().equals(EventsHandler.THE_REALM_ID))
+                .subscribe(e -> checkAnyChannelHasEnoughUsers());
     }
 
-    public void handleUserVoiceChannelEvent(Guild guild) {
-        checkAnyChannelHasEnoughUsers(guild);
-    }
-
-    public void checkAnyChannelHasEnoughUsers(Guild guild) {
+    public void checkAnyChannelHasEnoughUsers() {
         boolean hasEnoughUsers = anyChannelHasEnoughUsers(guild);
         if (checkerIsActive() && !hasEnoughUsers) {
             System.out.println("All guild voice channel users <= 1, stopping xp checker");

@@ -3,13 +3,11 @@ package discord.core.game;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.data.UserManager;
-import discord4j.core.event.domain.message.ReactionAddEvent;
+import discord.listener.EventsHandler;
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.Status;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +24,8 @@ import discord.util.MessageUtils;
 
 public class GameManager {
 
-    private static final HashMap<Message, GameRequest> REQUESTS = new HashMap<>();
-    private static final HashMap<Message, AbstractGame> GAMES = new HashMap<>();
+    private static final Set<GameRequest> REQUESTS = new HashSet<>();
+    private static final Set<AbstractGame> GAMES = new HashSet<>();
 
     public static final int EARN_LIMIT = 1000;
     public static HashMap<Long, Integer> usersMoneyEarned = new HashMap<>();
@@ -66,67 +64,82 @@ public class GameManager {
         }
     }
 
-    public static Collection<AbstractGame> getGames() {
-        return GAMES.values();
+    public static Set<AbstractGame> getGames() {
+        return GAMES;
     }
 
-    public static void addGameRequest(Message requestMessage, GameRequest request) {
-        REQUESTS.put(requestMessage, request);
+    public static boolean gameRequestExists(GameRequest request) {
+        return REQUESTS.contains(request);
     }
 
-    public static void addGame(Message gameMessage, AbstractGame game) {
-        GAMES.put(gameMessage, game);
+    public static void addGame(AbstractGame game) {
+        GAMES.add(game);
     }
 
-    public static void removeGameRequest(Message requestMessage) {
-        REQUESTS.remove(requestMessage);
+    public static void removeGame(AbstractGame game) {
+        GAMES.remove(game);
     }
 
-    public static void removeGame(Message gameMessage) {
-        GAMES.remove(gameMessage);
+    public static void removeGameRequest(GameRequest request) {
+        REQUESTS.remove(request);
     }
 
-    public static void onReactionAddEvent(ReactionAddEvent event) {
-        if (event.getGuild().onErrorResume(e -> Mono.empty()).block() != null && !event.getUser().block().isBot()) {
-
-            if (GAMES.containsKey(event.getMessage().block()) && (GAMES.get(event.getMessage().block()) instanceof ButtonGame)) {
-                ButtonGame game = (ButtonGame) GAMES.get(event.getMessage().block());
-                game.handleMessageReaction(event.getEmoji(), event.getMember().get());
-            } else if (REQUESTS.containsKey(event.getMessage().block())) {
-                GameRequest request = REQUESTS.get(event.getMessage().block());
-                request.handleMessageReaction(event.getEmoji(), event.getMember().get());
-            }
-        }
+    private static boolean playerIsInAGame(Member player) {
+        return GAMES.stream().anyMatch(g -> g.playerIsInGame(player));
     }
 
-    public static void processGameCommand(Message message, TextChannel channel, String[] args, String gameName, Class<? extends AbstractGame> gameType) {
-        List<User> opponentList = message.getUserMentions().onErrorResume(e -> Flux.empty()).collectList().block();
-        if (opponentList.isEmpty()) {
-            MessageUtils.sendErrorMessage(channel, "Could not parse a valid opponent. Please @mention them.");
+    public static void createSinglePlayerGame(Class<? extends AbstractGame> gameType, TextChannel channel, Member player, int betAmount) {
+        if (playerIsInAGame(player)) {
+            MessageUtils.sendErrorMessage(channel, "You're already in a game!");
             return;
         }
 
-        if (opponentList.get(0).isBot() || opponentList.get(0).equals(message.getAuthor().get())) {
-            MessageUtils.sendErrorMessage(channel, "You can't play against yourself or a bot.");
-            return;
+        try {
+            Message gameMessage = channel.createEmbed(embed -> embed.setDescription("Loading..")).block();
+            AbstractGame game = gameType.getConstructor( //dont know how else to do this?
+                    Message.class, Member[].class, int.class).newInstance(gameMessage, new Member[]{player}, betAmount);
+            addGame(game);
+            game.start();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
+    }
+
+    public static void createMultiPlayerGame(Class<? extends AbstractGame> gameType, String gameName, TextChannel channel, Message message, String[] args) {
         Member player = message.getAuthorAsMember().block();
-        Member opponent = opponentList.get(0).asMember(message.getGuild().block().getId()).block();
 
-        if (opponentList.get(0).asMember(message.getGuild().block().getId()).block().getPresence().block().getStatus().equals(Status.OFFLINE)) {
+        if (REQUESTS.stream().anyMatch(r -> r.isCreatedBy(player))) {
+            MessageUtils.sendErrorMessage(channel, "You've already created a pending game request!");
+            return;
+        } else if (playerIsInAGame(player)) {
+            MessageUtils.sendErrorMessage(channel, "You're already in a game!");
+            return;
+        }
+
+        Member opponent = message.getUserMentions()
+                .filter(user -> !(user.isBot() || user.equals(message.getAuthor().orElse(null))))
+                .flatMap(u -> u.asMember(channel.getGuildId()))
+                .blockFirst();
+
+        if (opponent == null) {
+            MessageUtils.sendErrorMessage(channel, "Couldn't parse a playable opponent. Please @mention them.");
+            return;
+        }
+
+        if (opponent.getPresence().block().getStatus().equals(Status.OFFLINE)) {
             MessageUtils.sendErrorMessage(channel, "Your opponent must be online.");
             return;
         }
 
         int betAmount = 0;
-        if (args.length > 1) {
-            if (!args[1].matches("\\d+")) { //check for an int >= 0
+        if (channel.getGuildId().equals(EventsHandler.THE_REALM_ID) && args.length > 1) {
+            if (!args[1].matches("\\d{1,9}")) { //check for an int >= 0
                 MessageUtils.sendErrorMessage(channel, "Couldn't parse a valid bet amount.");
                 return;
             }
 
-            betAmount = Integer.parseInt(args[1]); //TODO will break with numbers higher than int?
+            betAmount = Integer.parseInt(args[1]);
             if (betAmount > UserManager.getDUserFromMember(player).getBalance()) {
                 MessageUtils.sendErrorMessage(channel, "You don't have that much money to bet!");
                 return;
@@ -137,8 +150,7 @@ public class GameManager {
         }
 
         Message requestMessage = channel.createEmbed(embed -> embed.setDescription("Creating request..")).block();
-        GameManager.addGameRequest(requestMessage, new GameRequest(gameName, gameType, betAmount, requestMessage,
-                new Member[] {player, opponent}));
+        REQUESTS.add(new GameRequest(gameName, gameType, betAmount, requestMessage, new Member[] {player, opponent}));
     }
 }
 

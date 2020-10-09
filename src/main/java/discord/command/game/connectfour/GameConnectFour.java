@@ -101,7 +101,7 @@ public class GameConnectFour extends TypeGame {
             super.tie("Board is full. **Tie!**");
         } else {
             super.setGameDisplay(super.getPThisTurn().getDisplayName() + " went in slot **" + input + "**.\n"
-                    + getPiece(super.getPNextTurn()).emoji + " " + super.getPNextTurn().getMention());
+                    + getPiece(super.getPNextTurn()).emoji + " Your turn, " + super.getPNextTurn().getMention());
         }
     }
 

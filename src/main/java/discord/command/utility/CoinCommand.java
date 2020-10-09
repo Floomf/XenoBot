@@ -27,4 +27,10 @@ public class CoinCommand extends AbstractCommand {
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "", "Flip a coin.");
     }
+
+    @Override
+    public boolean isSupportedGlobally() {
+        return true;
+    }
+
 }

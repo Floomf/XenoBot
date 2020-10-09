@@ -23,12 +23,12 @@ public class SetNickCommand extends AbstractCommand {
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        List<User> mentions = message.getUserMentions().onErrorResume(e -> Flux.empty()).collectList().block();
-        if (mentions.isEmpty()) {
+        User mention = message.getUserMentions().filter(user -> !user.isBot()).blockFirst();
+        if (mention == null) {
             MessageUtils.sendErrorMessage(channel, "Couldn't parse a user. Please @mention them.");
             return;
         }
-        DUser userToChange = UserManager.getDUserFromUser(mentions.get(0));
+        DUser userToChange = UserManager.getDUserFromUser(mention);
         if (userToChange == null) {
             MessageUtils.sendErrorMessage(channel, "Couldn't find that user in the database. Are they a bot?");
             return;

@@ -26,4 +26,9 @@ public class DogCommand extends AbstractCommand {
         return BotUtils.buildUsage(alias, "", "View a random dog.");
     }
 
+    @Override
+    public boolean isSupportedGlobally() {
+        return true;
+    }
+
 }

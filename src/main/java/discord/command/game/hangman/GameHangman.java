@@ -29,7 +29,7 @@ public class GameHangman extends TypeGame {
         SMALL, MEDIUM, LARGE, HUGE
     }
 
-    public GameHangman(Message message, Member[] players) {
+    public GameHangman(Message message, Member[] players, int betAmount) {
         super(message, players, 0);
 
         assignRandomWord();

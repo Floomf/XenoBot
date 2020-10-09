@@ -1,5 +1,6 @@
 package discord.command.game.twentythree;
 
+import discord.core.game.Button;
 import discord4j.core.object.entity.Member;
 import discord.core.game.ButtonGame;
 import discord4j.core.object.entity.Message;
@@ -39,9 +40,9 @@ public class GameTwentyThree extends ButtonGame {
     }
 
     @Override
-    protected void onTurn(int input) {
-        amount -= input;
-        String suffix = ((input > 1) ? "s" : "");
+    protected void onTurn(Button input) {
+        amount -= input.getNumValue();
+        String suffix = ((input.getNumValue() > 1) ? "s" : "");
         if (amount > 0) {
             super.setInfoDisplay(super.getPNextTurn(), super.getPThisTurn().getMention() + " ate **" + input +
                     "** cookie" + suffix + ". Your move, " + super.getPNextTurn().getMention());
@@ -52,8 +53,8 @@ public class GameTwentyThree extends ButtonGame {
     }
 
     @Override
-    protected boolean isValidInput(int input) {
-        return (input <= amount);
+    protected boolean isValidInput(Button input) {
+        return (input.getNumValue() <= amount);
     }
 
     @Override

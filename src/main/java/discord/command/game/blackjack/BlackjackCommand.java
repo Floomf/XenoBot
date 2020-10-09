@@ -2,6 +2,7 @@ package discord.command.game.blackjack;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.command.game.akinator.GameAkinator;
 import discord.core.game.AbstractGame;
 import discord.core.game.GameManager;
 import discord.data.UserManager;
@@ -39,10 +40,7 @@ public class BlackjackCommand extends AbstractCommand {
             return;
         }
 
-        Message gameMessage = channel.createEmbed(embed -> embed.setDescription("Ready..")).block();
-        AbstractGame game = new GameBlackjack(gameMessage, new Member[]{message.getAuthorAsMember().block()}, betAmount);
-        GameManager.addGame(gameMessage, game);
-        game.start();
+        GameManager.createSinglePlayerGame(GameBlackjack.class, channel, message.getAuthorAsMember().block(), betAmount);
     }
 
     @Override

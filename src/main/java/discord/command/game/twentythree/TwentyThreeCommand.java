@@ -15,13 +15,18 @@ public class TwentyThreeCommand extends AbstractCommand {
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        GameManager.processGameCommand(message, channel, args, "23", GameTwentyThree.class);
+        GameManager.createMultiPlayerGame(GameTwentyThree.class, "23", channel, message, args);
     }
 
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "@mention [bet]", "Play a game of 23 with someone. " +
                 "You can also specify a bet for a money match.");
+    }
+
+    @Override
+    public boolean isSupportedGlobally() {
+        return true;
     }
 
 }

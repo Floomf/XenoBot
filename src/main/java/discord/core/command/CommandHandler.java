@@ -6,6 +6,7 @@ import discord.core.game.GameManager;
 import discord.core.game.TypeGame;
 import discord.data.UserManager;
 import discord.data.object.user.Progress;
+import discord.listener.EventsHandler;
 import discord.util.MessageUtils;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
@@ -21,12 +22,12 @@ public class CommandHandler {
     public static void onMessageEvent(MessageCreateEvent event) {
         Message message = event.getMessage();
         TextChannel channel = message.getChannel().ofType(TextChannel.class).block();
-
         if (channel == null || !(message.getContent().startsWith(CommandManager.CMD_PREFIX))) {
             return;
         }
 
-        if (!(channel.getName().equals("commands") || channel.getName().equals("testing"))) {
+        if (channel.getGuildId().equals(EventsHandler.THE_REALM_ID)
+                && !(channel.getName().equals("commands") || channel.getName().equals("testing"))) {
             event.getMessage().addReaction(ReactionEmoji.unicode("❌")).block();
             return;
         }
@@ -49,24 +50,6 @@ public class CommandHandler {
             return;
         }
 
-        /*
-        //make sure the guild has a commands channel
-        List<Channel> commandChannels = guild.getChannelsByName("commands");
-        if (commandChannels.isEmpty()) {
-            BotUtils.sendInfoMessage(channel,
-                    "Please create a new text channel named `#commands`!"
-                            + " I will only function properly there. Beep boop.");
-            return;
-        }
-
-        //make sure command is in the commands channel
-        if (!channel)) {
-            BotUtils.sendInfoMessage(channel,
-                    "I will only respond to commands within the <#" + commandChannels.get(0).getLongID() + "> chat."
-                            + " Please type your command again there.");
-            return;
-        }*/
-
         //get command from name
         String name = contents.get(0).substring(1).toLowerCase();
         AbstractCommand command = CommandManager.getCommand(name);
@@ -78,11 +61,17 @@ public class CommandHandler {
             return;
         }
 
-        System.out.println(message.getAuthorAsMember().block().getDisplayName() + " issued " + message.getContent());
+        System.out.println(message.getAuthorAsMember().block().getDisplayName() + " issued " + message.getContent()
+                + " on " + channel.getGuild().block().getName());
+
+        if (!command.isSupportedGlobally() && !channel.getGuildId().equals(EventsHandler.THE_REALM_ID)) {
+            MessageUtils.sendErrorMessage(channel, "That command isn't supported on this guild. Sorry!");
+            return;
+        }
 
         //check if command requires owner (and if owner is executing it)
         if (command.getCategory().equals(CommandCategory.ADMIN) &&
-                !message.getAuthorAsMember().block().equals(message.getGuild().block().getOwner().block())) {
+                !message.getAuthorAsMember().block().equals(channel.getGuild().block().getOwner().block())) {
             MessageUtils.sendErrorMessage(channel, "You must be this guild's owner to use this command.");
             return;
         }

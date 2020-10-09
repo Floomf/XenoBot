@@ -5,6 +5,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
@@ -48,36 +49,41 @@ public class GameRequest {
             }
         }).block();
 
-        TimerTask task = new TimerTask() {
+        inactiveTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 requestMessage.edit(spec -> spec.setEmbed(MessageUtils.getEmbed("Game Request",
                         players[1].getMention() + " failed to respond to the request in time."))).block();
                 requestMessage.removeAllReactions().block();
-                GameManager.removeGameRequest(requestMessage);
+                remove();
             }
-        };
-        inactiveTimer.schedule(task, TimeUnit.MINUTES.toMillis(3));
+        }, TimeUnit.MINUTES.toMillis(3));
+
+        requestMessage.getClient().on(ReactionAddEvent.class).takeWhile(e -> GameManager.gameRequestExists(this))
+                .filter(e -> e.getMessageId().equals(requestMessage.getId()))
+                .doOnNext(e -> requestMessage.removeReaction(e.getEmoji(), e.getUserId()))
+                .filter(e -> players[1].equals(e.getMember().get()))
+                .map(ReactionAddEvent::getEmoji)
+                .subscribe(this::onOpponentReaction);
     }
 
-    public void handleMessageReaction(ReactionEmoji reaction, Member fromUser) {
-        requestMessage.removeReaction(reaction, fromUser.getId()).block();
-        if (fromUser.equals(players[1])) {
-            Button button = bm.getButton(reaction);
-            if (button != null) {
-                if (button.equals(Button.CHECKMARK)) {
-                    requestMessage.removeAllReactions().block();
-                    createGame();
-                    GameManager.removeGameRequest(requestMessage);
-                } else if (button.equals(Button.EXIT)) {
-                    requestMessage.edit(spec -> spec.setContent(players[0].getMention()).setEmbed(
-                            MessageUtils.getEmbed("Game Request", fromUser.getMention() + " has denied your request."))).block();
-                    requestMessage.removeAllReactions().block();
-                    GameManager.removeGameRequest(requestMessage);
-                }
+    private void onOpponentReaction(ReactionEmoji reaction) {
+        Button button = bm.getButton(reaction);
+        if (button != null) {
+            requestMessage.removeAllReactions().block();
+            if (button.equals(Button.CHECKMARK)) {
+                createGame();
+            } else if (button.equals(Button.EXIT)) {
+                requestMessage.edit(spec -> spec.setContent(players[0].getMention()).setEmbed(
+                        MessageUtils.getEmbed("Game Request", players[1].getMention() + " has denied your request."))).block();
             }
+            remove();
             inactiveTimer.cancel();
         }
+    }
+
+    public boolean isCreatedBy(Member player) {
+        return players[0].equals(player);
     }
 
     public void createGame() {
@@ -88,12 +94,16 @@ public class GameRequest {
             }).block();
             AbstractGame game = gameType.getConstructor( //dont know how else to do this?
                     Message.class, Member[].class, int.class).newInstance(requestMessage, players, betAmount);
-            GameManager.addGame(requestMessage, game);
+            GameManager.addGame(game);
             game.start();
         } catch (NoSuchMethodException
                 | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void remove() {
+        GameManager.removeGameRequest(this);
     }
 
 }

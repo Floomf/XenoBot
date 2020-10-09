@@ -1,5 +1,6 @@
 package discord.command.hidden;
 
+import discord.listener.EventsHandler;
 import discord.util.BotUtils;
 import discord.core.command.CommandManager;
 import discord.data.UserManager;
@@ -32,7 +33,8 @@ public class HelpCommand extends AbstractCommand {
             }
         } else {
             HashSet<AbstractCommand> commands = CommandManager.getAllCommands();
-            commands.removeIf(command -> command.getCategory() == CommandCategory.HIDDEN //Take out hidden
+            commands.removeIf(command -> !command.isSupportedGlobally() && !channel.getGuildId().equals(EventsHandler.THE_REALM_ID)
+                    || command.getCategory() == CommandCategory.HIDDEN //Take out hidden
                     || (command.getCategory() == CommandCategory.PERK //take out not unlocked
                     && command.getLevelRequired() > UserManager.getDUserFromMessage(message).getProg().getTotalLevelThisLife())
                     || (command.getCategory() == CommandCategory.ADMIN //take out admin if not owner
@@ -49,6 +51,10 @@ public class HelpCommand extends AbstractCommand {
                                 embed.addField(c.toString(), sb.toString(), false);
                             }
                         }
+                        if (!channel.getGuildId().equals(EventsHandler.THE_REALM_ID)) {
+                            embed.setFooter(CommandManager.getAllCommands().size() - commands.size()
+                                    + " other commands are currently unsupported on this guild.", "");
+                        }
                     })).block();
 
         }
@@ -57,6 +63,11 @@ public class HelpCommand extends AbstractCommand {
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "", "View available commands.");
+    }
+
+    @Override
+    public boolean isSupportedGlobally() {
+        return true;
     }
 
 }

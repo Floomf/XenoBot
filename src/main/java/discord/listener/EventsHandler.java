@@ -2,6 +2,7 @@ package discord.listener;
 
 import discord.data.object.BirthdayScheduler;
 import discord.util.BotUtils;
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.PresenceUpdateEvent;
 import discord.data.object.XPChecker;
 import discord.core.command.CommandManager;
@@ -19,20 +20,18 @@ import discord.data.object.user.DUser;
 
 public class EventsHandler {
 
-    private static XPScheduler scheduler;
+    public static final Snowflake THE_REALM_ID = Snowflake.of(98236427971592192L);
 
     //TODO seperate into different classes?
     public static void onGuildCreateEvent(GuildCreateEvent event) {
-        event.getClient().updatePresence(Presence.online(Activity.listening("!help"))).block();
-        BotUtils.BOT_AVATAR_URL = event.getClient().getSelf().block().getAvatarUrl(); //TODO bad
-
-        UserManager.createDatabase(event.getGuild());
-        CommandManager.createCommands();
-
-        scheduler = new XPScheduler(new XPChecker(event.getGuild()));
-        scheduler.checkAnyChannelHasEnoughUsers(event.getGuild());
-
-        new BirthdayScheduler(event.getGuild());
+        if (event.getGuild().getId().equals(THE_REALM_ID)) {
+            event.getClient().updatePresence(Presence.online(Activity.listening("!help"))).block();
+            BotUtils.BOT_AVATAR_URL = event.getClient().getSelf().block().getAvatarUrl();
+            UserManager.createDatabase(event.getGuild());
+            CommandManager.createCommands();
+            new XPScheduler(event.getGuild()).checkAnyChannelHasEnoughUsers();
+            new BirthdayScheduler(event.getGuild());
+        }
     }
 
     //if the user changes their discord username, we can force their old name as nickname if not done already
@@ -43,10 +42,6 @@ public class EventsHandler {
             user.setGuildMember(event.getMember().block()); //we have to update guildmember so displayname updates correctly
             user.getName().verifyOnGuild();
         }
-    }
-
-    public static void onVoiceStateUpdateEvent(VoiceStateUpdateEvent event) {
-        scheduler.checkAnyChannelHasEnoughUsers(event.getCurrent().getGuild().block());
     }
 
 }

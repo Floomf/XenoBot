@@ -31,4 +31,9 @@ public class RngCommand extends AbstractCommand {
         return BotUtils.buildUsage(alias, "[max]",
                 "Generate an number from 1 to the max.");
     }
+
+    @Override
+    public boolean isSupportedGlobally() {
+        return true;
+    }
 }

@@ -4,6 +4,7 @@ import discord.command.game.checkers.GameCheckers;
 import discord.command.game.connectfour.GameConnectFour;
 import discord.command.game.slide.GameSlide;
 import discord.data.UserManager;
+import discord.util.BotUtils;
 import discord.util.DiscordColor;
 import discord4j.core.object.entity.Member;
 
@@ -66,7 +67,7 @@ public abstract class AbstractGame {
 
     protected final void win(String winMessage, Member winner, int winAmount) {
         //TODO i cant think correctly clean this later
-        if (winAmount > 0) {
+        if (UserManager.databaseContainsUser(winner) && winAmount > 0) {
             if (betAmount == 0 && players.length == 1) { //blackjack has bets but is singleplayer
                 long winnerID = winner.getId().asLong();
                 if (GameManager.usersMoneyEarned.containsKey(winnerID)
@@ -98,7 +99,9 @@ public abstract class AbstractGame {
     }
 
     protected final void win(String winMessage, Member winner) {
-        UserManager.getDUserFromUser(getOtherPlayer(winner)).addBalance(-betAmount); //will still fire if betAmount is 0
+        if (betAmount > 0) {
+            UserManager.getDUserFromUser(getOtherPlayer(winner)).addBalance(-betAmount);
+        }
         win(winMessage, winner, betAmount);
     }
 
@@ -123,11 +126,11 @@ public abstract class AbstractGame {
         end();
     }
 
-    private void end() {
+    protected void end() {
         if (active) { //is this necessary?
             idleTimer.cancel();
             active = false;
-            GameManager.removeGame(gameMessage);
+            GameManager.removeGame(this);
             onEnd();
         }
     }
@@ -146,7 +149,7 @@ public abstract class AbstractGame {
             } else {
                 spec.setEmbed(embed -> {
                     embed.setDescription(embedText);
-                    embed.setAuthor(getGameTitle(), "", gameMessage.getClient().getSelf().block().getAvatarUrl());
+                    embed.setAuthor(getGameTitle(), "", BotUtils.BOT_AVATAR_URL);// gameMessage.getClient().getSelf().block().getAvatarUrl());
                     embed.setColor(color);
                 });
             }

@@ -27,4 +27,9 @@ public class CatCommand extends AbstractCommand {
         return BotUtils.buildUsage(alias, "", "View a random cat.");
     }
 
+    @Override
+    public boolean isSupportedGlobally() {
+        return true;
+    }
+
 }

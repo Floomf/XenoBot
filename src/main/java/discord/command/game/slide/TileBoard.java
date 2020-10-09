@@ -44,8 +44,8 @@ public class TileBoard {
     private int index;
 
     public TileBoard(GameSlide.Difficulty difficulty) {
-       index = board.length - 1;
-       shuffle(difficulty.getNumMoves());
+        index = board.length - 1;
+        shuffle(difficulty.getNumMoves());
     }
 
     private String boardToString() {
@@ -137,11 +137,11 @@ public class TileBoard {
                 boardDisplay += "\n";
             }
 
-                if (board[i] == 0) {
-                    boardDisplay += "⬛";
-                } else {
-                    boardDisplay += Button.getFromNum(board[i]).getEmoji().asUnicodeEmoji().get().getRaw();
-                }
+            if (board[i] == 0) {
+                boardDisplay += "⬛";
+            } else {
+                boardDisplay += Button.getFromNum(board[i]).getEmoji().asUnicodeEmoji().get().getRaw();
+            }
         }
         return boardDisplay;
     }
