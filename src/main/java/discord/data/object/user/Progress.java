@@ -14,6 +14,7 @@ import discord.util.BotUtils;
 import discord.util.DiscordColor;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Role;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Color;
 
 import java.util.List;
@@ -193,8 +194,10 @@ public class Progress {
         level++;
         genXPTotalForLevelUp();
 
-        MessageUtils.sendMessage(BotUtils.getGuildTextChannel("log", user.asGuildMember().getGuild().block()), "Level up!",
-                String.format("%s\n**%d → %d**", user.asGuildMember().getMention(), level - 1, level), user.asGuildMember().getColor().block());
+        if (!reincarnation.isReincarnated() || prestige.isMax()) {
+            MessageUtils.sendMessage(BotUtils.getGuildTextChannel("log", user.asGuildMember().getGuild().block()), "Level up!",
+                    String.format("%s\n**%d → %d**", user.asGuildMember().getMention(), level - 1, level), user.asGuildMember().getColor().block());
+        }
     }
 
     //same as leveling up method
@@ -393,13 +396,7 @@ public class Progress {
                 .filter(role -> role.getName().equals(rank.getRoleName()))
                 .blockFirst();
 
-        List<Role> memberRoles = user.asGuildMember().getRoles().collectList().block();
-
-        for (Role r : memberRoles) {
-            System.out.print(r.getName() + ", ");
-        }
-
-        System.out.println();
+        List<Role> memberRoles = user.asGuildMember().getRoles(EntityRetrievalStrategy.REST).collectList().block();
 
         if (!memberRoles.contains(rankRole)) {
             for (Rank rank : Rank.RANKS) { //remove all existing rank roles

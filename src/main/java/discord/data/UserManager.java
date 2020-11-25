@@ -68,7 +68,7 @@ public class UserManager {
                 }
 
                 dUser.setGuildMember(member);
-                dUser.verifyOnGuild();
+                //dUser.verifyOnGuild();
             }
 
             System.out.println("Database loaded.");

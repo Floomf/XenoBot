@@ -2,10 +2,8 @@ package discord.command.game.akinator;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.core.game.AbstractGame;
 import discord.core.game.GameManager;
 import discord.util.BotUtils;
-import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 

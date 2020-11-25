@@ -23,6 +23,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.entity.Message;
+import discord4j.core.util.OrderUtil;
 import discord4j.rest.util.Color;
 
 public class ColorCommand extends AbstractCommand {
@@ -46,12 +47,14 @@ public class ColorCommand extends AbstractCommand {
             List<String> purchasedColors = user.getPurchases().stream().filter(item -> item.getCategory() == ShopItem.Category.NAME_COLOR)
                     .map(ShopItem::getName).collect(Collectors.toList());
 
-            List<String> defaultColorMentions = message.getGuild().block().getRoles()
-                    .filter(role -> ColorManager.isDefaultColor(role.getName())).map(Role::getMention).collectList().block();
-            List<String> unlockedColorMentions = message.getGuild().block().getRoles()
-                    .filter(role -> ColorManager.colorIsInArray(unlockedColors, role.getName())).map(Role::getMention).collectList().block();
-            List<String> purchasedColorMentions = message.getGuild().block().getRoles()
-                    .filter(role -> purchasedColors.contains(role.getName())).map(Role::getMention).collectList().block();
+            List<Role> roles = OrderUtil.orderRoles(message.getGuild().block().getRoles()).collectList().block();
+
+            List<String> defaultColorMentions = roles.stream().filter(role -> ColorManager.isDefaultColor(role.getName()))
+                    .map(Role::getMention).collect(Collectors.toList());
+            List<String> unlockedColorMentions = roles.stream().filter(role -> ColorManager.colorIsInArray(unlockedColors, role.getName()))
+                    .map(Role::getMention).collect(Collectors.toList());
+            List<String> purchasedColorMentions = roles.stream().filter(role -> purchasedColors.contains(role.getName()))
+                    .map(Role::getMention).collect(Collectors.toList());
 
             //We have to reverse them due to the way they are ordered on discord
             Collections.reverse(defaultColorMentions);
@@ -69,9 +72,9 @@ public class ColorCommand extends AbstractCommand {
                                     purchasedColorMentions.isEmpty() ? "`!shop`"
                                             : purchasedColorMentions.toString().replace("[", "").replace("]", ""), false);
                         embed.setFooter(unlockedColors.length == ColorManager.COLORS_UNLOCKS.length
-                                ? "You've unlocked every color that's unlockable. Astounding."
-                                : (user.getProg().isMaxLevel() ? "You can prestige to unlock more colors."
-                                : "You can keep leveling to unlock more colors."), "");
+                                ? "You've unlocked every unlockable color. Astounding."
+                                : (user.getProg().isMaxLevel() ? "Prestige to unlock more colors."
+                                : "Keep leveling to unlock more colors."), "");
                     })).block();
             return;
         } else if (name.equals("none")) {

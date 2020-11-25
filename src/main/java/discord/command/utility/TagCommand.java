@@ -114,7 +114,7 @@ public class TagCommand extends AbstractCommand {
     }
 
     private boolean tagsContainsIgnoreCase(String tagToCheck) {
-        return (tags.stream().anyMatch((tag) -> (tag.toLowerCase().equalsIgnoreCase(tagToCheck))));
+        return (tags.stream().anyMatch(tag -> tag.equalsIgnoreCase(tagToCheck)));
     }
 
 }

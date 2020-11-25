@@ -22,7 +22,7 @@ public class XPCommand extends AbstractCommand {
         List<User> users = message.getUserMentions().filter(user -> !user.isBot()).collectList().block();
 
         if (users.isEmpty()) {
-            MessageUtils.sendErrorMessage(channel, "Could not identify any user. Please @mention at least one.");
+            MessageUtils.sendErrorMessage(channel, "Couldn't identify any user. Please @mention at least one.");
             return;
         }
 
@@ -32,7 +32,7 @@ public class XPCommand extends AbstractCommand {
             xp = Double.parseDouble(args[0]);
             if (xp > 20000.0) xp = 20000.0;
         } catch (NumberFormatException ex) {
-            MessageUtils.sendErrorMessage(channel, "Could not parse the specified XP amount.");
+            MessageUtils.sendErrorMessage(channel, "Couldn't parse the specified XP amount.");
             return;
         }
 

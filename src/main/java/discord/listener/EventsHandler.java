@@ -36,11 +36,13 @@ public class EventsHandler {
 
     //if the user changes their discord username, we can force their old name as nickname if not done already
     public static void onPresenceUpdateEvent(PresenceUpdateEvent event) {
-        if (!event.getNewUsername().orElse(event.getOldUser().get().getUsername())
-                .equalsIgnoreCase(event.getOldUser().get().getUsername())) {
-            DUser user = UserManager.getDUserFromUser(event.getUser().block());
-            user.setGuildMember(event.getMember().block()); //we have to update guildmember so displayname updates correctly
-            user.getName().verifyOnGuild();
+        if (event.getGuildId().equals(THE_REALM_ID)) {
+            if (!event.getNewUsername().orElse(event.getOldUser().get().getUsername())
+                    .equalsIgnoreCase(event.getOldUser().get().getUsername())) {
+                DUser user = UserManager.getDUserFromUser(event.getUser().block());
+                user.setGuildMember(event.getMember().block()); //we have to update guildmember so displayname updates correctly
+                user.getName().verifyOnGuild();
+            }
         }
     }
 

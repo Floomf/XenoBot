@@ -12,6 +12,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -20,19 +21,24 @@ import java.util.regex.Pattern;
 public class CommandHandler {
 
     public static void onMessageEvent(MessageCreateEvent event) {
-        Message message = event.getMessage();
+        processCommand(event.getMessage());
+    }
+
+    public static void processCommand(Message message) {
         TextChannel channel = message.getChannel().ofType(TextChannel.class).block();
-        if (channel == null || !(message.getContent().startsWith(CommandManager.CMD_PREFIX))) {
+        if (channel == null || !message.getAuthor().isPresent()
+                || message.getAuthor().get().isBot()
+                || !message.getContent().startsWith(CommandManager.CMD_PREFIX)) {
             return;
         }
 
-        if (channel.getGuildId().equals(EventsHandler.THE_REALM_ID)
-                && !(channel.getName().equals("commands") || channel.getName().equals("testing"))) {
-            event.getMessage().addReaction(ReactionEmoji.unicode("❌")).block();
+        //TODO fail silently (method from botutils?)
+        if (!(channel.getName().contains("command") || channel.getName().contains("bot"))) {
+            message.addReaction(ReactionEmoji.unicode("❌")).block();
             return;
         }
 
-        //block starting new games when in type game
+        //block all commands when in type game
         if (GameManager.getGames().stream().anyMatch(game -> game.isActive() && //TEMPORARY
                 game instanceof TypeGame && game.playerIsInGame(message.getAuthorAsMember().block()))) {
             return;
@@ -57,11 +63,11 @@ public class CommandHandler {
         //make sure command exists
         if (command == null) {
             //MessageUtils.sendErrorMessage(channel,"Unknown command. Type `!help` for available commands.");
-            event.getMessage().addReaction(ReactionEmoji.unicode("❔")).block();
+            message.addReaction(ReactionEmoji.unicode("❔")).block();
             return;
         }
 
-        System.out.println(message.getAuthorAsMember().block().getDisplayName() + " issued " + message.getContent()
+        LoggerFactory.getLogger(CommandHandler.class).info(message.getAuthor().get().getTag() + " issued " + message.getContent()
                 + " on " + channel.getGuild().block().getName());
 
         if (!command.isSupportedGlobally() && !channel.getGuildId().equals(EventsHandler.THE_REALM_ID)) {

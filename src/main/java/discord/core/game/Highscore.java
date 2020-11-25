@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Highscore {
 
-    private long discordID;
+    private final long discordID;
     private int highscore;
 
     //@JsonCreator

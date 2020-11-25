@@ -43,13 +43,15 @@ public class GameConnectFour extends TypeGame {
         }
 
         message.edit(spec -> {
-            spec.setContent(":one: :two: :three: :four: :five: :six: :seven:");
+            spec.setContent(":one: :two: :three: :four: :five: :six: :seven:"
+                    + "\n:white_circle: :white_circle: :white_circle: :white_circle: :white_circle: :white_circle: :white_circle:");
             spec.setEmbed(null);
         }).block();
 
         MessageChannel channel = message.getChannel().block();
 
-        for (int i = 0; i < rowMessages.length; i++) {
+        rowMessages[0] = message;
+        for (int i = 1; i < rowMessages.length; i++) {
             rowMessages[i] = channel.createMessage(":white_circle: :white_circle: :white_circle: " +
                     ":white_circle: :white_circle: :white_circle: :white_circle:").block();
         }
@@ -123,8 +125,10 @@ public class GameConnectFour extends TypeGame {
         for (int row = board.length - 1; row >= 0; row--) {
             if (board[row][col] == Piece.EMPTY) {
                 board[row][col] = piece;
-                final int temp = row;
-                rowMessages[row].edit(spec -> spec.setContent(rowToString(board[temp]))).block();
+                String rowString = row == 0
+                        ? ":one: :two: :three: :four: :five: :six: :seven:\n" + rowToString(board[row])
+                        : rowToString(board[row]);;
+                rowMessages[row].edit(spec -> spec.setContent(rowString)).block();
                 return;
             }
         }

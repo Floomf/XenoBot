@@ -29,17 +29,17 @@ public class RaffleCommand extends AbstractCommand {
             return;
         }
 
-        List<User> raffleUsers = message.getGuild().block().getMembers().cast(User.class).collectList().block();
+        List<Member> raffleUsers = message.getGuild().block().getMembers().collectList().block();
 
         if (poolType.equals("online")) {
-            raffleUsers.removeIf(user -> ((Member) user).getPresence().block().getStatus().equals(Status.OFFLINE));
+            raffleUsers.removeIf(user -> user.getPresence().block().getStatus().equals(Status.OFFLINE));
         } else if (poolType.equals("voice")) {
             if (message.getAuthorAsMember().block().getVoiceState().block() == null) {
                 MessageUtils.sendErrorMessage(channel, "You aren't connected to any voice channel on this guild.");
                 return;
             }
             raffleUsers = message.getAuthorAsMember().block().getVoiceState().block().getChannel().block()
-                    .getVoiceStates().flatMap(VoiceState::getUser).collectList().block();
+                    .getVoiceStates().flatMap(VoiceState::getMember).collectList().block();
         }
 
         raffleUsers.removeIf(user -> user.equals(message.getAuthorAsMember().block()) || user.isBot());

@@ -156,10 +156,10 @@ public class GameHangman extends TypeGame {
                 if (WIN_STREAKS.containsKey(super.getPThisTurn())) {
                     int streak = WIN_STREAKS.get(super.getPThisTurn()) + 1;
                     win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo() + "\n\n**" + streak + "** win streak!",
-                            super.getPThisTurn(), 2 * (10 + missesLeft + streak));
+                            super.getPThisTurn(), 2 * (11 + missesLeft + streak));
                     WIN_STREAKS.put(super.getPThisTurn(), streak);
                 } else {
-                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo(), super.getPThisTurn(), 2 * (11 + missesLeft));
+                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo(), super.getPThisTurn(), 2 * (12 + missesLeft));
                     WIN_STREAKS.put(super.getPThisTurn(), 1);
                 }
             } else {
@@ -170,7 +170,7 @@ public class GameHangman extends TypeGame {
             if (missesLeft == 0) {
                 WIN_STREAKS.remove(super.getPThisTurn());
                 lose(BotUtils.getRandomGuildEmoji(super.getGameMessage().getGuild().block(),
-                        new String[] {"Sadge", "PepeHands", "peepoSad"})
+                        new String[] {"Sadge", "PepeHands"})
                         + " **You lose.** The answer was:\n\n" + getFullWordAndInfo());
             } else {
                 super.setInfoDisplay("❌ **Nope!** Guess again:");

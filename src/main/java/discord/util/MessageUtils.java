@@ -1,10 +1,12 @@
 package discord.util;
 
 import discord.Main;
+import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
+import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
@@ -22,12 +24,8 @@ public class MessageUtils {
         return getEmbed(title, desc, Color.WHITE);
     }
 
-    public static void sendMessage(PrivateChannel channel, String title, String desc, Color color) {
-        channel.createEmbed(getEmbed(title, desc, color)).block();
-    }
-
-    public static void sendMessage(TextChannel channel, String title, String desc, Color color) {
-        channel.createEmbed(getEmbed(title, desc, color)).block();
+    public static void sendMessage(MessageChannel channel, String title, String desc, Color color) {
+        channel.createEmbed(getEmbed(title, desc, color)).onErrorResume(e -> Mono.empty()).block();
     }
 
     public static void sendMessage(TextChannel channel, String title, String desc) {

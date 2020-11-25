@@ -31,9 +31,12 @@ public class BirthdayScheduler {
 
         //scheduler.scheduleAtFixedRate(this::checkBirthdays, 1, TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES);
 
+        System.out.println("Starting BirthdayScheduler..");
         scheduler.scheduleAtFixedRate(this::checkBirthdays,
                 LocalDateTime.now().until(LocalDate.now().plusDays(1).atStartOfDay().plusMinutes(1),
                         ChronoUnit.MINUTES), TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES);
+
+        //scheduler.scheduleAtFixedRate(this::checkBirthdays, 0, TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES);
     }
 
     private void checkBirthdays() {

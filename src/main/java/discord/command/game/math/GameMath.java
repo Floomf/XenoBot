@@ -99,7 +99,7 @@ public class GameMath extends TypeGame {
 
         endMessage += "Your best: **" + highScores.get(getPThisTurn().getId()).getHighscore() + "**\n\n";
         endMessage += getHighscores();
-        super.win(endMessage, super.getPThisTurn(), 3 * score + (score / 5));
+        super.win(endMessage, super.getPThisTurn(), 3 * score + (score / 3));
     }
 
     @Override

@@ -67,7 +67,7 @@ public abstract class AbstractGame {
 
     protected final void win(String winMessage, Member winner, int winAmount) {
         //TODO i cant think correctly clean this later
-        if (UserManager.databaseContainsUser(winner) && winAmount > 0) {
+        if (winAmount > 0 && UserManager.databaseContainsUser(winner) ) {
             if (betAmount == 0 && players.length == 1) { //blackjack has bets but is singleplayer
                 long winnerID = winner.getId().asLong();
                 if (GameManager.usersMoneyEarned.containsKey(winnerID)
