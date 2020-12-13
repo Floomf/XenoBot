@@ -1,16 +1,17 @@
 package discord.command.game.blackjack;
 
-import discord.core.game.Button;
-import discord.core.game.ButtonGame;
-import discord.data.UserManager;
+import discord.core.game.GameEmoji;
+import discord.core.game.SingleplayerGame;
+import discord.manager.UserManager;
 import discord.util.BotUtils;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.object.reaction.ReactionEmoji;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-public class GameBlackjack extends ButtonGame {
+public class GameBlackjack extends SingleplayerGame {
 
     private static final ArrayList<Card> DECK_CONSTANT = new ArrayList<>();
     private static final String[] SEX = {"👨", "👩"};
@@ -29,17 +30,13 @@ public class GameBlackjack extends ButtonGame {
     }
 
     private final ArrayList<Card> gameDeck = new ArrayList<>(DECK_CONSTANT);
-    private final String dealerEmoji;
+    private String dealerEmoji;
 
     private final Hand playerHand = new Hand(false);
     private final Hand dealerHand = new Hand(true);
 
-    public GameBlackjack(Message message, Member[] players, int betAmount) {
-        super(message, players, betAmount);
-        super.getButtonManager().addButton(message, Button.H);
-        super.getButtonManager().addButton(message, Button.S);
-        super.getButtonManager().addButton(message, Button.D);
-        dealerEmoji = getRandomDealer();
+    public GameBlackjack(String gameTitle, TextChannel channel, Member player, int betAmount) {
+        super(gameTitle, channel, player, betAmount);
     }
 
     private static String getRandomDealer() {
@@ -48,27 +45,31 @@ public class GameBlackjack extends ButtonGame {
     }
 
     @Override
-    protected String getGameTitle() {
-        return "Blackjack";
-    }
-
-    @Override
-    protected String getForfeitMessage(Member forfeiter) {
+    protected String getForfeitMessage() {
         return "";
     }
 
     @Override
-    protected String getIdleMessage(Member idler) {
+    protected String getIdleMessage() {
         return "You failed to go in time.";
     }
 
     @Override
-    protected void onStart() {
+    protected void setup() {
+        dealerEmoji = getRandomDealer();
         playerHand.addCard(drawCard());
         dealerHand.addCard(drawCard());
         playerHand.addCard(drawCard());
         dealerHand.addCard(drawCard());
+    }
 
+    @Override
+    protected String getFirstDisplay() {
+        return "**Hand dealt!** What's your move?\n\n" + getBoard();
+    }
+
+    @Override
+    protected void onStart() {
         //check for blackjack
         if (playerHand.isBlackjack()) {
             if (dealerHand.isBlackjack()) {
@@ -76,8 +77,7 @@ public class GameBlackjack extends ButtonGame {
                 super.tie("**WOW!** Double blackjack! **Push.**");
             } else {
                 super.win("**Blackjack!** " + BotUtils.getRandomGuildEmoji(getGameMessage().getGuild().block(),
-                        new String[]{"Pog", "PogU"})
-                        + "\n\n" + getBoard(), super.getPThisTurn(), super.getBetAmount() * 3 / 2);
+                        new String[]{"Pog", "PogU"}) + "\n\n" + getBoard(), super.getBetAmount() * 3 / 2);
             }
             return;
         } else if (dealerHand.isBlackjack()) {
@@ -86,12 +86,15 @@ public class GameBlackjack extends ButtonGame {
             return;
         }
 
-        super.setInfoDisplay("**Hand dealt!** What's your move?");
+        super.registerReactionListener();
+        getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.H)).block();
+        getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.S)).block();
+        getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.D)).block();
     }
 
     @Override
-    protected void onTurn(Button input) {
-        if (input == Button.H) {
+    protected void onTurn(String input) {
+        if (input.equals(GameEmoji.H)) {
             Card card = drawCard();
             playerHand.addCard(card);
             if (playerHand.hasBusted()) {
@@ -99,11 +102,11 @@ public class GameBlackjack extends ButtonGame {
             } else {
                 super.setInfoDisplay("Drew a **" + card.toString() + "**! Hit or stand?");
             }
-        } else if (input == Button.S) {
+        } else if (input.equals(GameEmoji.S)) {
             dealerHand.setHidden(false);
             super.setInfoDisplay("You stood.");
             commitStand();
-        } else if (input == Button.D) {
+        } else if (input.equals(GameEmoji.D)) {
             super.setBetAmount(super.getBetAmount() * 2);
             Card card = drawCard();
             playerHand.addCard(card);
@@ -148,11 +151,9 @@ public class GameBlackjack extends ButtonGame {
     }
 
     @Override
-    protected boolean isValidInput(Button input) {
-        if (input == Button.D) {
-            if (gameDeck.size() < 48 || UserManager.getDUserFromMember(super.getPThisTurn()).getBalance() < getBetAmount() * 2) {
-                return false;
-            }
+    protected boolean isValidInput(String input) {
+        if (input.equals(GameEmoji.D)) {
+            return gameDeck.size() == 48 && UserManager.getDUserFromMember(getPlayer()).getBalance() >= getBetAmount() * 2;
         }
         return true;
     }

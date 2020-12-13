@@ -1,4 +1,4 @@
-package discord.data;
+package discord.manager;
 
 import discord.data.object.ShopItem;
 import discord.data.object.TempShopItem;
@@ -15,21 +15,21 @@ import java.util.function.Consumer;
 public class ShopManager {
 
     private static final ShopItem[] SHOP_ITEMS = {
-            new ShopItem("Jazzberry", 1000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Cinnamon", 1000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Jungle", 1000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Jewel", 1500, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Dark Seafoam", 1500, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Periwinkle", 1500, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Lynch", 2000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Eminence", 2000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Stratos", 2000, ShopItem.Category.NAME_COLOR),
+            new ShopItem("Jazzberry", 2000, ShopItem.Category.NAME_COLOR),
+            new ShopItem("Cinnamon", 2000, ShopItem.Category.NAME_COLOR),
+            new ShopItem("Jungle", 2000, ShopItem.Category.NAME_COLOR),
+            new ShopItem("Jewel", 3000, ShopItem.Category.NAME_COLOR),
+            new ShopItem("Dark Seafoam", 3000, ShopItem.Category.NAME_COLOR),
+            new ShopItem("Periwinkle", 3000, ShopItem.Category.NAME_COLOR),
+            new ShopItem("Lynch", 4000, ShopItem.Category.NAME_COLOR),
+            new ShopItem("Eminence", 4000, ShopItem.Category.NAME_COLOR),
+            new ShopItem("Stratos", 4000, ShopItem.Category.NAME_COLOR),
 
-            new TempShopItem("Double XP for 1h", 500, ShopItem.Category.XP_MULTIPLIER, 1),
-            new TempShopItem("Double XP for 3h", 1000, ShopItem.Category.XP_MULTIPLIER, 3),
-            new TempShopItem("Triple XP for 5h", 2500, ShopItem.Category.XP_MULTIPLIER, 5),
+            new TempShopItem("Double XP for 1h", 750, ShopItem.Category.XP_MULTIPLIER, 1),
+            new TempShopItem("Double XP for 3h", 1500, ShopItem.Category.XP_MULTIPLIER, 3),
+            new TempShopItem("Triple XP for 5h", 4000, ShopItem.Category.XP_MULTIPLIER, 5),
 
-            new ShopItem("Custom Server Emoji", 2000, ShopItem.Category.MISC),
+            new ShopItem("Custom Server Emoji", 5000, ShopItem.Category.MISC),
             new ShopItem("hacked item (DONT BUY HAHA)", 696969, ShopItem.Category.MISC)
     };
 

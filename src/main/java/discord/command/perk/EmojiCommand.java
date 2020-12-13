@@ -4,7 +4,7 @@ import com.vdurmont.emoji.EmojiManager;
 import com.vdurmont.emoji.EmojiParser;
 import discord.core.command.CommandHandler;
 import discord.util.BotUtils;
-import discord.data.UserManager;
+import discord.manager.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.data.object.user.Name;

@@ -5,84 +5,91 @@ import com.markozajc.akiwrapper.AkiwrapperBuilder;
 import com.markozajc.akiwrapper.core.entities.Guess;
 import com.markozajc.akiwrapper.core.entities.Server;
 import com.markozajc.akiwrapper.core.exceptions.ServerNotFoundException;
-import discord.core.game.Button;
-import discord.core.game.ButtonGame;
+import discord.core.game.GameEmoji;
+import discord.core.game.SingleplayerGame;
 import discord.util.BotUtils;
 import discord.util.DiscordColor;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.object.reaction.ReactionEmoji;
 
 import java.net.URL;
 import java.util.*;
 
-public class GameAkinator extends ButtonGame {
+public class GameAkinator extends SingleplayerGame {
 
     private Akiwrapper aw;
-    private final HashMap<Button, Akiwrapper.Answer> answerMap = new HashMap<>();
+    private final HashMap<String, Akiwrapper.Answer> answerMap = new HashMap<>();
     private final List<Long> declinedGuesses = new ArrayList<>();
     private Guess currentGuess;
 
     private final static Server.GuessType[] GUESS_TYPES = {Server.GuessType.CHARACTER, Server.GuessType.OBJECT, Server.GuessType.ANIMAL};
     private int guessTypeIndex = 0;
 
-    public GameAkinator(Message message, Member[] players, int betAmount) {
-        super(message, players, 0);
-
-        super.getButtonManager().addButton(message, Button.Y);
-        super.getButtonManager().addButton(message, Button.N);
-        super.getButtonManager().addButton(message, Button.D);
-        super.getButtonManager().addButton(message, Button.P);
-        super.getButtonManager().addButton(message, Button.U);
-        super.getButtonManager().addButton(message, Button.LEFT_ARROW);
-
-        super.getButtonManager().addButton(message, Button.EXIT);
-
-        answerMap.put(Button.Y, Akiwrapper.Answer.YES);
-        answerMap.put(Button.N, Akiwrapper.Answer.NO);
-        answerMap.put(Button.D, Akiwrapper.Answer.DONT_KNOW);
-        answerMap.put(Button.P, Akiwrapper.Answer.PROBABLY);
-        answerMap.put(Button.U, Akiwrapper.Answer.PROBABLY_NOT);
+    public GameAkinator(String gameTitle, TextChannel channel, Member player, int betAmount) {
+        super(gameTitle, channel, player, 0);
     }
 
     @Override
-    protected String getGameTitle() {
-        return "Akinator \uD83E\uDDDE\u200D♂️";
-    }
-
-    @Override
-    protected String getForfeitMessage(Member forfeiter) {
+    protected String getForfeitMessage() {
         return "See you next time!";
     }
 
     @Override
-    protected String getIdleMessage(Member idler) {
+    protected String getIdleMessage() {
         return "Where did you go? See you later.";
     }
 
     @Override
-    protected void onStart() {
-        super.setGameDisplay("**Let's begin!**\nThink of any character/object/animal and answer below."
-                + "\n\nAre you thinking of " + (guessTypeIndex == 0 ? "a **" : "an **") + GUESS_TYPES[guessTypeIndex].name().toLowerCase() + "**?"
-                + "\n\n:regional_indicator_y: Yes\n:regional_indicator_n: No");
+    protected boolean useEmbed() {
+        return true;
     }
 
     @Override
-    protected void onTurn(Button input) {
+    protected void setup() {
+        answerMap.put(GameEmoji.Y, Akiwrapper.Answer.YES);
+        answerMap.put(GameEmoji.N, Akiwrapper.Answer.NO);
+        answerMap.put(GameEmoji.D, Akiwrapper.Answer.DONT_KNOW);
+        answerMap.put(GameEmoji.P, Akiwrapper.Answer.PROBABLY);
+        answerMap.put(GameEmoji.U, Akiwrapper.Answer.PROBABLY_NOT);
+    }
+
+    @Override
+    protected String getFirstDisplay() {
+        return "**Let's begin!**\nThink of any character/object/animal and answer below."
+                + "\n\nAre you thinking of " + (guessTypeIndex == 0 ? "a **" : "an **") + GUESS_TYPES[guessTypeIndex].name().toLowerCase() + "**?"
+                + "\n\n:regional_indicator_y: Yes\n:regional_indicator_n: No";
+    }
+
+    @Override
+    protected void onStart() {
+        super.registerReactionListener();
+        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.Y)).block();
+        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.N)).block();
+        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.D)).block();
+        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.P)).block();
+        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.U)).block();
+        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.LEFT_ARROW)).block();
+        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.EXIT)).block();
+    }
+
+    @Override
+    protected void onTurn(String input) {
         if (aw == null) {
             handleGuessType(input);
             return;
         }
 
-        if (input == Button.LEFT_ARROW) {
+        if (input.equals(GameEmoji.LEFT_ARROW)) {
             aw.undoAnswer();
             super.setInfoDisplay("");
             return;
         }
 
         if (currentGuess != null) {
-            if (input == Button.Y) {
+            if (input.equals(GameEmoji.Y)) {
                 super.getGameMessage().edit(spec -> spec.setEmbed(embed -> {
-                    embed.setAuthor(getGameTitle(), "", getGameMessage().getClient().getSelf().block().getAvatarUrl());
+                    embed.setAuthor("Akinator \uD83E\uDDDE\u200D♂️", "", getGameMessage().getClient().getSelf().block().getAvatarUrl());
                     embed.setDescription(":grin: I win! Your " + GUESS_TYPES[guessTypeIndex].name().toLowerCase() + " was:\n\n**"
                             + currentGuess.getName() + "**\n" + Optional.ofNullable(currentGuess.getDescription()).orElse(""));
                     embed.setImage(Optional.ofNullable(currentGuess.getImage().toString()).orElse(""));
@@ -90,13 +97,12 @@ public class GameAkinator extends ButtonGame {
                 })).block();
                 super.end();
                 return;
-            } else if (input == Button.N) {
+            } else if (input.equals(GameEmoji.N)) {
                 declinedGuesses.add(currentGuess.getIdLong());
                 currentGuess = null;
             }
         } else {
             aw.answerCurrentQuestion(answerMap.get(input));
-            System.out.println(aw.getCurrentQuestion() == null);
         }
 
         if (aw.getCurrentQuestion() == null || aw.getCurrentQuestion().getProgression() > 85) {
@@ -119,15 +125,15 @@ public class GameAkinator extends ButtonGame {
 
     private void sendGuessMessage(Guess guess) {
         super.getGameMessage().edit(spec -> spec.setEmbed(embed -> {
-            embed.setAuthor(getGameTitle(), "", BotUtils.BOT_AVATAR_URL);
+            embed.setAuthor("Akinator \uD83E\uDDDE\u200D♂️", "", BotUtils.BOT_AVATAR_URL);
             embed.setDescription(":grinning: I've got it! Is it **" + guess.getName() + "?**\n\n:regional_indicator_y: Yes\n:regional_indicator_n: No");
             embed.setImage(Optional.ofNullable(guess.getImage()).map(URL::toString).orElse(""));
             embed.setColor(DiscordColor.ORANGE);
         })).block();
     }
 
-    private void handleGuessType(Button input) {
-        if (input == Button.Y) {
+    private void handleGuessType(String input) {
+        if (input.equals(GameEmoji.Y)) {
             try {
                 super.setGameDisplay("**Lets see..**");
                 aw = new AkiwrapperBuilder().setFilterProfanity(false).setGuessType(GUESS_TYPES[guessTypeIndex]).build();
@@ -135,7 +141,7 @@ public class GameAkinator extends ButtonGame {
             } catch (ServerNotFoundException e) {
                 this.lose("Something went wrong. Akinator is dead.");
             }
-        } else if (input == Button.N) {
+        } else if (input.equals(GameEmoji.N)) {
             guessTypeIndex = (guessTypeIndex + 1) % GUESS_TYPES.length; //allows looping back to first element
             super.setGameDisplay("Are you thinking of " + (guessTypeIndex == 0 ? "a **" : "an **")
                     + GUESS_TYPES[guessTypeIndex].name().toLowerCase() + "**?"
@@ -158,8 +164,8 @@ public class GameAkinator extends ButtonGame {
     }
 
     @Override
-    protected boolean isValidInput(Button input) {
-        return (currentGuess == null && aw != null) || input.equals(Button.Y) || input.equals(Button.N);
+    protected boolean isValidInput(String input) {
+        return (currentGuess == null && aw != null) || input.equals(GameEmoji.Y) || input.equals(GameEmoji.N);
     }
 
     @Override

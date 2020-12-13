@@ -1,7 +1,7 @@
 package discord.command.info;
 
 import discord.core.command.CommandManager;
-import discord.data.UserManager;
+import discord.manager.UserManager;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;

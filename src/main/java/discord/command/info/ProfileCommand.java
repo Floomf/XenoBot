@@ -2,7 +2,7 @@ package discord.command.info;
 
 import discord.data.object.XPChecker;
 import discord.util.BotUtils;
-import discord.data.UserManager;
+import discord.manager.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.data.object.user.Prestige;
@@ -18,7 +18,6 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
-import reactor.core.publisher.Flux;
 import discord4j.core.object.entity.Message;
 
 public class ProfileCommand extends AbstractCommand {

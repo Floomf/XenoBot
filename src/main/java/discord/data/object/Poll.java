@@ -1,10 +1,7 @@
 package discord.data.object;
 
-import discord.data.UserManager;
-import discord.util.BotUtils;
-import discord.util.DiscordColor;
+import discord.manager.UserManager;
 import discord.util.MessageUtils;
-import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -29,7 +26,7 @@ public class Poll {
 
     public final static String[] EMOJI_LETTERS = {"🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮", "🇯",
             "🇰", "🇱", "🇲", "🇳", "🇴", "🇵", "🇶", "🇷", "🇸", "🇹"};
-    private final static int REWARD_AMOUNT = 75;
+    private final static int REWARD_AMOUNT = 150;
     private final static String VOTER_ROLE_MENTION = "<@&780706513902895106>"; //hardcoded for now?
 
     private boolean active;
@@ -184,6 +181,7 @@ public class Poll {
         return votes == 1 ? "vote" : "votes";
     }
 
+    //TODO hybridly resize based on longest poll answer
     private static String getBarForPercentage(double percent) {
         String bar = "■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■";
         return bar.substring(0, (int) (percent * bar.length()))

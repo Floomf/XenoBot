@@ -1,16 +1,13 @@
-package discord.core.game;
+package discord.manager;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import discord.data.UserManager;
+import discord.core.game.BaseGame;
+import discord.core.game.GameRequest;
+import discord.manager.UserManager;
 import discord.listener.EventsHandler;
-import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.Status;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -25,15 +22,13 @@ import discord.util.MessageUtils;
 public class GameManager {
 
     private static final Set<GameRequest> REQUESTS = new HashSet<>();
-    private static final Set<AbstractGame> GAMES = new HashSet<>();
+    private static final Set<BaseGame> GAMES = new HashSet<>();
 
-    public static final int EARN_LIMIT = 1000;
+    public static final int EARN_LIMIT = 5000;
     public static HashMap<Long, Integer> usersMoneyEarned = new HashMap<>();
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     static {
-        loadEarningLimits();
-
         //TODO rewrite this without if statements (it has to be possible)
         if (LocalDateTime.now().getHour() < 8) { //Schedule for this morning
             System.out.println("Scheduled for 8AM today");
@@ -48,23 +43,7 @@ public class GameManager {
         }
     }
 
-    private static void loadEarningLimits() {
-        try {
-            usersMoneyEarned = (HashMap<Long, Integer>) new ObjectMapper().readValue(new File("earning_limits.json"), new TypeReference<Map<Long, Integer>>() {});
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void saveEarningLimits() {
-        try {
-            new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(new File("earning_limits.json"), usersMoneyEarned);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static Set<AbstractGame> getGames() {
+    public static Set<BaseGame> getGames() {
         return GAMES;
     }
 
@@ -72,11 +51,11 @@ public class GameManager {
         return REQUESTS.contains(request);
     }
 
-    public static void addGame(AbstractGame game) {
+    public static void addGame(BaseGame game) {
         GAMES.add(game);
     }
 
-    public static void removeGame(AbstractGame game) {
+    public static void removeGame(BaseGame game) {
         GAMES.remove(game);
     }
 
@@ -88,16 +67,15 @@ public class GameManager {
         return GAMES.stream().anyMatch(g -> g.playerIsInGame(player));
     }
 
-    public static void createSinglePlayerGame(Class<? extends AbstractGame> gameType, TextChannel channel, Member player, int betAmount) {
+    public static void createSinglePlayerGame(Class<? extends BaseGame> gameType, String gameTitle, TextChannel channel, Member player, int betAmount) {
         if (playerIsInAGame(player)) {
             MessageUtils.sendErrorMessage(channel, "You're already in a game!");
             return;
         }
 
         try {
-            Message gameMessage = channel.createEmbed(embed -> embed.setDescription("Loading..")).block();
-            AbstractGame game = gameType.getConstructor( //dont know how else to do this?
-                    Message.class, Member[].class, int.class).newInstance(gameMessage, new Member[]{player}, betAmount);
+            BaseGame game = gameType.getConstructor(String.class, TextChannel.class, Member.class, int.class)
+                    .newInstance(gameTitle, channel, player, betAmount);
             addGame(game);
             game.start();
         } catch (Exception e) {
@@ -106,7 +84,7 @@ public class GameManager {
 
     }
 
-    public static void createMultiPlayerGame(Class<? extends AbstractGame> gameType, String gameName, TextChannel channel, Message message, String[] args) {
+    public static void createMultiPlayerGame(Class<? extends BaseGame> gameType, String gameTitle, TextChannel channel, Message message, String[] args) {
         Member player = message.getAuthorAsMember().block();
 
         if (REQUESTS.stream().anyMatch(r -> r.isCreatedBy(player))) {
@@ -150,7 +128,7 @@ public class GameManager {
         }
 
         Message requestMessage = channel.createEmbed(embed -> embed.setDescription("Creating request..")).block();
-        REQUESTS.add(new GameRequest(gameName, gameType, betAmount, requestMessage, new Member[] {player, opponent}));
+        REQUESTS.add(new GameRequest(gameTitle, gameType, betAmount, requestMessage, new Member[] {player, opponent}));
     }
 }
 

@@ -5,25 +5,27 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+import discord.manager.GameManager;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord.util.MessageUtils;
 
 public class GameRequest {
 
     private final String gameName;
-    private final Class<? extends AbstractGame> gameType;
+    private final Class<? extends BaseGame> gameType;
     private final int betAmount;
     private final Message requestMessage;
     private final Member[] players;
     private final ButtonManager bm;
     private final Timer inactiveTimer;
 
-    public GameRequest(String gameName, Class<? extends AbstractGame> gameType, int betAmount,
+    public GameRequest(String gameTitle, Class<? extends BaseGame> gameType, int betAmount,
                        Message message, Member[] players) {
-        this.gameName = gameName;
+        this.gameName = gameTitle;
         this.gameType = gameType;
         this.betAmount = betAmount;
         this.requestMessage = message;
@@ -41,11 +43,11 @@ public class GameRequest {
             spec.setContent(players[1].getMention());
             if (betAmount > 0) {
                 spec.setEmbed(MessageUtils.getEmbed("Game Request",
-                        players[0].getMention() + " has challenged you to a money match of `" + gameName
-                                + "`.\n\nYou'll each bet **$" + betAmount + "**. Do you accept?"));
+                        players[0].getMention() + " has challenged you to a money match of **" + gameName
+                                + "**.\n\nYou'll each bet **$" + betAmount + "**. Do you accept?"));
             } else {
                 spec.setEmbed(MessageUtils.getEmbed("Game Request",
-                        players[0].getMention() + " has challenged you to a game of `" + gameName + "`.\n\nDo you accept?"));
+                        players[0].getMention() + " has challenged you to a game of **" + gameName + "**.\n\nDo you accept?"));
             }
         }).block();
 
@@ -70,10 +72,10 @@ public class GameRequest {
     private void onOpponentReaction(ReactionEmoji reaction) {
         Button button = bm.getButton(reaction);
         if (button != null) {
-            requestMessage.removeAllReactions().block();
             if (button.equals(Button.CHECKMARK)) {
                 createGame();
             } else if (button.equals(Button.EXIT)) {
+                requestMessage.removeAllReactions().block();
                 requestMessage.edit(spec -> spec.setContent(players[0].getMention()).setEmbed(
                         MessageUtils.getEmbed("Game Request", players[1].getMention() + " has denied your request."))).block();
             }
@@ -88,16 +90,13 @@ public class GameRequest {
 
     public void createGame() {
         try {
-            requestMessage.edit(spec ->  {
-                spec.setContent("");
-                spec.setEmbed(embed -> embed.setDescription("Loading `" + gameName + "`.."));
-            }).block();
-            AbstractGame game = gameType.getConstructor( //dont know how else to do this?
-                    Message.class, Member[].class, int.class).newInstance(requestMessage, players, betAmount);
+            requestMessage.delete().block();
+            BaseGame game = gameType.getConstructor( //dont know how else to do this?
+                    String.class, TextChannel.class, Member[].class, int.class)
+                    .newInstance(gameName, requestMessage.getChannel().cast(TextChannel.class).block(), players, betAmount);
             GameManager.addGame(game);
             game.start();
-        } catch (NoSuchMethodException
-                | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
             ex.printStackTrace();
         }
     }

@@ -1,11 +1,11 @@
 package discord.command.game.reversi;
 
 import discord.core.game.Button;
-import discord.core.game.TypeGame;
+import discord.core.game.MultiplayerGame;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.TextChannel;
 
-public class GameReversi extends TypeGame {
+public class GameReversi extends MultiplayerGame {
 
     private static final int HEIGHT = 6, LENGTH = 6;
 
@@ -18,13 +18,8 @@ public class GameReversi extends TypeGame {
     private Member redPlayer;
     private Member bluePlayer;
 
-    public GameReversi(Message message, Member[] players, int betAmount) {
-        super(message, players, betAmount);
-    }
-
-    @Override
-    protected String getGameTitle() {
-        return "Reversi";
+    public GameReversi(String gameTitle, TextChannel channel, Member[] players, int betAmount) {
+        super(gameTitle, channel, players, betAmount);
     }
 
     @Override
@@ -38,7 +33,7 @@ public class GameReversi extends TypeGame {
     }
 
     @Override
-    protected void onStart() {
+    protected void setup() {
         //Assign starting pieces
         board[HEIGHT / 2 - 1][LENGTH / 2 - 1] = BLUE;
         board[HEIGHT / 2 - 1][LENGTH / 2] = RED;
@@ -47,8 +42,17 @@ public class GameReversi extends TypeGame {
         redPlayer = super.getPThisTurn();
         bluePlayer = super.getPNextTurn();
         updateValidChoices(RED);
-        super.setInfoDisplay(redPlayer, formatMessage(redPlayer, "You start off, " + redPlayer.getMention()
-                + "\nEnter a grid position to place your piece (like \"f4\"):"));
+    }
+
+    @Override
+    protected String getFirstDisplay() {
+        return getBoard() + "\n" + formatMessage(redPlayer, "You start off, " + redPlayer.getMention()
+                + "\nEnter a grid position to place your piece (like \"d2\"):");
+    }
+
+    @Override
+    protected void onStart() {
+        super.registerMessageListener();
     }
 
     @Override

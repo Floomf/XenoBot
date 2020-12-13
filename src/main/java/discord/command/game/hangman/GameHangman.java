@@ -1,38 +1,73 @@
 package discord.command.game.hangman;
 
-import discord.core.game.TypeGame;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import discord.core.game.SingleplayerGame;
 import discord.util.BotUtils;
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.TextChannel;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
+import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Random;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
-public class GameHangman extends TypeGame {
+public class GameHangman extends SingleplayerGame {
 
-    private static final HashMap<Member, Integer> WIN_STREAKS = new HashMap<>();
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private static HashMap<Long, Integer> WIN_STREAKS = new HashMap<>();
 
     private String word;
     private String partOfSpeech;
-    private AnswerType type;
 
-    private final char[] wordProgress;
-    private final char[] guesses;
+    private char[] wordProgress;
+    private char[] guesses;
 
     private int missesLeft;
 
-    private enum AnswerType {
-        SMALL, MEDIUM, LARGE, HUGE
+    private final List<Snowflake> inputMessages = new ArrayList<>();
+
+    static {
+        try {
+            WIN_STREAKS = mapper.readValue(new File("streaks_hangman.json"), new TypeReference<HashMap<Long, Integer>>() {});
+        } catch (IOException e) {
+            LoggerFactory.getLogger(GameHangman.class).error(e.toString());
+        }
     }
 
-    public GameHangman(Message message, Member[] players, int betAmount) {
-        super(message, players, 0);
+    public GameHangman(String gameTitle, TextChannel channel, Member player, int betAmount) {
+        super(gameTitle, channel, player, 0);
+    }
 
-        assignRandomWord();
+    private static void saveStreaks() {
+        try {
+            mapper.writeValue(new File("streaks_hangman.json"), WIN_STREAKS);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected String getForfeitMessage() {
+        return "**You forfeited.**";
+    }
+
+    @Override
+    protected String getIdleMessage() {
+        return "**You failed to guess in time.** The word was:\n\n" + getFullWordAndInfo();
+    }
+
+    @Override
+    protected void setup() {
+        int length = getRandIntInRange(4, 30);
+        assignRandomWord(length);
         wordProgress = new char[word.length()];
         guesses = new char[26];
         Arrays.fill(guesses, '-');
@@ -44,103 +79,85 @@ public class GameHangman extends TypeGame {
                 wordProgress[i] = '_';
             }
         }
-        for (int i = 0; i < AnswerType.values().length; i++) {
-            if (type == AnswerType.values()[i]) {
-                missesLeft = 9 - i * 2;
-            }
+        if (length <= 15) { //4-7, 8-11, 12-15
+            missesLeft = 9 - (length / 4);
+        } else { //16-20, 21-25, 26-30
+            missesLeft = 8 - ((length - 1) / 5);
         }
     }
 
     @Override
-    protected String getGameTitle() {
-        return "Hangman";
+    protected String getFirstDisplay() {
+        return "**Start!** Guess a letter:\n\n" + getWordGuessAndInfo();
     }
 
     @Override
-    protected String getForfeitMessage(Member forfeiter) {
-        return "**You forfeited.**";
+    protected void onStart() {
+        super.registerMessageListener();
     }
 
     @Override
-    protected String getIdleMessage(Member idler) {
-        return "**You failed to guess in time.** The word was:\n\n" + getFullWordAndInfo();
+    protected void onEnd() {
+        getChannel().bulkDelete(Mono.just(inputMessages).flatMapMany(Flux::fromIterable)).blockFirst();
+        saveStreaks();
+    }
+
+    @Override
+    protected void onTimeout() {
+        WIN_STREAKS.remove(getPlayer().getId().asLong());
+        super.onTimeout();
     }
 
     private static int getRandIntInRange(int min, int max) {
         return new Random().nextInt(max - min + 1) + min;
     }
 
-    private static int getLettersFromType(AnswerType type) {
-        switch (type) {
-            case SMALL:
-                return getRandIntInRange(3, 5);
-            case MEDIUM:
-                return getRandIntInRange(6, 13);
-            case LARGE:
-                return getRandIntInRange(14, 23);
-            case HUGE:
-                return getRandIntInRange(24, 33);
-        }
-        return 0; //bad
-    }
-
     private static String getPOSFromLetter(String letter) {
         switch (letter) {
             case "n":
-                return "Noun";
+                return "Noun, ";
             case "v":
-                return "Verb";
+                return "Verb, ";
             case "adj":
-                return "Adjective";
+                return "Adjective, ";
             case "adv":
-                return "Adverb";
+                return "Adverb, ";
             default:
-                return "Unknown";
+                return "";
         }
     }
 
-    private void assignRandomAnswerType() {
-        int rand = new Random().nextInt(6);
-        if (rand >= AnswerType.values().length) { //increase chance of medium games
-            type = AnswerType.MEDIUM;
-        } else {
-            type = AnswerType.values()[rand];
-        }
-    }
-
-    private void assignRandomWord() {
-        assignRandomAnswerType();
-
+    private void assignRandomWord(int length) {
         Random r = new Random();
         String firstLetters = "abcdefghijklmnopqrstuwy";
         String lettersToAdd = "????????????????????????????????"; //up to 33 letters total
         String url = "https://api.datamuse.com/words?md=p&sp=";
         url += firstLetters.charAt(r.nextInt(firstLetters.length()));
-        url += lettersToAdd.substring(0, getLettersFromType(type) - 1);
+        url += lettersToAdd.substring(0, length - 1);
 
         JSONArray wordsJson = Unirest.get(url).asJson().getBody().getArray();
 
         if (wordsJson.isEmpty()) {
-            assignRandomWord();
+            assignRandomWord(length);
             return;
         }
 
         JSONObject wordJson = wordsJson.getJSONObject(r.nextInt(wordsJson.length()));
 
+        if (wordJson.isNull("word")) {
+            assignRandomWord(length);
+            return;
+        }
+
         word = wordJson.getString("word");
-        System.out.println("Fetched " + word + " from " + url);
 
         if (wordJson.isNull("tags")) {
-            partOfSpeech = "???";
+            partOfSpeech = "";
         } else {
             partOfSpeech = getPOSFromLetter(wordJson.getJSONArray("tags").getString(0));
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.setGameDisplay("**Start!** Guess a letter:\n\n" + getWordGuessAndInfo());
-    }
 
     @Override
     protected void onTurn(String input) {
@@ -153,14 +170,15 @@ public class GameHangman extends TypeGame {
                 }
             }
             if (hasWon()) {
-                if (WIN_STREAKS.containsKey(super.getPThisTurn())) {
-                    int streak = WIN_STREAKS.get(super.getPThisTurn()) + 1;
-                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo() + "\n\n**" + streak + "** win streak!",
-                            super.getPThisTurn(), 2 * (11 + missesLeft + streak));
-                    WIN_STREAKS.put(super.getPThisTurn(), streak);
+                if (WIN_STREAKS.containsKey(getPlayer().getId().asLong())) {
+                    int streak = WIN_STREAKS.get(getPlayer().getId().asLong());
+                    WIN_STREAKS.put(getPlayer().getId().asLong(), streak + 1);
+                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo()
+                                    + "\n\n📈 **" + (1 + streak) + "** win streak!\n💰 **$" + (streak * 6) + "** bonus!",
+                            60 + (streak * 6));
                 } else {
-                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo(), super.getPThisTurn(), 2 * (12 + missesLeft));
-                    WIN_STREAKS.put(super.getPThisTurn(), 1);
+                    WIN_STREAKS.put(getPlayer().getId().asLong(), 1);
+                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo(), 60);
                 }
             } else {
                 super.setInfoDisplay("✅ **Yep!** Guess again:");
@@ -168,14 +186,31 @@ public class GameHangman extends TypeGame {
         } else {
             missesLeft--;
             if (missesLeft == 0) {
-                WIN_STREAKS.remove(super.getPThisTurn());
-                lose(BotUtils.getRandomGuildEmoji(super.getGameMessage().getGuild().block(),
-                        new String[] {"Sadge", "PepeHands"})
-                        + " **You lose.** The answer was:\n\n" + getFullWordAndInfo());
+                if (WIN_STREAKS.containsKey(getPlayer().getId().asLong()) && WIN_STREAKS.get(getPlayer().getId().asLong()) > 1) {
+                    WIN_STREAKS.remove(getPlayer().getId().asLong());
+                    lose(BotUtils.getRandomGuildEmoji(super.getGameMessage().getGuild().block(),
+                            new String[] {"Sadge", "PepeHands"})
+                            + " **You lose. Win streak ended.**\nThe answer was:\n\n" + getFullWordAndInfo());
+                } else {
+                    WIN_STREAKS.remove(getPlayer().getId().asLong());
+                    lose(BotUtils.getRandomGuildEmoji(super.getGameMessage().getGuild().block(),
+                            new String[] {"Sadge", "PepeHands"})
+                            + " **You lose.** The answer was:\n\n" + getFullWordAndInfo());
+                }
             } else {
                 super.setInfoDisplay("❌ **Nope!** Guess again:");
             }
         }
+        if (inputMessages.size() >= 3) {
+            getChannel().bulkDelete(Mono.just(inputMessages).flatMapMany(Flux::fromIterable)).blockFirst();
+            inputMessages.clear();
+        }
+    }
+
+    @Override
+    protected final void onPlayerMessage(Message message, Member player) {
+        inputMessages.add(message.getId());
+        super.onPlayerMessage(message, player);
     }
 
     @Override
@@ -212,7 +247,7 @@ public class GameHangman extends TypeGame {
     }
 
     private String getWordInfo() {
-        return "*(" + partOfSpeech + ", " + getLetterCount() + " Letters)*";
+        return "*(" + partOfSpeech + getLetterCount() + " Letters)*";
     }
 
     private int getLetterCount() {

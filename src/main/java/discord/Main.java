@@ -1,16 +1,13 @@
 package discord;
 
 import discord4j.core.event.domain.PresenceUpdateEvent;
-import discord4j.core.event.domain.message.ReactionAddEvent;
-import discord.core.game.GameManager;
-import discord.data.UserManager;
+import discord.manager.UserManager;
 import discord.listener.EventsHandler;
 import discord.core.command.CommandHandler;
 
 import java.io.IOException;
 
 import discord4j.core.DiscordClientBuilder;
-import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.guild.MemberJoinEvent;
 import discord4j.core.event.domain.guild.MemberLeaveEvent;

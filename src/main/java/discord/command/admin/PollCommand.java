@@ -32,7 +32,6 @@ public class PollCommand extends AbstractCommand {
 
         TextChannel pollChannel = BotUtils.getGuildTextChannel("polls", channel.getGuild().block());
         new Poll(pollChannel, Color.of(Integer.parseInt(args[0], 16)), Integer.parseInt(args[1]), args[2], Arrays.copyOfRange(args, 3, args.length));
-        //new Poll(pollChannel, DiscordColor.valueOf(args[0].toUpperCase()).get(), Integer.parseInt(args[1]), args[2], Arrays.copyOfRange(args, 3, args.length));
         MessageUtils.sendInfoMessage(channel, "Poll created in " + pollChannel.getMention() + " chat.");
     }
 

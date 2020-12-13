@@ -1,12 +1,9 @@
 package discord.command.game.math;
 
-import discord.command.game.akinator.GameAkinator;
-import discord.core.game.AbstractGame;
-import discord4j.core.object.entity.Member;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.core.game.GameManager;
+import discord.manager.GameManager;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 
@@ -18,7 +15,7 @@ public class MathCommand extends AbstractCommand {
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        GameManager.createSinglePlayerGame(GameMath.class, channel, message.getAuthorAsMember().block(), 0);
+        GameManager.createSinglePlayerGame(GameMath.class, "Quick Math", channel, message.getAuthorAsMember().block(), 0);
     }
 
     @Override

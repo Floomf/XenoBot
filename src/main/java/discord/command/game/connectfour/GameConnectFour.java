@@ -1,14 +1,15 @@
 package discord.command.game.connectfour;
 
-import discord.core.game.TypeGame;
+import discord.core.game.GameEmoji;
+import discord.core.game.MultiplayerGame;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 import java.util.Arrays;
 import java.util.Random;
 
-public class GameConnectFour extends TypeGame {
+public class GameConnectFour extends MultiplayerGame {
 
     enum Piece {
         RED(1, ":red_circle:"), BLUE(-1, ":blue_circle:"), EMPTY(0, ":white_circle:");
@@ -35,45 +36,60 @@ public class GameConnectFour extends TypeGame {
     private final Piece[][] board = new Piece[HEIGHT][LENGTH];
     private Member player1;
 
-    public GameConnectFour(Message message, Member[] players, int betAmount) {
-        super(message, players, betAmount);
+    public GameConnectFour(String gameTitle, TextChannel channel, Member[] players, int betAmount) {
+        super(gameTitle, channel, players, betAmount);
 
-        for (Piece[] pieces : board) {
-            Arrays.fill(pieces, Piece.EMPTY);
-        }
-
-        message.edit(spec -> {
-            spec.setContent(":one: :two: :three: :four: :five: :six: :seven:"
-                    + "\n:white_circle: :white_circle: :white_circle: :white_circle: :white_circle: :white_circle: :white_circle:");
-            spec.setEmbed(null);
-        }).block();
-
-        MessageChannel channel = message.getChannel().block();
-
-        rowMessages[0] = message;
-        for (int i = 1; i < rowMessages.length; i++) {
-            rowMessages[i] = channel.createMessage(":white_circle: :white_circle: :white_circle: " +
-                    ":white_circle: :white_circle: :white_circle: :white_circle:").block();
-        }
-
-        super.setGameMessage(channel.createMessage("Loading...").block());
-
-        randomizePieceEmojis();
     }
 
     @Override
-    protected String getGameTitle() {
-        return "Connect Four";
+    protected boolean useEmbed() {
+        return false;
     }
 
     @Override
     protected String getForfeitMessage(Member forfeiter) {
-        return forfeiter.getMention() + " forfeited.\n" + super.getOtherPlayer(forfeiter).getMention() + " wins!\n\n" + getBoard();
+        return getPiece(forfeiter) + " " + forfeiter.getMention() + " forfeited.\n"
+                + getPiece(getOtherPlayer(forfeiter)) + " " + super.getOtherPlayer(forfeiter).getMention() + " wins!\n\n" + getBoard();
     }
 
     @Override
     protected String getIdleMessage(Member idler) {
         return idler.getMention() + " failed to go in time.\n" + super.getOtherPlayer(idler).getMention() + " wins!\n\n" + getBoard();
+    }
+
+    @Override
+    protected void setup() {
+        player1 = super.getPThisTurn();
+        for (Piece[] pieces : board) {
+            Arrays.fill(pieces, Piece.EMPTY);
+        }
+
+        rowMessages[0] = getChannel().createMessage(":one: :two: :three: :four: :five: :six: :seven:"
+                + "\n:white_circle: :white_circle: :white_circle: :white_circle: :white_circle: :white_circle: :white_circle:").block();
+        for (int i = 1; i < rowMessages.length; i++) {
+            rowMessages[i] = getChannel().createMessage(":white_circle: :white_circle: :white_circle: " +
+                    ":white_circle: :white_circle: :white_circle: :white_circle:").block();
+        }
+
+        randomizePieceEmojis();
+    }
+
+    @Override
+    protected String getFirstDisplay() {
+        return getPiece(player1).emoji + " You start off, " + player1.getMention() + "\nClick an emoji to place your piece.";
+    }
+
+    @Override
+    protected void onStart() {
+        super.registerReactionListener();
+        super.addEmojiReaction(GameEmoji.ONE);
+        super.addEmojiReaction(GameEmoji.TWO);
+        super.addEmojiReaction(GameEmoji.THREE);
+        super.addEmojiReaction(GameEmoji.FOUR);
+        super.addEmojiReaction(GameEmoji.FIVE);
+        super.addEmojiReaction(GameEmoji.SIX);
+        super.addEmojiReaction(GameEmoji.SEVEN);
+        super.addEmojiReaction(GameEmoji.EXIT);
     }
 
     private void randomizePieceEmojis() {
@@ -88,14 +104,8 @@ public class GameConnectFour extends TypeGame {
     }
 
     @Override
-    protected void onStart() {
-        player1 = super.getPThisTurn();
-        super.setGameDisplay("Type a column **[1-7]** to place your piece.\n" + getPiece(player1).emoji + " You start off, " + player1.getMention());
-    }
-
-    @Override
     protected void onTurn(String input) {
-        dropPiece(getPiece(super.getPThisTurn()), Integer.parseInt(input) - 1);
+        dropPiece(getPiece(super.getPThisTurn()), GameEmoji.numberEmojiToInt(input) - 1);
         if (playerHasWon(super.getPThisTurn())) {
             Member winner = super.getPThisTurn();
             super.win(getPiece(super.getPThisTurn()).emoji + " " + winner.getMention() + " wins!", winner);
@@ -110,7 +120,7 @@ public class GameConnectFour extends TypeGame {
     @Override
     protected boolean isValidInput(String input) {
         //if top slot of column empty, c is still open
-        return input.matches("[1-7]") && board[0][Integer.parseInt(input) - 1] == Piece.EMPTY;
+        return GameEmoji.numberEmojiToInt(input) > 0 && board[0][GameEmoji.numberEmojiToInt(input) - 1] == Piece.EMPTY;
     }
 
     private Piece getPiece(Member player) {
@@ -184,7 +194,6 @@ public class GameConnectFour extends TypeGame {
         return false;
     }
 
-    //TODO redesign this
     @Override
     protected String getBoard() {
         return "";

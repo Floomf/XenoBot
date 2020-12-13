@@ -2,7 +2,7 @@ package discord.command.admin;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.UserManager;
+import discord.manager.UserManager;
 import discord.util.BotUtils;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;

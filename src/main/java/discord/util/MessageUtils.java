@@ -21,7 +21,7 @@ public class MessageUtils {
     }
 
     public static Consumer<EmbedCreateSpec> getEmbed(String title, String desc) {
-        return getEmbed(title, desc, Color.WHITE);
+        return getEmbed(title, desc, Color.DISCORD_WHITE);
     }
 
     public static void sendMessage(MessageChannel channel, String title, String desc, Color color) {
@@ -29,7 +29,7 @@ public class MessageUtils {
     }
 
     public static void sendMessage(TextChannel channel, String title, String desc) {
-        sendMessage(channel, title, desc, Color.WHITE);
+        sendMessage(channel, title, desc, Color.DISCORD_WHITE);
     }
 
     public static void sendInfoMessage(TextChannel channel, String message) {

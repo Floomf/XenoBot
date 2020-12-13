@@ -2,11 +2,8 @@ package discord.command.game.hangman;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.command.game.akinator.GameAkinator;
-import discord.core.game.AbstractGame;
-import discord.core.game.GameManager;
+import discord.manager.GameManager;
 import discord.util.BotUtils;
-import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 
@@ -18,7 +15,7 @@ public class HangmanCommand extends AbstractCommand {
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        GameManager.createSinglePlayerGame(GameHangman.class, channel, message.getAuthorAsMember().block(), 0);
+        GameManager.createSinglePlayerGame(GameHangman.class, "Hangman", channel, message.getAuthorAsMember().block(), 0);
     }
 
     @Override

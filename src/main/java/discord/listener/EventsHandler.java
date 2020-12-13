@@ -4,16 +4,11 @@ import discord.data.object.BirthdayScheduler;
 import discord.util.BotUtils;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.PresenceUpdateEvent;
-import discord.data.object.XPChecker;
 import discord.core.command.CommandManager;
-import discord.data.UserManager;
+import discord.manager.UserManager;
 import discord.data.object.XPScheduler;
 
-import java.util.List;
-
-import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
 import discord.data.object.user.DUser;

@@ -1,4 +1,4 @@
-package discord.data;
+package discord.manager;
 
 import discord.data.object.Unlockable;
 import discord.data.object.user.DUser;

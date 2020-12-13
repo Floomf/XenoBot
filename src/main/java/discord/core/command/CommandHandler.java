@@ -2,9 +2,7 @@ package discord.core.command;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.core.game.GameManager;
-import discord.core.game.TypeGame;
-import discord.data.UserManager;
+import discord.manager.UserManager;
 import discord.data.object.user.Progress;
 import discord.listener.EventsHandler;
 import discord.util.MessageUtils;
@@ -39,10 +37,10 @@ public class CommandHandler {
         }
 
         //block all commands when in type game
-        if (GameManager.getGames().stream().anyMatch(game -> game.isActive() && //TEMPORARY
+        /*if (GameManager.getGames().stream().anyMatch(game -> game.isActive() && //TEMPORARY
                 game instanceof TypeGame && game.playerIsInGame(message.getAuthorAsMember().block()))) {
             return;
-        }
+        }*/
 
         //separate the contents of the message into a list of strings
         //separate by space characters, and group quoted sections into their own element

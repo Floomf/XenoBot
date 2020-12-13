@@ -1,4 +1,4 @@
-package discord.data;
+package discord.manager;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import discord.data.object.user.DUser;

@@ -2,9 +2,8 @@ package discord.command.perk;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.core.game.GameManager;
-import discord.data.ShopManager;
-import discord.data.UserManager;
+import discord.manager.ShopManager;
+import discord.manager.UserManager;
 import discord.data.object.ShopItem;
 import discord.data.object.user.DUser;
 import discord.util.BotUtils;
@@ -48,7 +47,6 @@ public class ShopCommand extends AbstractCommand {
             UserManager.saveDatabase();
         } else {
             channel.createEmbed(ShopManager.getShopEmbedFor(UserManager.getDUserFromMessage(message))).block();
-            GameManager.saveEarningLimits(); //put it here for now
         }
     }
 

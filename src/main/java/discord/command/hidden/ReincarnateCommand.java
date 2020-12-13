@@ -2,7 +2,7 @@ package discord.command.hidden;
 
 import discord.util.BotUtils;
 import discord.core.command.CommandHandler;
-import discord.data.UserManager;
+import discord.manager.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.data.object.user.DUser;

@@ -2,18 +2,24 @@ package discord.command.game.math;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.core.game.Highscore;
-import discord.core.game.TypeGame;
+import discord.core.game.SingleplayerGame;
 import discord.util.ProfileBuilder;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.TextChannel;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class GameMath extends TypeGame {
+public class GameMath extends SingleplayerGame {
+
+    //tried using TreeMap but it sorts the keys not the values
+    private static final HashMap<Snowflake, Highscore> highScores = new HashMap<>();
 
     private final Timer gameTimer = new Timer();
     private final Random rand = new Random();
@@ -23,8 +29,7 @@ public class GameMath extends TypeGame {
 
     private int score = 0;
 
-    //tried using TreeMap but it sorts the keys not the values
-    private static final HashMap<Snowflake, Highscore> highScores = new HashMap<>();
+    private final List<Snowflake> inputMessages = new ArrayList<>();
 
     static {
         try {
@@ -35,37 +40,40 @@ public class GameMath extends TypeGame {
         }
     }
 
-    public GameMath(Message message, Member[] players, int betAmount) {
-        super(message, players, 0);
+    public GameMath(String gameTitle, TextChannel channel, Member player, int betAmount) {
+        super(gameTitle, channel, player, 0);
     }
 
     @Override
-    protected String getGameTitle() {
-        return "Quick Math";
-    }
-
-    @Override
-    protected String getForfeitMessage(Member forfeiter) {
-        gameTimer.cancel(); //cant be good design
-        return "**You forfeited.** No score was recorded.";
-    }
-
-    @Override
-    protected String getIdleMessage(Member idler) {
-        return ""; //This will never be called for this game
-    }
-
-    @Override
-    protected void onStart() {
+    protected void setup() {
         genNewProblem();
-        super.setInfoDisplay("**Start!** Enter the answer:");
-
         gameTimer.schedule(new TimerTask() {
             public void run() {
                 endGame();
                 gameTimer.cancel();
             }
         }, TimeUnit.SECONDS.toMillis(60));
+    }
+
+    @Override
+    protected String getFirstDisplay() {
+        return "**Start!** Enter the answer:\n\n" + getBoard();
+    }
+
+    @Override
+    protected String getForfeitMessage() {
+        gameTimer.cancel(); //cant be good design
+        return "**You forfeited.** No score was recorded.";
+    }
+
+    @Override
+    protected String getIdleMessage() {
+        return ""; //This will never be called for this game
+    }
+
+    @Override
+    protected void onStart() {
+        super.registerMessageListener();
     }
 
     @Override
@@ -82,24 +90,39 @@ public class GameMath extends TypeGame {
                 genNewProblem();
                 super.setInfoDisplay("❌ **Incorrect!**");
             }
+            if (inputMessages.size() >= 5) {
+                super.getChannel().bulkDelete(Mono.just(inputMessages).flatMapMany(Flux::fromIterable)).blockFirst();
+                inputMessages.clear();
+            }
         }
+    }
+
+    @Override
+    protected void onEnd() {
+        super.getChannel().bulkDelete(Mono.just(inputMessages).flatMapMany(Flux::fromIterable)).blockFirst();
     }
 
     private void endGame() {
         String endMessage = "🛑 *Time's up!*\nYour score: **" + score + "**\n";
 
-        if (!highScores.containsKey(super.getPThisTurn().getId())) {
-            highScores.put(super.getPThisTurn().getId(), new Highscore(super.getPThisTurn().getId().asLong(), score));
+        if (!highScores.containsKey(getPlayer().getId())) {
+            highScores.put(getPlayer().getId(), new Highscore(getPlayer().getId().asLong(), score));
             endMessage += "\n**NEW HIGH SCORE!**\n\n";
             saveScores();
-        } else if (highScores.get(super.getPThisTurn().getId()).validateNewScore(score)) {
+        } else if (highScores.get(getPlayer().getId()).validateNewScore(score)) {
             endMessage += "\n**NEW HIGH SCORE!**\n\n";
             saveScores();
         }
 
-        endMessage += "Your best: **" + highScores.get(getPThisTurn().getId()).getHighscore() + "**\n\n";
+        endMessage += "Your best: **" + highScores.get(getPlayer().getId()).getHighscore() + "**\n\n";
         endMessage += getHighscores();
-        super.win(endMessage, super.getPThisTurn(), 3 * score + (score / 3));
+        super.win(endMessage, 6 * score);
+    }
+
+    @Override
+    protected final void onPlayerMessage(Message message, Member player) {
+        inputMessages.add(message.getId());
+        super.onPlayerMessage(message, player);
     }
 
     @Override

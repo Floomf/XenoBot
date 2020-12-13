@@ -1,12 +1,12 @@
 package discord.command.perk;
 
-import discord.data.ShopManager;
+import discord.manager.ShopManager;
 import discord.data.object.ShopItem;
 import discord.data.object.user.Progress;
 import discord.util.BotUtils;
-import discord.data.ColorManager;
+import discord.manager.ColorManager;
 import discord.core.command.CommandHandler;
-import discord.data.UserManager;
+import discord.manager.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.data.object.user.DUser;

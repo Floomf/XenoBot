@@ -1,25 +1,19 @@
 package discord.command.game.twentythree;
 
-import discord.core.game.Button;
+import discord.core.game.GameEmoji;
+import discord.core.game.MultiplayerGame;
 import discord4j.core.object.entity.Member;
-import discord.core.game.ButtonGame;
-import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.TextChannel;
 
-public class GameTwentyThree extends ButtonGame {
+public class GameTwentyThree extends MultiplayerGame {
 
     private static final int MAX_COUNT = 23;
 
     private int amount;
 
-    public GameTwentyThree(Message message, Member[] players, int betAmount) {
-        super(message, players, betAmount);
-        super.getButtonManager().addNumButtons(message, 3);
+    public GameTwentyThree(String gameTitle, TextChannel channel, Member[] players, int betAmount) {
+        super(gameTitle, channel, players, betAmount);
         amount = MAX_COUNT;
-    }
-
-    @Override
-    protected String getGameTitle() {
-        return "23";
     }
 
     @Override
@@ -33,19 +27,32 @@ public class GameTwentyThree extends ButtonGame {
     }
 
     @Override
-    protected void onStart() {
-        super.setInfoDisplay(super.getPThisTurn(),"Game started! There are **" + amount + "** cookies to snack on."
-                + "\nYou may eat up to **3** per turn. The person to eat the last cookie loses!"
-                + "\n\nYou start off, " + super.getPThisTurn().getMention());
+    protected void setup() {
+        amount = MAX_COUNT;
     }
 
     @Override
-    protected void onTurn(Button input) {
-        amount -= input.getNumValue();
-        String suffix = ((input.getNumValue() > 1) ? "s" : "");
+    protected String getFirstDisplay() {
+        return "Game started! There are **" + amount + "** cookies to snack on."
+                + "\nYou may eat up to **3** per turn. The person to eat the last cookie loses!"
+                + "\n\nYou start off, " + super.getPThisTurn().getMention();
+    }
+
+    @Override
+    protected void onStart() {
+        super.registerReactionListener();
+        super.addEmojiReaction(GameEmoji.ONE);
+        super.addEmojiReaction(GameEmoji.TWO);
+        super.addEmojiReaction(GameEmoji.THREE);
+    }
+
+    @Override
+    protected void onTurn(String input) {
+        amount -= GameEmoji.numberEmojiToInt(input);
+        String suffix = ((GameEmoji.numberEmojiToInt(input) > 1) ? "s" : "");
         if (amount > 0) {
             super.setInfoDisplay(super.getPNextTurn(), super.getPThisTurn().getMention() + " ate **" + input +
-                    "** cookie" + suffix + ". Your move, " + super.getPNextTurn().getMention());
+                    "** cookie" + suffix + ".\nYour move, " + super.getPNextTurn().getMention());
         } else {
             super.win(super.getPThisTurn().getMention() + " ate the last cookie"
                     + suffix + ".\n" + super.getPNextTurn().getMention() + " wins!", super.getPNextTurn());
@@ -53,8 +60,8 @@ public class GameTwentyThree extends ButtonGame {
     }
 
     @Override
-    protected boolean isValidInput(Button input) {
-        return (input.getNumValue() <= amount);
+    protected boolean isValidInput(String input) {
+        return (GameEmoji.numberEmojiToInt(input) <= amount);
     }
 
     @Override

@@ -2,18 +2,15 @@ package discord.command.admin;
 
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
-import reactor.core.publisher.Flux;
 import discord.util.BotUtils;
 import discord.core.command.CommandHandler;
-import discord.data.UserManager;
+import discord.manager.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.data.object.user.DUser;
 
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
-
-import java.util.List;
 
 public class SetNickCommand extends AbstractCommand {
 

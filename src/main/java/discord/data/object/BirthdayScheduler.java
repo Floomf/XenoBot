@@ -1,6 +1,6 @@
 package discord.data.object;
 
-import discord.data.UserManager;
+import discord.manager.UserManager;
 import discord.data.object.user.DUser;
 import discord.util.BotUtils;
 import discord.util.MessageUtils;
@@ -29,14 +29,10 @@ public class BirthdayScheduler {
                 .filter(channel -> channel.getName().equals("general")).blockFirst();
         birthdayRole = guild.getRoles().filter(role -> role.getName().equals("Birthday Boy \uD83E\uDD73")).blockFirst().getId();
 
-        //scheduler.scheduleAtFixedRate(this::checkBirthdays, 1, TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES);
-
         System.out.println("Starting BirthdayScheduler..");
         scheduler.scheduleAtFixedRate(this::checkBirthdays,
                 LocalDateTime.now().until(LocalDate.now().plusDays(1).atStartOfDay().plusMinutes(1),
                         ChronoUnit.MINUTES), TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES);
-
-        //scheduler.scheduleAtFixedRate(this::checkBirthdays, 0, TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES);
     }
 
     private void checkBirthdays() {

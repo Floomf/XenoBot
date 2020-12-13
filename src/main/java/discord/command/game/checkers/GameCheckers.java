@@ -1,14 +1,12 @@
 package discord.command.game.checkers;
 
 import discord.core.game.Button;
-import discord.core.game.TypeGame;
+import discord.core.game.MultiplayerGame;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
-import java.util.Random;
-
-public class GameCheckers extends TypeGame {
+public class GameCheckers extends MultiplayerGame {
 
     enum Square {
         EMPTY(":black_large_square:", 0, false),
@@ -43,10 +41,7 @@ public class GameCheckers extends TypeGame {
 
     private static final int LENGTH = 8, HEIGHT = 8;
 
-    private static final String[] PIECES = {":red_circle:", ":blue_circle:",
-            ":green_circle:", ":purple_circle:", ":yellow_circle:"};
-
-    private final Message[] boardMessages;
+    private Message[] boardMessages;
 
     private final Square[][] board = new Square[HEIGHT][LENGTH];
     private Member player1;
@@ -63,8 +58,30 @@ public class GameCheckers extends TypeGame {
     private int turnsSinceCapture = 0;
     private boolean hasAnotherCapture = false;
 
-    public GameCheckers(Message message, Member[] players, int betAmount) {
-        super(message, players, betAmount);
+    public GameCheckers(String gameTitle, TextChannel channel, Member[] players, int betAmount) {
+        super(gameTitle, channel, players, betAmount);
+    }
+
+    @Override
+    protected boolean useEmbed() {
+        return false;
+    }
+
+    @Override
+    protected String getForfeitMessage(Member forfeiter) {
+        return getPiece(forfeiter) + " " + forfeiter.getMention() + " forfeited.\n"
+                + getPiece(getOtherPlayer(forfeiter)) + " " + super.getOtherPlayer(forfeiter).getMention() + " wins!\n\n" + getBoard();
+    }
+
+    @Override
+    protected String getIdleMessage(Member idler) {
+        return idler.getMention() + " failed to go in time.\n" + super.getOtherPlayer(idler).getMention() + " wins!\n\n" + getBoard();
+    }
+
+    @Override
+    protected void setup() {
+        player1 = super.getPThisTurn();
+        player2 = super.getPNextTurn();
 
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
@@ -81,54 +98,22 @@ public class GameCheckers extends TypeGame {
                 }
             }
         }
-
-        message.edit(spec -> {
-            spec.setContent("Loading..");
-            spec.setEmbed(null);
-        }).block();
-
-        MessageChannel channel = message.getChannel().block();
-
-        boardMessages = new Message[] {message, channel.createMessage("Loading..").block(), channel.createMessage("Loading..").block()};
-
-        super.setGameMessage(channel.createMessage("Loading...").block());
+        boardMessages = new Message[] {getChannel().createMessage("Loading..").block(),
+                getChannel().createMessage("Loading..").block(),
+                getChannel().createMessage("Loading..").block()};
 
         updateBoard();
-        assignPieces();
     }
 
     @Override
-    protected String getGameTitle() {
-        return "Checkers";
-    }
-
-    @Override
-    protected String getForfeitMessage(Member forfeiter) {
-        return forfeiter.getMention() + " forfeited.\n" + super.getOtherPlayer(forfeiter).getMention() + " wins!\n\n" + getBoard();
-    }
-
-    @Override
-    protected String getIdleMessage(Member idler) {
-        return idler.getMention() + " failed to go in time.\n" + super.getOtherPlayer(idler).getMention() + " wins!\n\n" + getBoard();
-    }
-
-    private void assignPieces() {
-        Random rand = new Random();
-        int one = rand.nextInt(PIECES.length);
-        int two = rand.nextInt(PIECES.length);
-        while (two == one) {
-            two = rand.nextInt(PIECES.length);
-        }
-        //player1piece = PIECES[one];
-        //player2piece = PIECES[two];
+    protected String getFirstDisplay() {
+        return "Enter your piece coord and the coord to move it to (Ex: **b3a4**)\n\n"
+                + getPiece(player1) + " You start off, " + player1.getMention();
     }
 
     @Override
     protected void onStart() {
-        player1 = super.getPThisTurn();
-        player2 = super.getPNextTurn();
-        super.setInfoDisplay("Enter your piece coord and the coord to move it to (Ex: **b3a4**)\n\n"
-                + getPiece(player1) + " You start off, " + player1.getMention());
+        super.registerMessageListener();
     }
 
     @Override //TODO clean up
@@ -205,7 +190,7 @@ public class GameCheckers extends TypeGame {
 
     @Override
     protected boolean isValidInput(String input) {
-        input = input.replace(" ", "");
+        input = input.replace(" ", "").replace(">", "");
         if (input.matches("([a-d][1-8]){2}")) {
             int fromR = HEIGHT - (input.charAt(1) - '0');
             int fromC = (input.charAt(0) - 'a') * 2 + ((fromR + 1) % 2); //its magic
@@ -250,11 +235,6 @@ public class GameCheckers extends TypeGame {
         return true;
     }
 
-    private void move(int row, int col) {
-
-    }
-
-    //holy fuck
     private boolean isValidMove(int fromR, int fromC, int toR, int toC) {
         return toR > -1 && toR < HEIGHT && toC > -1 && toC < LENGTH //check for out of bounds
                 && ((board[fromR][fromC].team == 1 && toR < fromR || board[fromR][fromC].team == 2 && toR > fromR) || board[fromR][fromC].isKing) //check for king to allow backwards
@@ -332,17 +312,6 @@ public class GameCheckers extends TypeGame {
     @Override
     protected String getBoard() {
         return "";
-    }
-
-    //Only works with even sized array, but thats fine here
-    private void rotateBoard180() {
-        for (int i = 0; i < board.length / 2; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                Square temp = board[i][j];
-                board[i][j] = board[board.length - i - 1][board[i].length - j - 1];
-                board[board.length - i - 1][board[i].length - j - 1] = temp;
-            }
-        }
     }
 
 }

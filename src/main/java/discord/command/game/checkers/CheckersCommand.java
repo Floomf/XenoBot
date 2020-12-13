@@ -2,7 +2,7 @@ package discord.command.game.checkers;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.core.game.GameManager;
+import discord.manager.GameManager;
 import discord.util.BotUtils;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;

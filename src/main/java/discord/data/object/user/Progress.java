@@ -7,7 +7,7 @@ import discord.command.perk.ColorCommand;
 import discord.command.perk.DescCommand;
 import discord.command.perk.EmojiCommand;
 import discord.command.perk.NickCommand;
-import discord.data.ColorManager;
+import discord.manager.ColorManager;
 import discord.data.object.TempShopItem;
 import discord.data.object.Unlockable;
 import discord.util.BotUtils;

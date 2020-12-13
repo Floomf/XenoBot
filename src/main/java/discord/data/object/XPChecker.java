@@ -1,6 +1,6 @@
 package discord.data.object;
 
-import discord.data.UserManager;
+import discord.manager.UserManager;
 
 import java.util.List;
 

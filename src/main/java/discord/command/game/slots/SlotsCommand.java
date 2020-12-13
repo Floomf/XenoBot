@@ -1,4 +1,4 @@
-package discord.command.game.blackjack;
+package discord.command.game.slots;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
@@ -9,10 +9,10 @@ import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 
-public class BlackjackCommand extends AbstractCommand {
+public class SlotsCommand extends AbstractCommand {
 
-    public BlackjackCommand() {
-        super(new String[]{"blackjack", "bj", "21"}, 1, CommandCategory.GAME);
+    public SlotsCommand() {
+        super(new String[]{"slots", "slotmachine"}, 1, CommandCategory.GAME);
     }
 
     @Override
@@ -37,12 +37,12 @@ public class BlackjackCommand extends AbstractCommand {
             return;
         }
 
-        GameManager.createSinglePlayerGame(GameBlackjack.class, "Blackjack", channel, message.getAuthorAsMember().block(), betAmount);
+        GameManager.createSinglePlayerGame(GameSlots.class, "Slots 🎰", channel, message.getAuthorAsMember().block(), betAmount);
     }
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[bet]", "Play a game of Blackjack and wager money.");
+        return BotUtils.buildUsage(alias, "[bet]", "Spin at the slot machine and wager money.");
     }
 
 }

@@ -1,10 +1,6 @@
 package discord.command.game.slide;
 
-import discord.core.game.TypeGame;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-
-public class GameSlide extends TypeGame {
+/*public class GameSlide extends TypeGame {
 
     enum Difficulty {
         EASY(10, 20),  MEDIUM(15, 50), HARD(20, 150);
@@ -85,4 +81,4 @@ public class GameSlide extends TypeGame {
     protected String getBoard() {
         return board.toString();
     }
-}
+}*/
