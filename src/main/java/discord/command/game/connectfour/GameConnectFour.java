@@ -38,7 +38,6 @@ public class GameConnectFour extends MultiplayerGame {
 
     public GameConnectFour(String gameTitle, TextChannel channel, Member[] players, int betAmount) {
         super(gameTitle, channel, players, betAmount);
-
     }
 
     @Override
@@ -48,8 +47,8 @@ public class GameConnectFour extends MultiplayerGame {
 
     @Override
     protected String getForfeitMessage(Member forfeiter) {
-        return getPiece(forfeiter) + " " + forfeiter.getMention() + " forfeited.\n"
-                + getPiece(getOtherPlayer(forfeiter)) + " " + super.getOtherPlayer(forfeiter).getMention() + " wins!\n\n" + getBoard();
+        return getPiece(forfeiter).emoji + " " + forfeiter.getMention() + " forfeited.\n"
+                + getPiece(getOtherPlayer(forfeiter)).emoji + " " + super.getOtherPlayer(forfeiter).getMention() + " wins!\n\n" + getBoard();
     }
 
     @Override

@@ -2,6 +2,7 @@ package discord.core.command;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.manager.GameManager;
 import discord.manager.UserManager;
 import discord.data.object.user.Progress;
 import discord.listener.EventsHandler;
@@ -30,17 +31,17 @@ public class CommandHandler {
             return;
         }
 
-        //TODO fail silently (method from botutils?)
         if (!(channel.getName().contains("command") || channel.getName().contains("bot"))) {
             message.addReaction(ReactionEmoji.unicode("❌")).block();
             return;
         }
 
+        System.out.println("game:" + Thread.currentThread().getId() + " - " + Thread.currentThread().getName());
+
         //block all commands when in type game
-        /*if (GameManager.getGames().stream().anyMatch(game -> game.isActive() && //TEMPORARY
-                game instanceof TypeGame && game.playerIsInGame(message.getAuthorAsMember().block()))) {
+        if (GameManager.playerIsInTypingGame(message.getAuthorAsMember().block())) {
             return;
-        }*/
+        }
 
         //separate the contents of the message into a list of strings
         //separate by space characters, and group quoted sections into their own element
@@ -61,7 +62,7 @@ public class CommandHandler {
         //make sure command exists
         if (command == null) {
             //MessageUtils.sendErrorMessage(channel,"Unknown command. Type `!help` for available commands.");
-            message.addReaction(ReactionEmoji.unicode("❔")).block();
+            message.addReaction(ReactionEmoji.unicode("❔")).doOnError(e -> System.out.println("lol")).block();
             return;
         }
 

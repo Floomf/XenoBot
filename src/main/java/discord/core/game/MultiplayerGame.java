@@ -6,6 +6,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
+import org.slf4j.LoggerFactory;
 
 public abstract class MultiplayerGame extends BaseGame {
 
@@ -16,11 +17,17 @@ public abstract class MultiplayerGame extends BaseGame {
         super(gameTitle, channel, betAmount);
         this.players = players;
         this.playerThisTurn = players[0];
+        LoggerFactory.getLogger(getClass()).info("Game created with players: "
+                + players[0].getTag() + " , " + players[1].getTag());
     }
 
     abstract protected String getForfeitMessage(Member forfeiter);
 
     abstract protected String getIdleMessage(Member idler);
+
+    protected String getInvalidInputMessage() {
+        return "**Invalid input.**\n(You can type **ff** to forfeit)";
+    }
 
     public final boolean playerIsInGame(Member player) {
         for (Member p : players) {
@@ -31,14 +38,16 @@ public abstract class MultiplayerGame extends BaseGame {
         return false;
     }
 
-    protected final void onPlayerMessage(Message message, Member player) {
+    protected final synchronized void onPlayerMessage(Message message, Member player) {
+        if (!super.isActive()) return;
+
         if (message.getContent().equalsIgnoreCase("forfeit") || message.getContent().equalsIgnoreCase("ff")) {
             message.delete().doOnError(e -> super.setGameDisplay("I don't have permission to delete messages! Ended game.")).onErrorStop().block();
             win(getForfeitMessage(player), getOtherPlayer(player));
             return;
         }
 
-        if (player.equals(getPThisTurn())) {
+        if (player.equals(playerThisTurn)) {
             String input = message.getContent().toLowerCase().trim();
             if (isValidInput(input)) {
                 onTurn(input);
@@ -46,7 +55,7 @@ public abstract class MultiplayerGame extends BaseGame {
                     setupNextTurn();
                 }
             } else {
-                Message invalidMessage = message.getChannel().block().createMessage("**Invalid input.**\n(You can type **ff** to forfeit)").block();
+                Message invalidMessage = message.getChannel().block().createMessage(getInvalidInputMessage()).block();
                 try {
                     Thread.sleep(1250);
                 } catch (InterruptedException e) {
@@ -58,7 +67,7 @@ public abstract class MultiplayerGame extends BaseGame {
         message.delete().doOnError(e -> super.setGameDisplay("I don't have permission to delete messages! Ended game.")).onErrorStop().block();
     }
 
-    public final void onPlayerReaction(ReactionEmoji emoji, Member player) {
+    public void onPlayerReaction(ReactionEmoji emoji, Member player) {
         String raw = emoji.asUnicodeEmoji().map(ReactionEmoji.Unicode::getRaw).orElse("");
         if (raw.equals(GameEmoji.EXIT)) {
             win(getForfeitMessage(player), getOtherPlayer(player));
@@ -78,6 +87,7 @@ public abstract class MultiplayerGame extends BaseGame {
     protected void onEnd() {}; //bad design?
 
     protected final void win(String winMessage, Member winner) {
+        end();
         if (getBetAmount() > 0 && UserManager.databaseContainsUser(winner) ) {
             UserManager.getDUserFromMember(winner).addBalance(getBetAmount());
             UserManager.getDUserFromUser(getOtherPlayer(winner)).addBalance(-super.getBetAmount());
@@ -85,10 +95,9 @@ public abstract class MultiplayerGame extends BaseGame {
         }
         //some games don't want getBoard() to display at end, so don't use setInfoDisplay()
         setGameDisplay(winMessage, DiscordColor.GREEN);
-        end();
     }
 
-    protected final void setupNextTurn() {
+    protected void setupNextTurn() {
         playerThisTurn = getPNextTurn();
         super.setupNextTurn();
     }
@@ -101,13 +110,8 @@ public abstract class MultiplayerGame extends BaseGame {
         return playerThisTurn;
     }
 
-    //Works with 1-2 player games
     protected final Member getOtherPlayer(Member player) {
-        if (player.equals(playerThisTurn)) {
-            return getPNextTurn();
-        } else {
-            return playerThisTurn;
-        }
+        return player.equals(playerThisTurn) ? getPNextTurn() : playerThisTurn;
     }
 
 }

@@ -7,6 +7,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
+import org.slf4j.LoggerFactory;
 
 public abstract class SingleplayerGame extends BaseGame {
 
@@ -15,6 +16,7 @@ public abstract class SingleplayerGame extends BaseGame {
     public SingleplayerGame(String gameTitle, TextChannel channel, Member player, int betAmount) {
         super(gameTitle, channel, betAmount);
         this.player = player;
+        LoggerFactory.getLogger(getClass()).info("Game created with player: " + player.getTag());
     }
 
     abstract protected String getForfeitMessage();
@@ -28,7 +30,9 @@ public abstract class SingleplayerGame extends BaseGame {
         return this.player.equals(player);
     }
 
-    protected void onPlayerMessage(Message message, Member player) {
+    protected synchronized void onPlayerMessage(Message message, Member player) {
+        if (!super.isActive()) return; //this is the way i thought of
+
         if (message.getContent().equalsIgnoreCase("forfeit") || message.getContent().equalsIgnoreCase("ff")) {
             message.delete().doOnError(e -> super.setGameDisplay("I don't have permission to delete messages! Ended game.")).onErrorStop().block();
             lose(getForfeitMessage());
@@ -71,6 +75,7 @@ public abstract class SingleplayerGame extends BaseGame {
     }
 
     protected void win(String winMessage, int winAmount) {
+        end();
         if (winAmount > 0 && UserManager.databaseContainsUser(player) ) {
             if (super.getBetAmount() == 0) { //not a betting game
                 long winnerID = player.getId().asLong();
@@ -99,7 +104,6 @@ public abstract class SingleplayerGame extends BaseGame {
 
         //some games don't want getBoard() to display at end, so don't use setInfoDisplay()
         setGameDisplay(winMessage, DiscordColor.GREEN);
-        end();
     }
 
     protected final void win(String winMessage) {
@@ -108,12 +112,12 @@ public abstract class SingleplayerGame extends BaseGame {
 
     //used for single player games
     protected final void lose(String loseMessage) {
+        end();
         if (super.getBetAmount() > 0) {
             UserManager.getDUserFromMember(player).addBalance(-super.getBetAmount());
             loseMessage += "\n\n💵 **$" + super.getBetAmount() + " lost.**";
         }
         setGameDisplay(loseMessage, DiscordColor.RED);
-        end();
     }
 
     protected final Member getPlayer() {

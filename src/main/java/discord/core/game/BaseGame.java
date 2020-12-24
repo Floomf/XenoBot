@@ -26,12 +26,15 @@ public abstract class BaseGame {
     private boolean active;
     private int turn;
 
+    private boolean typingGame;
+
     public BaseGame(String gameTitle, TextChannel channel, int betAmount) {
         this.gameTitle = gameTitle;
         this.channel = channel;
         this.betAmount = betAmount;
         this.idleTimer = new Timer();
         this.active = false;
+        this.typingGame = false;
     }
 
     protected boolean useEmbed() {
@@ -40,10 +43,9 @@ public abstract class BaseGame {
 
     abstract protected String getFirstDisplay();
 
-    //For setting up specific game types (button manager and message listener);
     abstract protected void setup();
 
-    //Games are responsible for calling updateMessageDisplay() on start
+    //Games are responsible for registering input handlers here
     abstract protected void onStart();
 
     abstract protected void onEnd();
@@ -52,12 +54,13 @@ public abstract class BaseGame {
 
     abstract protected void onTimeout();
 
-    //either a message, or a reaction's emoji
+    //either a message's content, or a reaction's raw emoji
     abstract protected boolean isValidInput(String input);
 
     abstract protected String getBoard();
 
     public final void start() {
+        System.out.println("game:" + Thread.currentThread().getId() + " - " + Thread.currentThread().getName());
         active = true;
         turn = 1;
         setup();
@@ -70,29 +73,33 @@ public abstract class BaseGame {
                 embed.setColor(Color.DISCORD_WHITE);
             }).block();
         }
+        if (gameMessage == null) { //somehow couldn't send message
+            end();
+            return;
+        }
         startIdleTimer();
         onStart();
     }
 
     protected final void tie(String tieMessage) {
-        setGameDisplay(tieMessage + "\n\n" + getBoard(), DiscordColor.ORANGE);
+        setGameDisplay(tieMessage, DiscordColor.ORANGE);
         end();
     }
 
     protected void end() {
-        if (active) { //is this necessary?
-            idleTimer.cancel();
-            onEnd();
-            active = false;
-            GameManager.removeGame(this);
-        }
+        active = false;
+        idleTimer.cancel();
+        onEnd();
+        GameManager.removeGame(this);
     }
 
     protected final void registerMessageListener() {
         channel.getClient().getEventDispatcher().on(MessageCreateEvent.class)
                 .takeUntil(e -> !active)
                 .filter(e -> e.getMessage().getChannelId().equals(channel.getId()) && playerIsInGame(e.getMember().get()))
+                .doOnNext(e -> System.out.println("type:" + Thread.currentThread().getId() + " - " + Thread.currentThread().getName()))
                 .subscribe(e -> onPlayerMessage(e.getMessage(), e.getMember().get()));
+        typingGame = true;
     }
 
     protected final void registerReactionListener() {
@@ -157,6 +164,10 @@ public abstract class BaseGame {
 
     public final boolean isActive() {
         return active;
+    }
+
+    public final boolean isTypingGame() {
+        return typingGame;
     }
 
     protected final Message getGameMessage() {

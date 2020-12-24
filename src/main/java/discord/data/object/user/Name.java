@@ -48,12 +48,8 @@ public class Name {
         verifyOnGuild();
     }
 
-    public void setEmojis(List<String> emojiList) {
-        String emojisToAdd = "";
-        for (String emoji : emojiList) {
-            emojisToAdd += emoji;
-        }
-        emojis = emojisToAdd;
+    public void setEmojis(String emojisToSet) {
+        emojis = emojisToSet;
 
         if (isOverflowed()) {
             nick = nick.substring(0, 29 - emojis.length());

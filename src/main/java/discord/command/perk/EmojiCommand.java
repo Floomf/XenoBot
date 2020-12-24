@@ -1,43 +1,46 @@
 package discord.command.perk;
 
-import com.vdurmont.emoji.EmojiManager;
-import com.vdurmont.emoji.EmojiParser;
 import discord.core.command.CommandHandler;
+import discord.data.object.ShopItem;
+import discord.data.object.user.DUser;
 import discord.util.BotUtils;
 import discord.manager.UserManager;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
-import discord.data.object.user.Name;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
-
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public class EmojiCommand extends AbstractCommand {
 
     public static final int LEVEL_REQUIRED = 60;
 
     public EmojiCommand() {
-        super(new String[]{"emoji", "emojis"}, 1, CommandCategory.PERK);
+        super(new String[]{"emoji", "emojis", "symbol", "symbols"}, 1, CommandCategory.PERK);
     }
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        Name name = UserManager.getDUserFromMessage(message).getName();
+        DUser dUser = UserManager.getDUserFromMessage(message);
         String emojis = CommandHandler.combineArgs(0, args).replace(" ", "");
-        //EmojiManager makes it easy to check for emoji
-        if (EmojiManager.isOnlyEmojis(emojis)) {
-            name.setEmojis(EmojiParser.extractEmojis(emojis).stream().limit(3).collect(Collectors.toList()));
-            MessageUtils.sendInfoMessage(channel, "Splendid choice. Updated your name emoji(s) accordingly.");
-            UserManager.saveDatabase();
-        } else if (emojis.toLowerCase().equals("none")) {
-            name.setEmojis(new ArrayList<String>());
-            MessageUtils.sendInfoMessage(channel, "Your name emojis have been removed.");
+        if (emojis.toLowerCase().equals("none")) {
+            dUser.getName().setEmojis("");
+            MessageUtils.sendInfoMessage(channel, "Your name emojis/symbols have been removed.");
             UserManager.saveDatabase();
         } else {
-            MessageUtils.sendErrorMessage(channel, "Couldn't parse a unicode emoji from input.");
+            int limit = dUser.hasPurchased(ShopItem.EXTENDED_EMOJIS) ? 12 : 6;
+
+            if (emojis.length() > limit) {
+                emojis = emojis.substring(0, limit);
+            }
+
+            if (emojis.isEmpty()) {
+                MessageUtils.sendErrorMessage(channel, "Couldn't parse any emojis/symbols from your input.");
+            } else {
+                dUser.getName().setEmojis(emojis);
+                MessageUtils.sendInfoMessage(channel, "Splendid choice! Updated your name accordingly.");
+                UserManager.saveDatabase();
+            }
         }
     }
 
@@ -48,8 +51,10 @@ public class EmojiCommand extends AbstractCommand {
 
     @Override
     public String getUsage(String alias) {
-        return BotUtils.buildUsage(alias, "[emoji(s)]", "Set up to three emojis next to your name."
-                + "\n\nProviding `none` as the parameter instead will remove your current emojis.");
+        return BotUtils.buildUsage(alias, "[emojis/symbols]",
+                "Set 3-6 emojis/symbols next to your name (String length <= 6).\nYou can extend this to 6-12 emojis/symbols through the `!shop`."
+                + "\n\n**Special Argument**"
+                + "\n`!" + alias + " none` - Remove your current emoji(s).");
     }
 
 }

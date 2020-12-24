@@ -1,6 +1,6 @@
 package discord.command.game.reversi;
 
-import discord.core.game.Button;
+import discord.core.game.GameEmoji;
 import discord.core.game.MultiplayerGame;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -98,7 +98,7 @@ public class GameReversi extends MultiplayerGame {
         } else if (sum < 0) {
             super.win(formatMessage(bluePlayer, bluePlayer.getMention() + " wins by **" + (-sum) + "** pieces!") + "\n\n" + getBoard(), bluePlayer);
         } else {
-            super.tie("Even split of captures! The game is a tie.");
+            super.tie("Even split of captures! The game is a tie.\n\n" + getBoard());
         }
     }
 
@@ -178,7 +178,7 @@ public class GameReversi extends MultiplayerGame {
         StringBuilder sb = new StringBuilder();
 
         for (int row = 0; row < HEIGHT; row++) {
-            sb.append(Button.getFromNum(HEIGHT - row).getEmoji().asUnicodeEmoji().get().getRaw());
+            sb.append(GameEmoji.intToNumberEmoji(HEIGHT - row));
             for (int col = 0; col < LENGTH; col++) {
                 sb.append(getUnicodeForPiece(board[row][col]));
             }

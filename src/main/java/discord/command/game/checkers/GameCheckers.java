@@ -1,6 +1,6 @@
 package discord.command.game.checkers;
 
-import discord.core.game.Button;
+import discord.core.game.GameEmoji;
 import discord.core.game.MultiplayerGame;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -294,7 +294,7 @@ public class GameCheckers extends MultiplayerGame {
         StringBuilder sb = new StringBuilder();
         for (int i = Math.min(fromRow, toRow) / 3; i <= Math.max(fromRow, toRow) / 3; i++) {
             for (int j = i * 3; j < i * 3 + 3 && j < board.length ; j++) {
-                sb.append(Button.getFromNum(HEIGHT - j).getEmoji().asUnicodeEmoji().get().getRaw());
+                sb.append(GameEmoji.intToNumberEmoji(HEIGHT - j));
                 for (Square square : board[j]) {
                     sb.append(square.emoji).append(" ");
                 }

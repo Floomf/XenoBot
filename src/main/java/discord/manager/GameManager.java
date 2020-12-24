@@ -2,7 +2,6 @@ package discord.manager;
 
 import discord.core.game.BaseGame;
 import discord.core.game.GameRequest;
-import discord.manager.UserManager;
 import discord.listener.EventsHandler;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -18,13 +17,14 @@ import java.util.concurrent.TimeUnit;
 
 import discord4j.core.object.entity.Message;
 import discord.util.MessageUtils;
+import org.slf4j.LoggerFactory;
 
 public class GameManager {
 
     private static final Set<GameRequest> REQUESTS = new HashSet<>();
     private static final Set<BaseGame> GAMES = new HashSet<>();
 
-    public static final int EARN_LIMIT = 5000;
+    public static final int EARN_LIMIT = 7500;
     public static HashMap<Long, Integer> usersMoneyEarned = new HashMap<>();
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -56,11 +56,16 @@ public class GameManager {
     }
 
     public static void removeGame(BaseGame game) {
-        GAMES.remove(game);
+        boolean removed = GAMES.remove(game);
+        LoggerFactory.getLogger(GameManager.class).info("Removed " + game.getClass().getName() + " from GameManager: " + removed);
     }
 
     public static void removeGameRequest(GameRequest request) {
         REQUESTS.remove(request);
+    }
+
+    public static boolean playerIsInTypingGame(Member player) {
+        return GAMES.stream().anyMatch(g -> g.isTypingGame() && g.playerIsInGame(player));
     }
 
     private static boolean playerIsInAGame(Member player) {
@@ -127,8 +132,7 @@ public class GameManager {
             }
         }
 
-        Message requestMessage = channel.createEmbed(embed -> embed.setDescription("Creating request..")).block();
-        REQUESTS.add(new GameRequest(gameTitle, gameType, betAmount, requestMessage, new Member[] {player, opponent}));
+        REQUESTS.add(new GameRequest(gameTitle, gameType, channel, new Member[] {player, opponent}, betAmount));
     }
 }
 

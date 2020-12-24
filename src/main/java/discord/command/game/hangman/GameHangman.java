@@ -174,11 +174,11 @@ public class GameHangman extends SingleplayerGame {
                     int streak = WIN_STREAKS.get(getPlayer().getId().asLong());
                     WIN_STREAKS.put(getPlayer().getId().asLong(), streak + 1);
                     win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo()
-                                    + "\n\n📈 **" + (1 + streak) + "** win streak!\n💰 **$" + (streak * 6) + "** bonus!",
-                            60 + (streak * 6));
+                                    + "\n\n📈 **" + (1 + streak) + "** win streak!\n💰 **$" + (streak * 5) + "** bonus!",
+                            65 + (streak * 5));
                 } else {
                     WIN_STREAKS.put(getPlayer().getId().asLong(), 1);
-                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo(), 60);
+                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo(), 65);
                 }
             } else {
                 super.setInfoDisplay("✅ **Yep!** Guess again:");

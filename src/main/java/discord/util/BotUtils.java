@@ -4,14 +4,17 @@ import discord.core.command.CommandManager;
 import discord.Main;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import discord.listener.EventsHandler;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.TextChannel;
+import reactor.core.publisher.Mono;
 
 public class BotUtils {
 
@@ -28,9 +31,8 @@ public class BotUtils {
     }
 
     public static String getGuildEmojiString(Guild guild, String emojiName) {
-        return guild.getClient().getGuildById(EventsHandler.THE_REALM_ID).block()
-                .getEmojis().filter(e -> e.getName().equals(emojiName))
-                .collectList().block().get(0).asFormat(); //will break if emoji doesnt exist
+        return guild.getClient().getGuildById(EventsHandler.THE_REALM_ID).flatMapMany(Guild::getEmojis)
+                .filter(e -> e.getName().equals(emojiName)).map(GuildEmoji::asFormat).switchIfEmpty(Mono.just("")).blockFirst();
     }
 
     public static String getRandomGuildEmoji(Guild guild, String[] emojiNames) {
@@ -43,7 +45,7 @@ public class BotUtils {
 
     //Takes a string and strips it of any non-basic characters and symbols
     public static String validateString(String string) {
-        Matcher m = Pattern.compile("([\u0020-\u00FF]+)").matcher(string);
+        Matcher m = Pattern.compile("([!-~|¿-ȯ]+)").matcher(string);
         String result = "";
         while (m.find()) {
             result += m.group(1);

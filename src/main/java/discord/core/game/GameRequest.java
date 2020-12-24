@@ -6,6 +6,7 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import discord.manager.GameManager;
+import discord.util.DiscordColor;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -15,41 +16,40 @@ import discord.util.MessageUtils;
 
 public class GameRequest {
 
-    private final String gameName;
+    private final String gameTitle;
     private final Class<? extends BaseGame> gameType;
     private final int betAmount;
-    private final Message requestMessage;
+    private final TextChannel channel;
     private final Member[] players;
-    private final ButtonManager bm;
     private final Timer inactiveTimer;
 
-    public GameRequest(String gameTitle, Class<? extends BaseGame> gameType, int betAmount,
-                       Message message, Member[] players) {
-        this.gameName = gameTitle;
+    private Message requestMessage;
+
+    public GameRequest(String gameTitle, Class<? extends BaseGame> gameType, TextChannel channel, Member[] players, int betAmount) {
+        this.gameTitle = gameTitle;
         this.gameType = gameType;
         this.betAmount = betAmount;
-        this.requestMessage = message;
+        this.channel = channel;
         this.players = players;
-        this.bm = new ButtonManager();
         this.inactiveTimer = new Timer();
         setup();
     }
 
     private void setup() {
-        bm.addButton(requestMessage, Button.CHECKMARK);
-        bm.addButton(requestMessage, Button.EXIT);
-
-        requestMessage.edit(spec -> {
+        requestMessage = channel.createMessage(spec -> {
             spec.setContent(players[1].getMention());
             if (betAmount > 0) {
                 spec.setEmbed(MessageUtils.getEmbed("Game Request",
-                        players[0].getMention() + " has challenged you to a money match of **" + gameName
+                        players[0].getMention() + " has challenged you to a money match of **" + gameTitle
                                 + "**.\n\nYou'll each bet **$" + betAmount + "**. Do you accept?"));
             } else {
                 spec.setEmbed(MessageUtils.getEmbed("Game Request",
-                        players[0].getMention() + " has challenged you to a game of **" + gameName + "**.\n\nDo you accept?"));
+                        players[0].getMention() + " has challenged you to a game of **" + gameTitle + "**.\n\nDo you accept?"));
             }
         }).block();
+
+        requestMessage.addReaction(ReactionEmoji.unicode(GameEmoji.CHECKMARK)).block();
+        requestMessage.addReaction(ReactionEmoji.unicode(GameEmoji.EXIT)).block();
 
         inactiveTimer.schedule(new TimerTask() {
             @Override
@@ -59,7 +59,7 @@ public class GameRequest {
                 requestMessage.removeAllReactions().block();
                 remove();
             }
-        }, TimeUnit.MINUTES.toMillis(3));
+        }, TimeUnit.SECONDS.toMillis(45));
 
         requestMessage.getClient().on(ReactionAddEvent.class).takeWhile(e -> GameManager.gameRequestExists(this))
                 .filter(e -> e.getMessageId().equals(requestMessage.getId()))
@@ -70,17 +70,18 @@ public class GameRequest {
     }
 
     private void onOpponentReaction(ReactionEmoji reaction) {
-        Button button = bm.getButton(reaction);
-        if (button != null) {
-            if (button.equals(Button.CHECKMARK)) {
-                createGame();
-            } else if (button.equals(Button.EXIT)) {
-                requestMessage.removeAllReactions().block();
-                requestMessage.edit(spec -> spec.setContent(players[0].getMention()).setEmbed(
-                        MessageUtils.getEmbed("Game Request", players[1].getMention() + " has denied your request."))).block();
-            }
-            remove();
+        String emoji = reaction.asUnicodeEmoji().map(ReactionEmoji.Unicode::getRaw).orElse("");
+        if (emoji.equals(GameEmoji.CHECKMARK)) {
+            createGame();
             inactiveTimer.cancel();
+            remove();
+        } else if (emoji.equals(GameEmoji.EXIT)) {
+            requestMessage.removeAllReactions().block();
+            requestMessage.edit(spec -> spec.setContent(players[0].getMention()).setEmbed(
+                    MessageUtils.getEmbed("Game Request", players[1].getMention() + " has denied your request.",
+                            DiscordColor.RED))).block();
+            inactiveTimer.cancel();
+            remove();
         }
     }
 
@@ -91,9 +92,8 @@ public class GameRequest {
     public void createGame() {
         try {
             requestMessage.delete().block();
-            BaseGame game = gameType.getConstructor( //dont know how else to do this?
-                    String.class, TextChannel.class, Member[].class, int.class)
-                    .newInstance(gameName, requestMessage.getChannel().cast(TextChannel.class).block(), players, betAmount);
+            BaseGame game = gameType.getConstructor(String.class, TextChannel.class, Member[].class, int.class)
+                    .newInstance(gameTitle, channel, players, betAmount);
             GameManager.addGame(game);
             game.start();
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {

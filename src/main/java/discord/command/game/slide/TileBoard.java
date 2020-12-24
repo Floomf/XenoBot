@@ -1,14 +1,8 @@
 package discord.command.game.slide;
 
-import discord.core.game.Button;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Random;
-
 public class TileBoard {
 
-    private enum Direction {
+    /*private enum Direction {
         UP, DOWN, LEFT, RIGHT;
 
         //When we move, we are actually moving the empty square around
@@ -144,6 +138,6 @@ public class TileBoard {
             }
         }
         return boardDisplay;
-    }
+    }*/
 
 }

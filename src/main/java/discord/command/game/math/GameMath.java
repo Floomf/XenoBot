@@ -20,7 +20,6 @@ public class GameMath extends SingleplayerGame {
 
     //tried using TreeMap but it sorts the keys not the values
     private static final HashMap<Snowflake, Highscore> highScores = new HashMap<>();
-
     private final Timer gameTimer = new Timer();
     private final Random rand = new Random();
 
@@ -50,7 +49,6 @@ public class GameMath extends SingleplayerGame {
         gameTimer.schedule(new TimerTask() {
             public void run() {
                 endGame();
-                gameTimer.cancel();
             }
         }, TimeUnit.SECONDS.toMillis(60));
     }
@@ -62,7 +60,6 @@ public class GameMath extends SingleplayerGame {
 
     @Override
     protected String getForfeitMessage() {
-        gameTimer.cancel(); //cant be good design
         return "**You forfeited.** No score was recorded.";
     }
 
@@ -78,31 +75,30 @@ public class GameMath extends SingleplayerGame {
 
     @Override
     protected void onTurn(String input) {
-        if (super.isActive()) { //Another messy check because i dont know threads
-            int answer = Integer.parseInt(input);
+        int answer = Integer.parseInt(input);
 
-            if (isCorrect(answer)) {
-                score++;
-                genNewProblem();
-                super.setInfoDisplay("✅ **Correct!**");
-            } else {
-                score--;
-                genNewProblem();
-                super.setInfoDisplay("❌ **Incorrect!**");
-            }
-            if (inputMessages.size() >= 5) {
-                super.getChannel().bulkDelete(Mono.just(inputMessages).flatMapMany(Flux::fromIterable)).blockFirst();
-                inputMessages.clear();
-            }
+        if (isCorrect(answer)) {
+            score++;
+            genNewProblem();
+            super.setInfoDisplay("✅ **Correct!**");
+        } else {
+            score--;
+            genNewProblem();
+            super.setInfoDisplay("❌ **Incorrect!**");
+        }
+        if (inputMessages.size() >= 5) {
+            super.getChannel().bulkDelete(Mono.just(inputMessages).flatMapMany(Flux::fromIterable)).blockFirst();
+            inputMessages.clear();
         }
     }
 
     @Override
     protected void onEnd() {
+        gameTimer.cancel();
         super.getChannel().bulkDelete(Mono.just(inputMessages).flatMapMany(Flux::fromIterable)).blockFirst();
     }
 
-    private void endGame() {
+    private synchronized void endGame() {
         String endMessage = "🛑 *Time's up!*\nYour score: **" + score + "**\n";
 
         if (!highScores.containsKey(getPlayer().getId())) {
@@ -116,7 +112,7 @@ public class GameMath extends SingleplayerGame {
 
         endMessage += "Your best: **" + highScores.get(getPlayer().getId()).getHighscore() + "**\n\n";
         endMessage += getHighscores();
-        super.win(endMessage, 6 * score);
+        super.win(endMessage, 6 * (score + score / 5));
     }
 
     @Override

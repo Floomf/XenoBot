@@ -74,7 +74,7 @@ public class GameBlackjack extends SingleplayerGame {
         if (playerHand.isBlackjack()) {
             if (dealerHand.isBlackjack()) {
                 dealerHand.setHidden(false);
-                super.tie("**WOW!** Double blackjack! **Push.**");
+                super.tie("**WOW!** Double blackjack! **Push.**\n\n" + getBoard());
             } else {
                 super.win("**Blackjack!** " + BotUtils.getRandomGuildEmoji(getGameMessage().getGuild().block(),
                         new String[]{"Pog", "PogU"}) + "\n\n" + getBoard(), super.getBetAmount() * 3 / 2);
@@ -144,7 +144,7 @@ public class GameBlackjack extends SingleplayerGame {
         } else if (playerHand.getTotal() > dealerHand.getTotal()) {
             super.win("**You win!**");
         } else if (playerHand.getTotal() == dealerHand.getTotal()) {
-            super.tie("**Push.**");
+            super.tie("**Push.**\n\n" + getBoard());
         } else {
             super.lose("**Dealer wins.**\n\n" + getBoard());
         }

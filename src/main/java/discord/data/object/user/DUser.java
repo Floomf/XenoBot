@@ -3,13 +3,10 @@ package discord.data.object.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord.command.admin.MultiplierCommand;
 import discord.data.object.ShopItem;
-import discord.data.object.TempShopItem;
 import discord.data.object.Unlockable;
 import discord4j.core.object.entity.Member;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -127,7 +124,7 @@ public class DUser {
         balance -= item.getPrice();
         purchases.add(item);
         if (item.getCategory() == ShopItem.Category.XP_MULTIPLIER) {
-            prog.onPurchaseMultiplier((TempShopItem) item);
+            prog.onPurchaseMultiplier(item);
         }
     }
 

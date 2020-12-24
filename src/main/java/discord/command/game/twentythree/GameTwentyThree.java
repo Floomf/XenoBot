@@ -13,7 +13,6 @@ public class GameTwentyThree extends MultiplayerGame {
 
     public GameTwentyThree(String gameTitle, TextChannel channel, Member[] players, int betAmount) {
         super(gameTitle, channel, players, betAmount);
-        amount = MAX_COUNT;
     }
 
     @Override

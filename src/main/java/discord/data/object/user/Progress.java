@@ -7,8 +7,8 @@ import discord.command.perk.ColorCommand;
 import discord.command.perk.DescCommand;
 import discord.command.perk.EmojiCommand;
 import discord.command.perk.NickCommand;
+import discord.data.object.ShopItem;
 import discord.manager.ColorManager;
-import discord.data.object.TempShopItem;
 import discord.data.object.Unlockable;
 import discord.util.BotUtils;
 import discord.util.DiscordColor;
@@ -411,7 +411,7 @@ public class Progress {
         }
     }
 
-    protected void onPurchaseMultiplier(TempShopItem item) {
+    protected void onPurchaseMultiplier(ShopItem item) {
         double tempMultiplier;
         if (item.getName().toLowerCase().startsWith("triple")) { //little hacky
             tempMultiplier = 3.0;
@@ -419,19 +419,19 @@ public class Progress {
             tempMultiplier = 2.0;
         }
         xpMultiplier = tempMultiplier;
-        user.asGuildMember().getPrivateChannel().block().createEmbed(MessageUtils.getEmbed("Info",
-                "You will now receive **" + tempMultiplier + "x** XP for the next **" + item.getHours() + "h**.", DiscordColor.CYAN)).block();
+        MessageUtils.sendMessage(user.asGuildMember().getPrivateChannel().block(), "Info",
+                "You will now receive **" + tempMultiplier + "x** XP for the next **" + item.getDuration() + "h**.", DiscordColor.CYAN);
 
         new java.util.Timer().schedule(
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
                         xpMultiplier = 1.0;
-                        user.asGuildMember().getPrivateChannel().block().createEmbed(MessageUtils.getEmbed("Info",
-                                "Your purchased XP boost has run out.", DiscordColor.CYAN)).block();
+                        MessageUtils.sendMessage(user.asGuildMember().getPrivateChannel().block(), "Info",
+                                "Your purchased XP boost has run out.", DiscordColor.CYAN);
                         user.getPurchases().remove(item);
                     }
-                }, TimeUnit.HOURS.toMillis(item.getHours())
+                }, TimeUnit.HOURS.toMillis(item.getDuration())
         );
     }
 

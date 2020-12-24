@@ -1,37 +1,16 @@
 package discord.manager;
 
 import discord.data.object.ShopItem;
-import discord.data.object.TempShopItem;
 import discord.data.object.user.DUser;
 import discord.util.DiscordColor;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Role;
 import discord4j.core.spec.EmbedCreateSpec;
 
-import java.awt.*;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class ShopManager {
-
-    private static final ShopItem[] SHOP_ITEMS = {
-            new ShopItem("Jazzberry", 2000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Cinnamon", 2000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Jungle", 2000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Jewel", 3000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Dark Seafoam", 3000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Periwinkle", 3000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Lynch", 4000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Eminence", 4000, ShopItem.Category.NAME_COLOR),
-            new ShopItem("Stratos", 4000, ShopItem.Category.NAME_COLOR),
-
-            new TempShopItem("Double XP for 1h", 750, ShopItem.Category.XP_MULTIPLIER, 1),
-            new TempShopItem("Double XP for 3h", 1500, ShopItem.Category.XP_MULTIPLIER, 3),
-            new TempShopItem("Triple XP for 5h", 4000, ShopItem.Category.XP_MULTIPLIER, 5),
-
-            new ShopItem("Custom Server Emoji", 5000, ShopItem.Category.MISC),
-            new ShopItem("hacked item (DONT BUY HAHA)", 696969, ShopItem.Category.MISC)
-    };
 
     public static Consumer<EmbedCreateSpec> getShopEmbedFor(DUser dUser) {
         //there are some temp final variables, but how else to we do it when using lambdas?
@@ -40,11 +19,11 @@ public class ShopManager {
                 DiscordColor.PURPLE);
         List<Role> roles = dUser.asGuildMember().getGuild().block().getRoles().collectList().block();
 
-        ShopItem.Category currentCat = SHOP_ITEMS[0].getCategory();
+        ShopItem.Category currentCat = ShopItem.values()[0].getCategory();
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < SHOP_ITEMS.length; i++) {
-            ShopItem currentItem = SHOP_ITEMS[i];
+        for (int i = 0; i < ShopItem.values().length; i++) {
+            ShopItem currentItem = ShopItem.values()[i];
             if (currentItem.getCategory() != currentCat) {
                 final ShopItem.Category finalCurrentCat = currentCat;
                 final String finalItemList = sb.toString(); //has to be stored now otherwise sb.toString() will be called later
@@ -67,14 +46,14 @@ public class ShopManager {
     }
 
     public static ShopItem getShopItem(int index) {
-        if (index > SHOP_ITEMS.length || index < 1) {
+        if (index > ShopItem.values().length || index < 1) {
             return null;
         }
-        return SHOP_ITEMS[index - 1];
+        return ShopItem.values()[index - 1];
     }
 
     public static boolean isPurchasedColor(String name) {
-        for (ShopItem item : SHOP_ITEMS) {
+        for (ShopItem item : ShopItem.values()) {
             if (item.getName().equalsIgnoreCase(name)
                     && item.getCategory() == ShopItem.Category.NAME_COLOR) {
                 return true;
