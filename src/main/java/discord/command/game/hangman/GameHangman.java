@@ -4,16 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.core.game.SingleplayerGame;
 import discord.util.BotUtils;
-import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,8 +27,6 @@ public class GameHangman extends SingleplayerGame {
     private char[] guesses;
 
     private int missesLeft;
-
-    private final List<Snowflake> inputMessages = new ArrayList<>();
 
     static {
         try {
@@ -66,7 +60,7 @@ public class GameHangman extends SingleplayerGame {
 
     @Override
     protected void setup() {
-        int length = getRandIntInRange(4, 30);
+        int length = new Random().nextInt(27) + 4; //4-30
         assignRandomWord(length);
         wordProgress = new char[word.length()];
         guesses = new char[26];
@@ -93,12 +87,11 @@ public class GameHangman extends SingleplayerGame {
 
     @Override
     protected void onStart() {
-        super.registerMessageListener();
+        super.registerMessageListener(3);
     }
 
     @Override
     protected void onEnd() {
-        getChannel().bulkDelete(Mono.just(inputMessages).flatMapMany(Flux::fromIterable)).blockFirst();
         saveStreaks();
     }
 
@@ -106,10 +99,6 @@ public class GameHangman extends SingleplayerGame {
     protected void onTimeout() {
         WIN_STREAKS.remove(getPlayer().getId().asLong());
         super.onTimeout();
-    }
-
-    private static int getRandIntInRange(int min, int max) {
-        return new Random().nextInt(max - min + 1) + min;
     }
 
     private static String getPOSFromLetter(String letter) {
@@ -201,16 +190,7 @@ public class GameHangman extends SingleplayerGame {
                 super.setInfoDisplay("❌ **Nope!** Guess again:");
             }
         }
-        if (inputMessages.size() >= 3) {
-            getChannel().bulkDelete(Mono.just(inputMessages).flatMapMany(Flux::fromIterable)).blockFirst();
-            inputMessages.clear();
-        }
-    }
 
-    @Override
-    protected final void onPlayerMessage(Message message, Member player) {
-        inputMessages.add(message.getId());
-        super.onPlayerMessage(message, player);
     }
 
     @Override

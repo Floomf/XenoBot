@@ -49,18 +49,20 @@ public class GameSlots extends SingleplayerGame {
 
     @Override
     protected void onStart() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        onTurn("");
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            onTurn("");
+        }).start();
     }
 
     //It's all predetermined before the game even starts
     private static String[] getRandomReel() {
         Random rand = new Random();
-        if (rand.nextInt(100) < 35) {
+        if (rand.nextInt(100) < 33) {
             int odds = rand.nextInt(100);
             if (odds < 1) {
                 return new String[]{SYMBOLS[4], SYMBOLS[4], SYMBOLS[4]};

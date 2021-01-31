@@ -28,8 +28,6 @@ public class GameMath extends SingleplayerGame {
 
     private int score = 0;
 
-    private final List<Snowflake> inputMessages = new ArrayList<>();
-
     static {
         try {
             Highscore[] loadScores = new ObjectMapper().readValue(new File("high_scores_math.json"), Highscore[].class);
@@ -70,7 +68,7 @@ public class GameMath extends SingleplayerGame {
 
     @Override
     protected void onStart() {
-        super.registerMessageListener();
+        super.registerMessageListener(5);
     }
 
     @Override
@@ -86,16 +84,11 @@ public class GameMath extends SingleplayerGame {
             genNewProblem();
             super.setInfoDisplay("❌ **Incorrect!**");
         }
-        if (inputMessages.size() >= 5) {
-            super.getChannel().bulkDelete(Mono.just(inputMessages).flatMapMany(Flux::fromIterable)).blockFirst();
-            inputMessages.clear();
-        }
     }
 
     @Override
     protected void onEnd() {
         gameTimer.cancel();
-        super.getChannel().bulkDelete(Mono.just(inputMessages).flatMapMany(Flux::fromIterable)).blockFirst();
     }
 
     private synchronized void endGame() {
@@ -112,13 +105,8 @@ public class GameMath extends SingleplayerGame {
 
         endMessage += "Your best: **" + highScores.get(getPlayer().getId()).getHighscore() + "**\n\n";
         endMessage += getHighscores();
+        super.deletePlayerMessages();
         super.win(endMessage, 6 * (score + score / 5));
-    }
-
-    @Override
-    protected final void onPlayerMessage(Message message, Member player) {
-        inputMessages.add(message.getId());
-        super.onPlayerMessage(message, player);
     }
 
     @Override

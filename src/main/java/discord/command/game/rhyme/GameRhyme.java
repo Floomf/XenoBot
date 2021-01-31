@@ -16,9 +16,8 @@ public class GameRhyme extends MultiplayerGame {
     private List<String> unguessedRhymes;
     private List<String> guessedRhymes;
 
+    private final Thread turnTimerThread = new Thread(this::startTurnTimer);
     private final HashMap<Member, Integer> scoresMap = new HashMap<>();
-
-    private Timer turnTimer;
 
     public GameRhyme(String gameTitle, TextChannel channel, Member[] players, int betAmount) {
         super(gameTitle, channel, players, betAmount);
@@ -41,7 +40,6 @@ public class GameRhyme extends MultiplayerGame {
 
     @Override
     protected void setup() {
-        turnTimer = new Timer();
         unguessedRhymes = new ArrayList<>();
         guessedRhymes = new ArrayList<>();
         scoresMap.put(super.getPThisTurn(), 0);
@@ -52,7 +50,7 @@ public class GameRhyme extends MultiplayerGame {
     private void generateNewRhyme() {
         Random r = new Random();
         String firstLetters = "abcdefghijklmnoprstuw";
-        String lettersToAdd = "????";
+        String lettersToAdd = "?????";
         String fetchURL = "https://api.datamuse.com/words?max=10&sp=";
         fetchURL += firstLetters.charAt(r.nextInt(firstLetters.length())) + "?";
         fetchURL += lettersToAdd.substring(0, r.nextInt(lettersToAdd.length()) + 1);
@@ -60,7 +58,7 @@ public class GameRhyme extends MultiplayerGame {
         JSONArray wordsJson = Unirest.get(fetchURL).asJson().getBody().getArray();
         JSONObject wordJson = wordsJson.getJSONObject(r.nextInt(wordsJson.length()));
 
-        JSONArray rhymesJson = Unirest.get("https://api.datamuse.com/words?max=250&rel_rhy=" + wordJson.getString("word"))
+        JSONArray rhymesJson = Unirest.get("https://api.datamuse.com/words?max=300&rel_rhy=" + wordJson.getString("word"))
                 .asJson().getBody().getArray();
 
         if (rhymesJson.length() < 45) {
@@ -83,20 +81,30 @@ public class GameRhyme extends MultiplayerGame {
     @Override
     protected void onStart() {
         super.registerMessageListener();
-        startTurnTimer();
+        turnTimerThread.start();
+    }
+
+    @Override
+    protected void onEnd() {
+        if (Thread.currentThread().getId() != turnTimerThread.getId()) {
+            turnTimerThread.interrupt();
+        }
     }
 
     private void startTurnTimer() {
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                onWordFail();
-                turnTimer.cancel();
+        try {
+            Thread.sleep(TimeUnit.SECONDS.toMillis(20));
+            onWordFail();
+            if (super.isActive()) {
+                startTurnTimer();
             }
-        };
-        turnTimer.cancel();
-        turnTimer = new Timer();
-        turnTimer.schedule(task, TimeUnit.SECONDS.toMillis(20));
+        } catch (InterruptedException e) {
+            if (!super.isActive()) {
+                Thread.currentThread().interrupt();
+            } else {
+                startTurnTimer();
+            }
+        }
     }
 
     private synchronized void onWordFail() {
@@ -111,7 +119,6 @@ public class GameRhyme extends MultiplayerGame {
             generateNewRhyme();
             setInfoDisplay(super.getPThisTurn(), super.getPNextTurn().getMention()
                     + " **failed to rhyme in time!** New round.\nYou start, " + super.getPThisTurn().getMention());
-            startTurnTimer();
         }
     }
 
@@ -129,13 +136,12 @@ public class GameRhyme extends MultiplayerGame {
         guessedRhymes.add(input);
 
         if (unguessedRhymes.isEmpty()) { //this will "never" happen but just in case
-            setupNextTurn();
-            onWordFail();
+            super.win(super.getPThisTurn().getMention()+ " found the last rhyme! **INSTANT WIN!**", super.getPThisTurn());
         } else {
             super.setInfoDisplay(super.getPNextTurn(),
                     super.getPThisTurn().getMention() + " rhymed with **" + input + "**!\n" +
                             "Go " + super.getPNextTurn().getMention() + "!");
-            startTurnTimer();
+            turnTimerThread.interrupt();
         }
     }
 
@@ -147,6 +153,6 @@ public class GameRhyme extends MultiplayerGame {
     @Override
     protected String getBoard() { //guessedRhymes can technically exceed the message limit, but probably never will
         return "**Enter what rhymes with:**\n```fix\n" + wordToRhyme.toUpperCase()
-                + "```\n\n**Already Rhymed:**\n`" + guessedRhymes.toString() + "`";
+                + "```\n\n**Already Rhymed:**\n" + guessedRhymes.toString();
     }
 }

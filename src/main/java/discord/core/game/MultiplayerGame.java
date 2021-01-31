@@ -38,24 +38,22 @@ public abstract class MultiplayerGame extends BaseGame {
         return false;
     }
 
-    protected final synchronized void onPlayerMessage(Message message, Member player) {
+    protected final synchronized void onPlayerInput(String input, Member player) {
         if (!super.isActive()) return;
 
-        if (message.getContent().equalsIgnoreCase("forfeit") || message.getContent().equalsIgnoreCase("ff")) {
-            message.delete().doOnError(e -> super.setGameDisplay("I don't have permission to delete messages! Ended game.")).onErrorStop().block();
+        if (input.equals("forfeit") || input.equals("ff")) {
             win(getForfeitMessage(player), getOtherPlayer(player));
             return;
         }
 
         if (player.equals(playerThisTurn)) {
-            String input = message.getContent().toLowerCase().trim();
             if (isValidInput(input)) {
                 onTurn(input);
                 if (super.isActive()) { //kinda messy
                     setupNextTurn();
                 }
             } else {
-                Message invalidMessage = message.getChannel().block().createMessage(getInvalidInputMessage()).block();
+                Message invalidMessage = getChannel().createMessage(getInvalidInputMessage()).block();
                 try {
                     Thread.sleep(1250);
                 } catch (InterruptedException e) {
@@ -64,7 +62,6 @@ public abstract class MultiplayerGame extends BaseGame {
                 invalidMessage.delete().block();
             }
         }
-        message.delete().doOnError(e -> super.setGameDisplay("I don't have permission to delete messages! Ended game.")).onErrorStop().block();
     }
 
     public void onPlayerReaction(ReactionEmoji emoji, Member player) {

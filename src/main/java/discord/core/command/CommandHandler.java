@@ -36,8 +36,6 @@ public class CommandHandler {
             return;
         }
 
-        System.out.println("game:" + Thread.currentThread().getId() + " - " + Thread.currentThread().getName());
-
         //block all commands when in type game
         if (GameManager.playerIsInTypingGame(message.getAuthorAsMember().block())) {
             return;
@@ -62,7 +60,7 @@ public class CommandHandler {
         //make sure command exists
         if (command == null) {
             //MessageUtils.sendErrorMessage(channel,"Unknown command. Type `!help` for available commands.");
-            message.addReaction(ReactionEmoji.unicode("❔")).doOnError(e -> System.out.println("lol")).block();
+            message.addReaction(ReactionEmoji.unicode("❔")).block();
             return;
         }
 

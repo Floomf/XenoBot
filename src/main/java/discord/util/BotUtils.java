@@ -45,7 +45,7 @@ public class BotUtils {
 
     //Takes a string and strips it of any non-basic characters and symbols
     public static String validateString(String string) {
-        Matcher m = Pattern.compile("([!-~|¿-ȯ]+)").matcher(string);
+        Matcher m = Pattern.compile("([!-~|¿-ȯ| ]+)").matcher(string);
         String result = "";
         while (m.find()) {
             result += m.group(1);

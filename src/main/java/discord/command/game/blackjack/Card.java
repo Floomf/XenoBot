@@ -3,21 +3,17 @@ package discord.command.game.blackjack;
 public class Card {
 
     enum SUIT {
-        DIAMONDS, CLUBS, HEARTS, SPADES;
+        DIAMONDS("♦️"), CLUBS("♣️"), HEARTS("♥️"), SPADES("♠️");
+
+        private final String emoji;
+
+        SUIT(String emoji) {
+            this.emoji = emoji;
+        }
 
         @Override
         public String toString() {
-            switch (this) {
-                case DIAMONDS:
-                    return "♦️";
-                case CLUBS:
-                    return "♣️";
-                case HEARTS:
-                    return "♥️";
-                case SPADES:
-                    return "♠️";
-            }
-            return "";
+            return emoji;
         }
     }
 
@@ -48,7 +44,7 @@ public class Card {
         if (type == TYPE.NUMBER) {
             return numValue + suit.toString();
         }
-        return type.name().substring(0, 1) + suit.toString();
+        return type.name().charAt(0) + suit.toString();
     }
 
 }

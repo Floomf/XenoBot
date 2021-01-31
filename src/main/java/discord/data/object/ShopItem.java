@@ -12,9 +12,9 @@ public enum ShopItem {
     EMINENCE("Eminence", 4000, Category.NAME_COLOR, 0),
     STRATOS("Stratos", 4000, Category.NAME_COLOR, 0),
 
-    DOUBLE_XP_1H("Double XP for 1h", 750, Category.XP_MULTIPLIER, 1),
-    DOUBLE_XP_3H("Double XP for 3h", 1500, Category.XP_MULTIPLIER, 3),
-    TRIPLE_XP_5H("Triple XP for 5h", 4000, Category.XP_MULTIPLIER, 5),
+    DOUBLE_XP_1H("Double XP for 1h", 500, Category.XP_MULTIPLIER, 1),
+    DOUBLE_XP_3H("Double XP for 3h", 1000, Category.XP_MULTIPLIER, 3),
+    TRIPLE_XP_5H("Triple XP for 5h", 2250, Category.XP_MULTIPLIER, 5),
 
     SERVER_EMOJI("Custom Server Emoji", 5000, Category.MISC, 0),
     EXTENDED_EMOJIS("+3 Emojis for `!emojis`", 4000, Category.MISC, 0);

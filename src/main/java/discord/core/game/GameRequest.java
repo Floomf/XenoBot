@@ -41,10 +41,10 @@ public class GameRequest {
             if (betAmount > 0) {
                 spec.setEmbed(MessageUtils.getEmbed("Game Request",
                         players[0].getMention() + " has challenged you to a money match of **" + gameTitle
-                                + "**.\n\nYou'll each bet **$" + betAmount + "**. Do you accept?"));
+                                + "**.\n\nYou'll each bet **$" + betAmount + "**. You have 30 seconds to accept/deny."));
             } else {
                 spec.setEmbed(MessageUtils.getEmbed("Game Request",
-                        players[0].getMention() + " has challenged you to a game of **" + gameTitle + "**.\n\nDo you accept?"));
+                        players[0].getMention() + " has challenged you to a game of **" + gameTitle + "**.\n\nYou have 30 seconds to accept/deny."));
             }
         }).block();
 
@@ -59,7 +59,7 @@ public class GameRequest {
                 requestMessage.removeAllReactions().block();
                 remove();
             }
-        }, TimeUnit.SECONDS.toMillis(45));
+        }, TimeUnit.SECONDS.toMillis(30));
 
         requestMessage.getClient().on(ReactionAddEvent.class).takeWhile(e -> GameManager.gameRequestExists(this))
                 .filter(e -> e.getMessageId().equals(requestMessage.getId()))

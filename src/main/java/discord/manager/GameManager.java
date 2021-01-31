@@ -6,42 +6,14 @@ import discord.listener.EventsHandler;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.Status;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import discord4j.core.object.entity.Message;
 import discord.util.MessageUtils;
-import org.slf4j.LoggerFactory;
+import java.util.*;
 
 public class GameManager {
 
     private static final Set<GameRequest> REQUESTS = new HashSet<>();
     private static final Set<BaseGame> GAMES = new HashSet<>();
-
-    public static final int EARN_LIMIT = 7500;
-    public static HashMap<Long, Integer> usersMoneyEarned = new HashMap<>();
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-    static {
-        //TODO rewrite this without if statements (it has to be possible)
-        if (LocalDateTime.now().getHour() < 8) { //Schedule for this morning
-            System.out.println("Scheduled for 8AM today");
-            scheduler.scheduleAtFixedRate(usersMoneyEarned::clear,
-                    LocalDateTime.now().until(LocalDate.now().atStartOfDay().plusHours(8), ChronoUnit.MINUTES),
-                    TimeUnit.HOURS.toMinutes(24), TimeUnit.MINUTES);
-        } else { //Schedule for tomorrow morning
-            System.out.println("Scheduled for 8AM tomorrow");
-            scheduler.scheduleAtFixedRate(usersMoneyEarned::clear,
-                    LocalDateTime.now().until(LocalDate.now().plusDays(1).atStartOfDay().plusHours(8), ChronoUnit.MINUTES),
-                    TimeUnit.HOURS.toMinutes(24), TimeUnit.MINUTES);
-        }
-    }
 
     public static Set<BaseGame> getGames() {
         return GAMES;
@@ -56,8 +28,7 @@ public class GameManager {
     }
 
     public static void removeGame(BaseGame game) {
-        boolean removed = GAMES.remove(game);
-        LoggerFactory.getLogger(GameManager.class).info("Removed " + game.getClass().getName() + " from GameManager: " + removed);
+        GAMES.remove(game);
     }
 
     public static void removeGameRequest(GameRequest request) {

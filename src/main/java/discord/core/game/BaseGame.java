@@ -3,6 +3,7 @@ package discord.core.game;
 import discord.manager.GameManager;
 import discord.util.BotUtils;
 import discord.util.DiscordColor;
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.Member;
@@ -10,9 +11,11 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.rest.util.Color;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public abstract class BaseGame {
@@ -21,18 +24,20 @@ public abstract class BaseGame {
     private final TextChannel channel;
     private Message gameMessage;
     private int betAmount;
-    private Timer idleTimer;
+    private final Thread idleTimerThread;
 
     private boolean active;
     private int turn;
 
+    private List<Snowflake> playerMessages;
+    private int msgDeleteInterval;
     private boolean typingGame;
 
     public BaseGame(String gameTitle, TextChannel channel, int betAmount) {
         this.gameTitle = gameTitle;
         this.channel = channel;
         this.betAmount = betAmount;
-        this.idleTimer = new Timer();
+        this.idleTimerThread = new Thread(this::startIdleTimerThread);
         this.active = false;
         this.typingGame = false;
     }
@@ -77,7 +82,7 @@ public abstract class BaseGame {
             end();
             return;
         }
-        startIdleTimer();
+        idleTimerThread.start();
         onStart();
     }
 
@@ -88,18 +93,41 @@ public abstract class BaseGame {
 
     protected void end() {
         active = false;
-        idleTimer.cancel();
+        if (Thread.currentThread().getId() != idleTimerThread.getId()) { //don't interrupt, just let it end
+            idleTimerThread.interrupt();
+        }
+        //idleTimer.cancel();
         onEnd();
         GameManager.removeGame(this);
     }
 
     protected final void registerMessageListener() {
+        typingGame = true;
         channel.getClient().getEventDispatcher().on(MessageCreateEvent.class)
                 .takeUntil(e -> !active)
                 .filter(e -> e.getMessage().getChannelId().equals(channel.getId()) && playerIsInGame(e.getMember().get()))
-                .doOnNext(e -> System.out.println("type:" + Thread.currentThread().getId() + " - " + Thread.currentThread().getName()))
-                .subscribe(e -> onPlayerMessage(e.getMessage(), e.getMember().get()));
-        typingGame = true;
+                .subscribe(e -> {
+                    onPlayerInput(e.getMessage().getContent().toLowerCase(), e.getMember().get());
+                    if (playerMessages == null) {
+                        e.getMessage().delete().block();
+                    } else {
+                        playerMessages.add(e.getMessage().getId());
+                        if (playerMessages.size() == msgDeleteInterval || !active) {
+                            deletePlayerMessages();
+                        }
+                    }
+                });
+    }
+
+    protected final void registerMessageListener(int msgDeleteInterval) {
+        this.msgDeleteInterval = msgDeleteInterval;
+        this.playerMessages = new ArrayList<>();
+        registerMessageListener();
+    }
+
+    protected void deletePlayerMessages() {
+        channel.bulkDelete(Mono.just(playerMessages).flatMapMany(Flux::fromIterable)).blockFirst();
+        playerMessages.clear();
     }
 
     protected final void registerReactionListener() {
@@ -118,7 +146,7 @@ public abstract class BaseGame {
 
     public abstract boolean playerIsInGame(Member player);
 
-    abstract protected void onPlayerMessage(Message message, Member player);
+    abstract protected void onPlayerInput(String input, Member player);
 
     abstract protected void onPlayerReaction(ReactionEmoji emoji, Member player);
 
@@ -188,19 +216,21 @@ public abstract class BaseGame {
 
     protected void setupNextTurn() {
         turn++;
-        startIdleTimer();
+        idleTimerThread.interrupt();
     }
 
-    private void startIdleTimer() {
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                onTimeout();
+    //Now we are no longer destroying a thread and creating one over and over
+    private void startIdleTimerThread() {
+        try {
+            Thread.sleep(TimeUnit.MINUTES.toMillis(5));
+            onTimeout();
+        } catch (InterruptedException e) {
+            if (!active) {
+                Thread.currentThread().interrupt();
+            } else {
+                startIdleTimerThread();
             }
-        };
-        idleTimer.cancel();
-        idleTimer = new Timer();
-        idleTimer.schedule(task, TimeUnit.MINUTES.toMillis(3));
+        }
     }
 
 }
