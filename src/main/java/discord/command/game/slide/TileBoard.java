@@ -1,8 +1,14 @@
 package discord.command.game.slide;
 
+import discord.core.game.GameEmoji;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Random;
+
 public class TileBoard {
 
-    /*private enum Direction {
+    private enum Direction {
         UP, DOWN, LEFT, RIGHT;
 
         //When we move, we are actually moving the empty square around
@@ -42,6 +48,10 @@ public class TileBoard {
         shuffle(difficulty.getNumMoves());
     }
 
+    public TileBoard() {
+        index = board.length - 1;
+    }
+
     private String boardToString() {
         StringBuilder sb = new StringBuilder();
         for (int i : board) {
@@ -50,7 +60,7 @@ public class TileBoard {
         return sb.toString();
     }
 
-    private void shuffle(int movesToSolve) {
+    protected void shuffle(int movesToSolve) {
         Random rand = new Random();
         HashSet<String> prevBoards = new HashSet<>(); //using strings cause unique
         Direction blockedMove = Direction.DOWN;
@@ -134,10 +144,10 @@ public class TileBoard {
             if (board[i] == 0) {
                 boardDisplay += "⬛";
             } else {
-                boardDisplay += Button.getFromNum(board[i]).getEmoji().asUnicodeEmoji().get().getRaw();
+                boardDisplay += GameEmoji.intToNumberEmoji(board[i]);
             }
         }
         return boardDisplay;
-    }*/
+    }
 
 }

@@ -1,7 +1,12 @@
 package discord.command;
 
+import discord.core.command.InteractionContext;
+import discord4j.core.event.domain.InteractionCreateEvent;
+import discord4j.core.object.command.ApplicationCommandInteraction;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public abstract class AbstractCommand {
 
@@ -15,7 +20,23 @@ public abstract class AbstractCommand {
         this.category = category;
     }
 
-    public abstract void execute(Message message, TextChannel channel, String[] args);
+    public ApplicationCommandRequest buildSlashCommand() {
+        return null;
+    }
+
+    public ApplicationCommandRequest buildOutsideGuildSlashCommand() {
+        return null;
+    }
+
+    //handle through slash command
+    public void execute(InteractionContext context) {
+
+    }
+
+    //handle through a channel message (old way)
+    public void execute(Message message, TextChannel channel, String[] args) {
+
+    }
 
     public abstract String getUsage(String alias);
 

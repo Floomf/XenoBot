@@ -2,20 +2,70 @@ package discord.command.utility;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.core.command.InteractionContext;
 import discord.manager.UserManager;
 import discord.data.object.user.Pref;
 import discord.util.BotUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.util.ApplicationCommandOptionType;
 
 public class PrefCommand extends AbstractCommand {
 
     public PrefCommand() {
-        super(new String[]{"pref", "preference", "setting"}, 1, CommandCategory.UTILITY);
+        super(new String[]{"preference"}, 1, CommandCategory.UTILITY);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildSlashCommand() {
+        return ApplicationCommandRequest.builder()
+                .name("preference")
+                .description("Change one of your preferences")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("pref")
+                        .description("The preference")
+                        .required(true)
+                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .addAllChoices(getPrefsAsChoices())
+                        .build())
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("value")
+                        .description("true/false")
+                        .required(true)
+                        .type(ApplicationCommandOptionType.BOOLEAN.getValue())
+                        .build())
+                .build();
+    }
+
+    private List<ApplicationCommandOptionChoiceData> getPrefsAsChoices() {
+        List<ApplicationCommandOptionChoiceData> choices = new ArrayList<>();
+        for (Pref pref : Pref.values()) {
+            choices.add(ApplicationCommandOptionChoiceData.builder()
+                    .name(pref.name().toLowerCase())
+                    .value(pref.name().toLowerCase())
+                    .build());
+        }
+        return choices;
+    }
+
+    @Override
+    public void execute(InteractionContext context) {
+        Pref pref = Pref.valueOf(context.getOptionAsString("pref").toUpperCase());
+        boolean update = context.getOptionAsBoolean("value").orElse(false);
+
+        context.getDUser().getPrefs().put(pref, update);
+        UserManager.saveDatabase();
+
+        context.replyWithInfo("`" + pref.toString() + "` has been set to `" + update + "`.");
     }
 
     @Override

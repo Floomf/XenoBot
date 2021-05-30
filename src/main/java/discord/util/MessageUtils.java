@@ -24,8 +24,20 @@ public class MessageUtils {
         return getEmbed(title, desc, Color.DISCORD_WHITE);
     }
 
+    public static Consumer<EmbedCreateSpec> getErrorEmbed(String message) {
+        return getEmbed("Error", message, DiscordColor.RED);
+    }
+
+    public static Consumer<EmbedCreateSpec> getInfoEmbed(String message) {
+        return getEmbed("Info", message, DiscordColor.GREEN);
+    }
+
+    public static void sendMessage(MessageChannel channel, Consumer<EmbedCreateSpec> embed) {
+        channel.createEmbed(embed).onErrorResume(e -> Mono.empty()).block();
+    }
+
     public static void sendMessage(MessageChannel channel, String title, String desc, Color color) {
-        channel.createEmbed(getEmbed(title, desc, color)).onErrorResume(e -> Mono.empty()).block();
+        sendMessage(channel, getEmbed(title, desc, color));
     }
 
     public static void sendMessage(TextChannel channel, String title, String desc) {
@@ -33,11 +45,11 @@ public class MessageUtils {
     }
 
     public static void sendInfoMessage(TextChannel channel, String message) {
-        sendMessage(channel, "Info", message, DiscordColor.CYAN);
+        sendMessage(channel, getInfoEmbed(message));
     }
 
     public static void sendErrorMessage(TextChannel channel, String message) {
-        sendMessage(channel, "Error", message, DiscordColor.RED);
+        sendMessage(channel, getErrorEmbed(message));
     }
 
     public static void sendUsageMessage(TextChannel channel, String message) {

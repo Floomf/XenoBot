@@ -1,5 +1,6 @@
 package discord.command.utility;
 
+import discord.core.command.InteractionContext;
 import discord.util.BotUtils;
 import discord.core.command.CommandHandler;
 import discord.command.AbstractCommand;
@@ -11,21 +12,57 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import discord.util.MessageUtils;
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.command.ApplicationCommandOptionChoice;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.util.ApplicationCommandOptionType;
 
 public class TagCommand extends AbstractCommand {
 
-    private static final Snowflake GAME_ROLE_ID = Snowflake.of(621486907620196392L);
+    public static final Snowflake GAMES_ROLE_ID = Snowflake.of(621486907620196392L);
+    public static int GAMES_ROLE_POSITION;
 
-    private ArrayList<String> tags = new ArrayList<>();
+    private final ArrayList<String> TAGS = new ArrayList<>();
+
+    @Override
+    public ApplicationCommandRequest buildSlashCommand() {
+        return ApplicationCommandRequest.builder()
+                .name("tag")
+                .description("Toggle various tags (roles) on your profile")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("name")
+                        .description("The tag to toggle")
+                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .required(true)
+                        .choices(getTagsAsChoices())
+                        .build())
+                .build();
+    }
+
+    private static List<ApplicationCommandOptionChoiceData> getTagsAsChoices() {
+        List<ApplicationCommandOptionChoiceData> choices = new ArrayList<>();
+        try {
+            Files.lines(Paths.get("tags.txt")).forEachOrdered(line -> {
+                if (!line.trim().isEmpty()) {
+                    choices.add(ApplicationCommandOptionChoiceData.builder().name(line).value(line).build());
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return choices;
+    }
 
     public TagCommand() {
         super(new String[]{"tag", "label"}, 1, CommandCategory.UTILITY);
-        try {
+        /*try {
             Files.lines(Paths.get("tags.txt")).forEachOrdered(line -> {
                 if (!line.trim().isEmpty()) {
                     tags.add(line);
@@ -34,12 +71,35 @@ public class TagCommand extends AbstractCommand {
             System.out.println(tags.size() + " tags loaded.");
         } catch (IOException e) {
             e.printStackTrace();
+        }*/
+    }
+
+    @Override
+    public void execute(InteractionContext context) {
+        Snowflake tagRole = context.getGuild().getRoles()
+                .filter(role -> role.getName().equals(context.getOptionAsString("name")))
+                .map(Role::getId)
+                .blockFirst();
+        if (tagRole == null) {
+           context.replyWithError("A role with that name doesn't exist on this guild. Please create one.");
+           return;
         }
+        Member member = context.getMember();
+        Set<Snowflake> roles = member.getRoleIds();
+        if (roles.contains(tagRole)) {
+            member.removeRole(tagRole).block();
+        } else {
+            member.addRole(tagRole).block();
+            if (!roles.contains(GAMES_ROLE_ID)) {
+                member.addRole(GAMES_ROLE_ID).block();
+            }
+        }
+        context.replyWithInfo("Tag **" + context.getOptionAsString("name") + "** toggled.");
     }
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        String operation = args[0].toLowerCase();
+        /*String operation = args[0].toLowerCase();
         String tag;
 
         Guild guild = message.getGuild().block();
@@ -102,7 +162,7 @@ public class TagCommand extends AbstractCommand {
                 member.addRole(GAME_ROLE_ID).block();
             }
         }
-        MessageUtils.sendInfoMessage(channel, "Tag toggled.");
+        MessageUtils.sendInfoMessage(channel, "Tag toggled.");*/
     }
 
     @Override
@@ -113,8 +173,8 @@ public class TagCommand extends AbstractCommand {
                 + "\n`!tag list` - View all available tags.");
     }
 
-    private boolean tagsContainsIgnoreCase(String tagToCheck) {
-        return (tags.stream().anyMatch(tag -> tag.equalsIgnoreCase(tagToCheck)));
-    }
+    //private boolean tagsContainsIgnoreCase(String tagToCheck) {
+    //    return (tags.stream().anyMatch(tag -> tag.equalsIgnoreCase(tagToCheck)));
+    //}
 
 }

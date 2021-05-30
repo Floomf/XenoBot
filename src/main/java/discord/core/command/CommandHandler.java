@@ -7,10 +7,10 @@ import discord.manager.UserManager;
 import discord.data.object.user.Progress;
 import discord.listener.EventsHandler;
 import discord.util.MessageUtils;
+import discord4j.core.event.domain.InteractionCreateEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.object.reaction.ReactionEmoji;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
@@ -21,20 +21,48 @@ public class CommandHandler {
 
     public static void onMessageEvent(MessageCreateEvent event) {
         processCommand(event.getMessage());
+
+    }
+
+    public static void onInteractionCreate(InteractionCreateEvent event) {
+        if (event.getInteraction().getGuildId().isEmpty()) {
+            event.replyEphemeral("Sorry, but DM commands are currently disabled.").block();
+            return;
+        }
+
+        AbstractCommand command = CommandManager.getCommand(event.getCommandName());
+        InteractionContext context = new InteractionContext(event);
+
+        LoggerFactory.getLogger(CommandHandler.class).info(event.getInteraction().getUser().getTag() + " issued /" + event.getCommandName()
+                + " on " + context.getGuild().getName() + " (ID: " + event.getInteraction().getGuildId().get().asString() + ")");
+
+        if (UserManager.databaseContainsUser(event.getInteraction().getUser())
+                && context.getDUser().getProg().getTotalLevelThisLife() < command.getLevelRequired()) {
+            event.replyEphemeral("You must be level **" + command.getLevelRequired()
+                    + "** to use this command! You can type `/profile` to view your progress.").block();
+            return;
+        }
+
+        if (GameManager.playerIsInTypingGame(context.getMember())) {
+            event.replyEphemeral("You can't use commands while in your game! First finish it or type **ff** to forfeit.").block();
+            return;
+        }
+
+        command.execute(context);
     }
 
     public static void processCommand(Message message) {
         TextChannel channel = message.getChannel().ofType(TextChannel.class).block();
-        if (channel == null || !message.getAuthor().isPresent()
+        if (channel == null || message.getGuildId().map(id -> !id.equals(EventsHandler.THE_REALM_ID)).orElse(false)
+                || !message.getAuthor().isPresent()
                 || message.getAuthor().get().isBot()
                 || !message.getContent().startsWith(CommandManager.CMD_PREFIX)) {
             return;
         }
 
-        if (!(channel.getName().contains("command") || channel.getName().contains("bot"))) {
-            message.addReaction(ReactionEmoji.unicode("❌")).block();
+        /*if (!(channel.getName().contains("command") || channel.getName().contains("bot"))) {
             return;
-        }
+        }*/
 
         //block all commands when in type game
         if (GameManager.playerIsInTypingGame(message.getAuthorAsMember().block())) {
@@ -60,7 +88,7 @@ public class CommandHandler {
         //make sure command exists
         if (command == null) {
             //MessageUtils.sendErrorMessage(channel,"Unknown command. Type `!help` for available commands.");
-            message.addReaction(ReactionEmoji.unicode("❔")).block();
+            //message.addReaction(ReactionEmoji.unicode("❔")).block();
             return;
         }
 
@@ -76,6 +104,11 @@ public class CommandHandler {
         if (command.getCategory().equals(CommandCategory.ADMIN) &&
                 !message.getAuthorAsMember().block().equals(channel.getGuild().block().getOwner().block())) {
             MessageUtils.sendErrorMessage(channel, "You must be this guild's owner to use this command.");
+            return;
+        }
+
+        if (!message.getAuthorAsMember().block().equals(channel.getGuild().block().getOwner().block())) {
+            channel.createMessage("Command moved! Type `/" + command.getName() + "` instead.").block();
             return;
         }
 

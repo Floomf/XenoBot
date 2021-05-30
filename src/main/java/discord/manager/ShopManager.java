@@ -15,7 +15,7 @@ public class ShopManager {
     public static Consumer<EmbedCreateSpec> getShopEmbedFor(DUser dUser) {
         //there are some temp final variables, but how else to we do it when using lambdas?
         Consumer<EmbedCreateSpec> embed = MessageUtils.getEmbed("The Realm Shop 🛒",
-                "💰 Balance: **" + String.format("$%,d", dUser.getBalance())+"**\n*To buy an item, use* **`!shop buy [number]`**",
+                "💰 Balance: **" + String.format("$%,d", dUser.getBalance())+"**\n*To buy an item, use* **`/shop buy [index]`**",
                 DiscordColor.PURPLE);
         List<Role> roles = dUser.asGuildMember().getGuild().block().getRoles().collectList().block();
 

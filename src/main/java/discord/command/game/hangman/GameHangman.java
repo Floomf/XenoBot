@@ -2,7 +2,9 @@ package discord.command.game.hangman;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord.core.game.Leaderboard;
 import discord.core.game.SingleplayerGame;
+import discord.listener.EventsHandler;
 import discord.util.BotUtils;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -11,12 +13,14 @@ import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
 import org.slf4j.LoggerFactory;
 
+import java.beans.EventHandler;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 public class GameHangman extends SingleplayerGame {
 
+    public static Leaderboard LEADERBOARD = new Leaderboard("leaderboard_hangman.json");
     private static final ObjectMapper mapper = new ObjectMapper();
     private static HashMap<Long, Integer> WIN_STREAKS = new HashMap<>();
 
@@ -60,7 +64,7 @@ public class GameHangman extends SingleplayerGame {
 
     @Override
     protected void setup() {
-        int length = new Random().nextInt(27) + 4; //4-30
+        int length = new Random().nextInt(27) + 5; //5-30
         assignRandomWord(length);
         wordProgress = new char[word.length()];
         guesses = new char[26];
@@ -87,7 +91,7 @@ public class GameHangman extends SingleplayerGame {
 
     @Override
     protected void onStart() {
-        super.registerMessageListener(3);
+        super.registerMessageListener(4);
     }
 
     @Override
@@ -160,11 +164,15 @@ public class GameHangman extends SingleplayerGame {
             }
             if (hasWon()) {
                 if (WIN_STREAKS.containsKey(getPlayer().getId().asLong())) {
-                    int streak = WIN_STREAKS.get(getPlayer().getId().asLong());
-                    WIN_STREAKS.put(getPlayer().getId().asLong(), streak + 1);
-                    win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo()
-                                    + "\n\n📈 **" + (1 + streak) + "** win streak!\n💰 **$" + (streak * 5) + "** bonus!",
-                            65 + (streak * 5));
+                    int streak = WIN_STREAKS.get(getPlayer().getId().asLong()) + 1;
+                    WIN_STREAKS.put(getPlayer().getId().asLong(), streak);
+                    String winMessage = "🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo()
+                            + "\n\n📈 **" + streak + "** win streak!";
+                    if (LEADERBOARD.submitScore(getPlayer(), streak)) {
+                        winMessage += "\n🏆 **NEW STREAK RECORD!**";
+                    }
+                    win(winMessage + "\n💰 **$" + ((streak - 1) * 5) + "** bonus!",
+                            65 + ((streak - 1) * 5));
                 } else {
                     WIN_STREAKS.put(getPlayer().getId().asLong(), 1);
                     win("🎉 **You win!** The answer was:\n\n" + getFullWordAndInfo(), 65);
@@ -177,13 +185,13 @@ public class GameHangman extends SingleplayerGame {
             if (missesLeft == 0) {
                 if (WIN_STREAKS.containsKey(getPlayer().getId().asLong()) && WIN_STREAKS.get(getPlayer().getId().asLong()) > 1) {
                     WIN_STREAKS.remove(getPlayer().getId().asLong());
-                    lose(BotUtils.getRandomGuildEmoji(super.getGameMessage().getGuild().block(),
-                            new String[] {"Sadge", "PepeHands"})
+                    lose(BotUtils.getRandomGuildEmoji(getChannel().getClient().getGuildById(EventsHandler.THE_REALM_ID).block(),
+                            new String[] {"Sadge", "PepeHands", "SadChamp"})
                             + " **You lose. Win streak ended.**\nThe answer was:\n\n" + getFullWordAndInfo());
                 } else {
                     WIN_STREAKS.remove(getPlayer().getId().asLong());
-                    lose(BotUtils.getRandomGuildEmoji(super.getGameMessage().getGuild().block(),
-                            new String[] {"Sadge", "PepeHands"})
+                    lose(BotUtils.getRandomGuildEmoji(getChannel().getClient().getGuildById(EventsHandler.THE_REALM_ID).block(),
+                            new String[] {"Sadge", "PepeHands", "SadChamp"})
                             + " **You lose.** The answer was:\n\n" + getFullWordAndInfo());
                 }
             } else {

@@ -1,5 +1,6 @@
 package discord.command.perk;
 
+import discord.core.command.InteractionContext;
 import discord.util.BotUtils;
 import discord.core.command.CommandHandler;
 import discord.manager.UserManager;
@@ -8,13 +9,44 @@ import discord.command.CommandCategory;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.util.ApplicationCommandOptionType;
 
 public class DescCommand extends AbstractCommand {
 
-    public static final int LEVEL_REQUIRED = 20;
-
     public DescCommand() {
-        super(new String[]{"desc", "motto", "title"}, 1, CommandCategory.PERK);
+        super(new String[]{"description"}, 1, CommandCategory.PERK);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildSlashCommand() {
+        return ApplicationCommandRequest.builder()
+                .name("description")
+                .description("Change your description on your profile")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("new_desc")
+                        .description("New description")
+                        .required(true)
+                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .build())
+                .build();
+    }
+
+    @Override
+    public void execute(InteractionContext context) {
+        String desc = BotUtils.validateString(context.getOptionAsString("new_desc"));
+
+        if (desc.isEmpty()) {
+            context.replyWithError("Couldn't parse a valid description. Only basic characters are allowed.");
+            return;
+        } else if (desc.length() > 150) {
+            desc = desc.substring(0, 150);
+        }
+
+        context.getDUser().setDesc(desc);
+        UserManager.saveDatabase();
+        context.replyWithInfo("How expressive! Updated your description accordingly.");
     }
 
     @Override
@@ -33,11 +65,6 @@ public class DescCommand extends AbstractCommand {
         UserManager.getDUserFromMessage(message).setDesc(desc);
         UserManager.saveDatabase();
         MessageUtils.sendInfoMessage(channel, "How expressive! Updated your description accordingly.");
-    }
-
-    @Override
-    public int getLevelRequired() {
-        return LEVEL_REQUIRED;
     }
 
     @Override

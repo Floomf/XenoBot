@@ -1,6 +1,12 @@
 package discord.command.game.slide;
 
-/*public class GameSlide extends TypeGame {
+import discord.core.game.SingleplayerGame;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.channel.TextChannel;
+
+import java.util.Random;
+
+public class GameSlide extends SingleplayerGame {
 
     enum Difficulty {
         EASY(10, 20),  MEDIUM(15, 50), HARD(20, 150);
@@ -34,41 +40,50 @@ package discord.command.game.slide;
     }
 
     private final TileBoard board;
-    private final Difficulty difficulty;
+    //private final Difficulty difficulty;
 
-    public GameSlide(Message message, Member[] players, Difficulty difficulty) {
-        super(message, players, 0);
-        this.board = new TileBoard(difficulty);
-        this.difficulty = difficulty;
+    public GameSlide(String gameTitle, TextChannel channel, Member player, int betAmount) {
+        super(gameTitle, channel, player, betAmount);
+        this.board = new TileBoard();
+        //this.difficulty = difficulty;
     }
 
     @Override
-    protected String getGameTitle() {
-        return "Slide Puzzle";
+    protected boolean useEmbed() {
+        return false;
     }
 
     @Override
-    protected String getForfeitMessage(Member forfeiter) {
+    protected String getForfeitMessage() {
         return "You forfeited.";
     }
 
     @Override
-    protected String getIdleMessage(Member idler) {
+    protected String getIdleMessage() {
         return "You failed to move in time.";
     }
 
     @Override
+    protected void setup() {
+        board.shuffle(new Random().nextInt(11) + 10); //10-20
+    }
+
+    protected String getFirstDisplay() {
+        return "Rearrange the board from 1-8, moving one square at time.\nType **W, A, S, or D** to move.\n\n" + getBoard();
+    }
+
+    @Override
     protected void onStart() {
-        super.setInfoDisplay("Order the board from 1-8, moving one piece at time.\nUse **WASD** to move.");
+        super.registerMessageListener(5);
     }
 
     @Override
     protected void onTurn(String input) {
         board.move(input);
         if (board.isSolved()) {
-            super.win("**You win!**\n" + getBoard(), super.getPThisTurn(), difficulty.getWinAmount());
+            super.win("**You win!**\n" + getBoard(), 75);
         } else {
-            super.setInfoDisplay(""); //Allows a huge emoji message
+            super.setInfoDisplay("");
         }
     }
 
@@ -81,4 +96,4 @@ package discord.command.game.slide;
     protected String getBoard() {
         return board.toString();
     }
-}*/
+}

@@ -1,16 +1,33 @@
 package discord.command.game.reversi;
 
+import discord.core.command.InteractionContext;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.manager.GameManager;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public class ReversiCommand extends AbstractCommand {
 
     public ReversiCommand() {
-        super(new String[]{"reversi", "othello"}, 1, CommandCategory.GAME);
+        super(new String[]{"reversi"}, 1, CommandCategory.GAME);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildSlashCommand() {
+        return GameManager.buildMultiplayerGameSlashCommand(getName(),"Reversi", true);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildOutsideGuildSlashCommand() {
+        return GameManager.buildMultiplayerGameSlashCommand(getName(),"Reversi", false);
+    }
+
+    @Override
+    public void execute(InteractionContext context) {
+        GameManager.createMultiPlayerGame(GameReversi.class, "Reversi", context);
     }
 
     @Override
@@ -26,7 +43,7 @@ public class ReversiCommand extends AbstractCommand {
 
     @Override
     public boolean isSupportedGlobally() {
-        return true;
+        return false;
     }
 
 }

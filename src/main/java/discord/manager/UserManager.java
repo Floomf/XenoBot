@@ -1,6 +1,7 @@
 package discord.manager;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import discord.core.command.InteractionContext;
 import discord.data.object.user.DUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord.listener.EventsHandler;
@@ -110,6 +111,7 @@ public class UserManager {
             name = "Realmer";
         }
         DUser dUser = new DUser(member, name);
+        dUser.setDesc("Just a realmer. (Set me with `/description`)");
         dUsers.put(member.getId().asLong(), dUser);
 
         System.out.println("Added " + member.getDisplayName() + " to the database.");

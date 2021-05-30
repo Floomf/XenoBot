@@ -14,11 +14,16 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
 public class BotUtils {
 
     public static String BOT_AVATAR_URL = "";
+
+    public static Color getRandomColor() {
+        return Color.of((int) (Math.random() * (0xFFFFFF + 1)));
+    }
 
     public static TextChannel getGuildTextChannel(String name, Guild guild) {
         return guild.getChannels().ofType(TextChannel.class)

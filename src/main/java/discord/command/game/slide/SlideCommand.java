@@ -2,29 +2,30 @@ package discord.command.game.slide;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.core.command.InteractionContext;
+import discord.manager.GameManager;
 import discord.util.BotUtils;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public class SlideCommand extends AbstractCommand {
 
     public SlideCommand() {
-        super(new String[]{"slide"}, 1, CommandCategory.GAME);
+        super(new String[]{"slide"}, 0, CommandCategory.GAME);
     }
 
     @Override
-    public void execute(Message message, TextChannel channel, String[] args) {
-        /*GameSlide.Difficulty difficulty = GameSlide.Difficulty.fromString(args[0]);
+    public ApplicationCommandRequest buildSlashCommand() {
+        return ApplicationCommandRequest.builder()
+                .name("slide")
+                .description("Solve a sliding puzzle.")
+                .build();
+    }
 
-        if (difficulty == null) {
-            MessageUtils.sendErrorMessage(channel, "Please specify a valid difficulty (easy/medium/hard).");
-            return;
-        }
-
-        Message gameMessage = channel.createMessage("Ready..").block();
-        AbstractGame game = new GameSlide(gameMessage, new Member[] {message.getAuthorAsMember().block()}, difficulty);
-        //GameManager.addGame(game);
-        game.start();*/
+    @Override
+    public void execute(InteractionContext context) {
+        GameManager.createSinglePlayerGame(GameSlide.class, "Sliding Puzzle", context, 0);
     }
 
     @Override

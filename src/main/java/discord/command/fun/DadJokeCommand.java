@@ -1,6 +1,8 @@
 package discord.command.fun;
 
+import discord.core.command.InteractionContext;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 import kong.unirest.Unirest;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
@@ -11,7 +13,24 @@ import discord4j.core.object.entity.Message;
 public class DadJokeCommand extends AbstractCommand {
 
     public DadJokeCommand() {
-        super(new String[]{"dadjoke", "dj"}, 0, CommandCategory.FUN);
+        super(new String[]{"dadjoke"}, 0, CommandCategory.FUN);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildSlashCommand() {
+        return ApplicationCommandRequest.builder()
+                .name("dadjoke")
+                .description("Read a random dad joke")
+                .build();
+    }
+
+    @Override
+    public void execute(InteractionContext context) {
+        context.reply(embed -> embed.setDescription("**" +
+                Unirest.get("https://icanhazdadjoke.com/")
+                        .header("Accept", "text/plain")
+                        .header("User-Agent", "Discord Bot")
+                        .asString().getBody() + "**"));
     }
 
     @Override

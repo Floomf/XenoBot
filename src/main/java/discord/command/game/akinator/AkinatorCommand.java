@@ -2,15 +2,30 @@ package discord.command.game.akinator;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.core.command.InteractionContext;
 import discord.manager.GameManager;
 import discord.util.BotUtils;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public class AkinatorCommand extends AbstractCommand {
 
     public AkinatorCommand() {
         super(new String[]{"akinator", "aki"}, 0, CommandCategory.GAME);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildSlashCommand() {
+        return ApplicationCommandRequest.builder()
+                .name("akinator")
+                .description("Play Akinator")
+                .build();
+    }
+
+    @Override
+    public void execute(InteractionContext context) {
+        GameManager.createSinglePlayerGame(GameAkinator.class, "Akinator \uD83E\uDDDE\u200D♂", context, 0);
     }
 
     @Override

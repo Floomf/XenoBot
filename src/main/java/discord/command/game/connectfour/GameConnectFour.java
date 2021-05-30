@@ -32,7 +32,7 @@ public class GameConnectFour extends MultiplayerGame {
     private static final String[] CIRCLE_EMOJIS = {":red_circle:", ":blue_circle:",
             ":green_circle:", ":purple_circle:", ":yellow_circle:"};
 
-    private final Message[] rowMessages = new Message[HEIGHT];
+    private final Message[] rowMessages = new Message[2];
     private final Piece[][] board = new Piece[HEIGHT][LENGTH];
     private Member player1;
 
@@ -63,14 +63,14 @@ public class GameConnectFour extends MultiplayerGame {
             Arrays.fill(pieces, Piece.EMPTY);
         }
 
-        rowMessages[0] = getChannel().createMessage(":one: :two: :three: :four: :five: :six: :seven:"
-                + "\n:white_circle: :white_circle: :white_circle: :white_circle: :white_circle: :white_circle: :white_circle:").block();
-        for (int i = 1; i < rowMessages.length; i++) {
+        getChannel().createMessage(":one: :two: :three: :four: :five: :six: :seven:").block();
+        for (int i = 0; i < rowMessages.length; i++) {
             rowMessages[i] = getChannel().createMessage(":white_circle: :white_circle: :white_circle: " +
-                    ":white_circle: :white_circle: :white_circle: :white_circle:").block();
+                    ":white_circle: :white_circle: :white_circle: :white_circle:\n:white_circle: :white_circle: " +
+                    ":white_circle: :white_circle: :white_circle: :white_circle: :white_circle:\n:white_circle: " +
+                    ":white_circle: :white_circle: :white_circle: :white_circle: :white_circle: :white_circle:").block();
         }
-
-        randomizePieceEmojis();
+        //randomizePieceEmojis(); will break one game if another one is started during it because they use same enums
     }
 
     @Override
@@ -134,21 +134,24 @@ public class GameConnectFour extends MultiplayerGame {
         for (int row = board.length - 1; row >= 0; row--) {
             if (board[row][col] == Piece.EMPTY) {
                 board[row][col] = piece;
-                String rowString = row == 0
-                        ? ":one: :two: :three: :four: :five: :six: :seven:\n" + rowToString(board[row])
-                        : rowToString(board[row]);;
-                rowMessages[row].edit(spec -> spec.setContent(rowString)).block();
+                final int rowsMessageIndex = row / 3;
+                rowMessages[rowsMessageIndex].edit(spec -> spec.setContent(
+                        rowsToString(rowsMessageIndex * 3, rowsMessageIndex * 3 + 2))).block();
                 return;
             }
         }
     }
 
-    private String rowToString(Piece[] row) {
-        String rowString = "";
-        for (Piece index : row) {
-            rowString += index.emoji + " ";
+    private String rowsToString(int first, int last) {
+        StringBuilder sb = new StringBuilder();
+        while (first <= last) {
+            for (Piece piece : board[first]) {
+                sb.append(piece.emoji).append(" ");
+            }
+            sb.append("\n");
+            first++;
         }
-        return rowString;
+        return sb.toString();
     }
 
     private boolean boardIsFull() {

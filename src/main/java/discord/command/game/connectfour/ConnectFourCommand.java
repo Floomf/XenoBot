@@ -1,16 +1,33 @@
 package discord.command.game.connectfour;
 
+import discord.core.command.InteractionContext;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.manager.GameManager;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public class ConnectFourCommand extends AbstractCommand {
 
     public ConnectFourCommand() {
         super(new String[]{"connect4", "c4"}, 1, CommandCategory.GAME);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildSlashCommand() {
+        return GameManager.buildMultiplayerGameSlashCommand(getName(),"Connect 4", true);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildOutsideGuildSlashCommand() {
+        return GameManager.buildMultiplayerGameSlashCommand(getName(),"Connect 4", false);
+    }
+
+    @Override
+    public void execute(InteractionContext context) {
+        GameManager.createMultiPlayerGame(GameConnectFour.class, "Connect 4", context);
     }
 
     @Override
@@ -26,7 +43,7 @@ public class ConnectFourCommand extends AbstractCommand {
 
     @Override
     public boolean isSupportedGlobally() {
-        return true;
+        return false;
     }
 
 }

@@ -1,8 +1,10 @@
 package discord.core.game;
 
+import discord.core.command.InteractionContext;
 import discord.manager.GameManager;
 import discord.util.BotUtils;
 import discord.util.DiscordColor;
+import discord.util.MessageUtils;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
@@ -65,7 +67,6 @@ public abstract class BaseGame {
     abstract protected String getBoard();
 
     public final void start() {
-        System.out.println("game:" + Thread.currentThread().getId() + " - " + Thread.currentThread().getName());
         active = true;
         turn = 1;
         setup();
@@ -86,6 +87,40 @@ public abstract class BaseGame {
         onStart();
     }
 
+    public final void startFromMessage(Message message) {
+        gameMessage = message;
+        active = true;
+        turn = 1;
+        setup();
+        if (!useEmbed()) {
+            gameMessage.edit(spec -> spec.setContent(getFirstDisplay())).block();
+        } else {
+            gameMessage.edit(spec -> spec.setEmbed(MessageUtils.getEmbed(gameTitle, getFirstDisplay(), Color.DISCORD_WHITE))).block();
+        }
+        idleTimerThread.start();
+        onStart();
+    }
+
+    public final void startFromInteraction(InteractionContext context) {
+        active = true;
+        turn = 1;
+        setup();
+        context.getChannel().getClient().on(MessageCreateEvent.class)
+                .map(MessageCreateEvent::getMessage)
+                .filter(message -> message.getInteraction().map(interaction -> interaction.getId().equals(context.event.getInteraction().getId())).orElse(false))
+                .take(1)
+                .subscribe(message -> {
+                    gameMessage = message;
+                    idleTimerThread.start();
+                    onStart();
+                });
+        if (!useEmbed()) {
+            context.event.reply(getFirstDisplay()).block();
+        } else {
+            context.reply(MessageUtils.getEmbed(gameTitle, getFirstDisplay(), Color.DISCORD_WHITE));
+        }
+    }
+
     protected final void tie(String tieMessage) {
         setGameDisplay(tieMessage, DiscordColor.ORANGE);
         end();
@@ -96,7 +131,6 @@ public abstract class BaseGame {
         if (Thread.currentThread().getId() != idleTimerThread.getId()) { //don't interrupt, just let it end
             idleTimerThread.interrupt();
         }
-        //idleTimer.cancel();
         onEnd();
         GameManager.removeGame(this);
     }

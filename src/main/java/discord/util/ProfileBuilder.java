@@ -1,13 +1,17 @@
 package discord.util;
 
+import discord.command.utility.TagCommand;
 import discord.data.object.user.Prestige;
 import discord.data.object.user.Progress;
 import discord.data.object.user.DUser;
 
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.function.Consumer;
 
+import discord4j.core.object.entity.Role;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.util.OrderUtil;
 
 public class ProfileBuilder {
 
@@ -105,6 +109,21 @@ public class ProfileBuilder {
 
     public ProfileBuilder addBalance() {
         embed = embed.andThen(embed -> embed.addField("Balance :moneybag:", "$" + String.format("%,d", user.getBalance()) + "", true));
+        return this;
+    }
+
+    public ProfileBuilder addTags() {
+        final StringBuilder sb = new StringBuilder("\uD83C\uDFAE ");
+        List<String> roleNames = user.asGuildMember().getRoles()
+                .filter(role -> role.getRawPosition() < TagCommand.GAMES_ROLE_POSITION)
+                .map(Role::getName).collectList().block();
+        if (!roleNames.isEmpty()) {
+            for (int i = 0; i < roleNames.size() - 1; i++) {
+                sb.append(roleNames.get(i)).append(" – ");
+            }
+            sb.append(roleNames.get(roleNames.size() - 1));
+            embed = embed.andThen(embed -> embed.setFooter(sb.toString(), ""));
+        }
         return this;
     }
 

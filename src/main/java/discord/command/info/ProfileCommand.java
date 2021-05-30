@@ -1,5 +1,6 @@
 package discord.command.info;
 
+import discord.core.command.InteractionContext;
 import discord.data.object.XPChecker;
 import discord.util.BotUtils;
 import discord.manager.UserManager;
@@ -14,16 +15,48 @@ import discord.data.object.user.DUser;
 import java.util.List;
 import java.util.function.Consumer;
 
+import discord4j.core.event.domain.InteractionCreateEvent;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.command.ApplicationCommandInteraction;
+import discord4j.core.object.command.ApplicationCommandInteractionOption;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.object.entity.Message;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.util.ApplicationCommandOptionType;
 
 public class ProfileCommand extends AbstractCommand {
 
     public ProfileCommand() {
-        super(new String[]{"profile", "prof", "bal", "balance", "progress", "prog", "level", "lvl", "rank", "xp"}, 0, CommandCategory.INFO);
+        super(new String[]{"profile"}, 0, CommandCategory.INFO);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildSlashCommand() {
+        return ApplicationCommandRequest.builder()
+                .name("profile")
+                .description("View your or another user's profile")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("other_user")
+                        .description("Specify another user instead")
+                        .required(false)
+                        .type(ApplicationCommandOptionType.USER.getValue())
+                        .build())
+                .build();
+    }
+
+   @Override
+    public void execute(InteractionContext context) {
+        DUser dUser = UserManager.getDUserFromUser(context.getOptionAsUser("other_user").orElse(context.getMember()));
+
+        if (dUser == null) {
+            context.reply(MessageUtils.getErrorEmbed("Couldn't find that user in the database. Are they a bot?"));
+        } else {
+            context.reply(buildProfileInfo(dUser));
+        }
     }
 
     @Override
@@ -62,7 +95,7 @@ public class ProfileCommand extends AbstractCommand {
         }
         if (user.getProg().isNotMaxLevel()) {
             builder.addXPProgress();
-            VoiceState vState = user.asGuildMember().getVoiceState().block();
+            VoiceState vState = user.asGuildMember().getVoiceState().blockOptional().orElse(null);
             if (vState != null && vState.getChannel().block() != null && !XPChecker.voiceStateIsNotTalking(vState)) { //Messy but oh well right?
                 List<VoiceState> states = vState.getChannel().block().getVoiceStates().collectList().block();
                 states.removeIf(state -> state.getUser().block().isBot() || XPChecker.voiceStateIsNotTalking(state));
@@ -82,6 +115,7 @@ public class ProfileCommand extends AbstractCommand {
         if (prestige.isPrestiged()) {
             builder.addBadgeCase();
         }
+        builder.addTags();
         return builder.build();
     }
 

@@ -2,15 +2,32 @@ package discord.command.game.rhyme;
 
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
+import discord.core.command.InteractionContext;
 import discord.manager.GameManager;
 import discord.util.BotUtils;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public class RhymeCommand extends AbstractCommand {
 
     public RhymeCommand() {
         super(new String[]{"rhyme", "rhymes"}, 1, CommandCategory.GAME);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildSlashCommand() {
+        return GameManager.buildMultiplayerGameSlashCommand(getName(),"Rapid Rhymes", true);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildOutsideGuildSlashCommand() {
+        return GameManager.buildMultiplayerGameSlashCommand(getName(),"Rapid Rhymes", false);
+    }
+
+    @Override
+    public void execute(InteractionContext context) {
+        GameManager.createMultiPlayerGame(GameRhyme.class, "Rapid Rhymes", context);
     }
 
     @Override
@@ -26,7 +43,7 @@ public class RhymeCommand extends AbstractCommand {
 
     @Override
     public boolean isSupportedGlobally() {
-        return true;
+        return false;
     }
 
 }

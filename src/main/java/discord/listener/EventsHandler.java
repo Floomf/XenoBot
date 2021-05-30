@@ -1,7 +1,10 @@
 package discord.listener;
 
+import discord.command.utility.TagCommand;
 import discord.data.object.BirthdayScheduler;
 import discord.util.BotUtils;
+import discord.util.DiscordColor;
+import discord.util.MessageUtils;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.PresenceUpdateEvent;
 import discord.core.command.CommandManager;
@@ -9,9 +12,11 @@ import discord.manager.UserManager;
 import discord.data.object.XPScheduler;
 
 import discord4j.core.event.domain.guild.GuildCreateEvent;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
 import discord.data.object.user.DUser;
+import discord4j.core.object.reaction.ReactionEmoji;
 
 public class EventsHandler {
 
@@ -20,12 +25,20 @@ public class EventsHandler {
     //TODO seperate into different classes?
     public static void onGuildCreateEvent(GuildCreateEvent event) {
         if (event.getGuild().getId().equals(THE_REALM_ID)) {
-            event.getClient().updatePresence(Presence.online(Activity.listening("!help"))).block();
+            event.getClient().updatePresence(Presence.online(Activity.listening("/help"))).block();
             BotUtils.BOT_AVATAR_URL = event.getClient().getSelf().block().getAvatarUrl();
             UserManager.createDatabase(event.getGuild());
-            CommandManager.createCommands();
             new XPScheduler(event.getGuild()).checkAnyChannelHasEnoughUsers();
             new BirthdayScheduler(event.getGuild());
+            TagCommand.GAMES_ROLE_POSITION = event.getGuild().getRoleById(TagCommand.GAMES_ROLE_ID).block().getRawPosition();
+
+            /*event.getGuild().getChannelById(Snowflake.of(813153135161114675L)).cast(TextChannel.class)
+                    .block().getMessageById(Snowflake.of(813245622848716820L)).block().edit(spec ->
+                    spec.setEmbed(MessageUtils.getEmbed("Go focus up!", "When you are finally done concentrating, " +
+                            "react with \uD83C\uDF89 to restore full server view.", DiscordColor.PURPLE))).block();*/
+
+            //CommandManager.createCommands();
+            //CommandManager.createInteractions(event.getClient().getRestClient().getApplicationId().block(), event.getClient().getRestClient());
         }
     }
 
@@ -38,6 +51,8 @@ public class EventsHandler {
                 user.setGuildMember(event.getMember().block()); //we have to update guildmember so displayname updates correctly
                 user.getName().verifyOnGuild();
             }
+
+
         }
     }
 

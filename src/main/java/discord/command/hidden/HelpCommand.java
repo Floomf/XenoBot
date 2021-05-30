@@ -1,5 +1,6 @@
 package discord.command.hidden;
 
+import discord.core.command.InteractionContext;
 import discord.listener.EventsHandler;
 import discord.util.BotUtils;
 import discord.core.command.CommandManager;
@@ -13,11 +14,43 @@ import discord.util.DiscordColor;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public class HelpCommand extends AbstractCommand {
 
     public HelpCommand() {
-        super(new String[]{"help", "commands"}, 0, CommandCategory.HIDDEN);
+        super(new String[]{"help"}, 0, CommandCategory.HIDDEN);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildSlashCommand() {
+        return ApplicationCommandRequest.builder()
+                .name("help")
+                .description("View all available commands")
+                .build();
+    }
+
+    @Override
+    public void execute(InteractionContext context) {
+        HashSet<AbstractCommand> commands = CommandManager.getAllCommands();
+        commands.removeIf(command -> (!command.isSupportedGlobally() && !context.getGuild().getId().equals(EventsHandler.THE_REALM_ID)
+                && command.buildOutsideGuildSlashCommand() == null)
+                || command.buildSlashCommand() == null
+                || command.getCategory() == CommandCategory.HIDDEN
+                || (context.getDUser() != null)
+                && command.getLevelRequired() > context.getDUser().getProg().getTotalLevelThisLife());
+
+        context.reply(MessageUtils.getEmbed("Available Commands", "", DiscordColor.PURPLE)
+                .andThen(embed -> {
+                    for (CommandCategory c : CommandCategory.values()) {
+                        StringBuilder sb = new StringBuilder();
+                        commands.stream().filter(cmd -> cmd.getCategory() == c)
+                                .forEach(cmd -> sb.append("`/").append(cmd.getName()).append("`  "));
+                        if (sb.length() > 0) { //skip over empty categories
+                            embed.addField(c.toString(), sb.toString(), false);
+                        }
+                    }
+                }));
     }
 
     @Override
@@ -46,14 +79,17 @@ public class HelpCommand extends AbstractCommand {
                         for (CommandCategory c : CommandCategory.values()) {
                             StringBuilder sb = new StringBuilder();
                             commands.stream().filter(cmd -> cmd.getCategory() == c)
-                                    .forEach(cmd -> sb.append("`!").append(cmd.getName()).append("`  "));
+                                    .forEach(cmd -> {
+                                        if (cmd.buildSlashCommand() != null) {
+                                            sb.append("`/");
+                                        } else {
+                                            sb.append("`!");
+                                        }
+                                        sb.append(cmd.getName()).append("`  ");
+                                    });
                             if (sb.length() > 0) { //skip over empty categories
                                 embed.addField(c.toString(), sb.toString(), false);
                             }
-                        }
-                        if (!channel.getGuildId().equals(EventsHandler.THE_REALM_ID)) {
-                            embed.setFooter(CommandManager.getAllCommands().size() - commands.size()
-                                    + " other commands are currently unsupported on this guild.", "");
                         }
                     })).block();
 
