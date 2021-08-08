@@ -12,17 +12,18 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.util.ApplicationCommandOptionType;
 import kong.unirest.Unirest;
+import org.apache.commons.text.StringEscapeUtils;
 
 public class EightBallCommand extends AbstractCommand {
 
     public EightBallCommand() {
-        super(new String[]{"8ball"}, 0, CommandCategory.FUN);
+        super("8ball", 0, CommandCategory.FUN);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("8ball")
+                .name(getName())
                 .description("Ask a yes–no question to the Magic 8-Ball")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("question")
@@ -37,7 +38,9 @@ public class EightBallCommand extends AbstractCommand {
     public void execute(InteractionContext context) {
         String question = context.getOptionAsString("question");
         question = question.charAt(question.length() - 1) == '?' ? question : question + "?";
-        context.reply(MessageUtils.getEmbed(question, Unirest.get("https://8ball.delegator.com/magic/JSON/" + question)
+        question = StringEscapeUtils.escapeHtml4(question);
+        context.reply(MessageUtils.getEmbed(StringEscapeUtils.unescapeHtml4(question),
+                Unirest.get("https://8ball.delegator.com/magic/JSON/" + question)
                         .asJson().getBody().getObject().getJSONObject("magic").getString("answer") + ".", DiscordColor.PURPLE));
     }
 

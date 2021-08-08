@@ -18,13 +18,13 @@ public class NickCommand extends AbstractCommand {
     public static final int LEVEL_REQUIRED = 30;
 
     public NickCommand() {
-        super(new String[]{"name"}, 1, CommandCategory.PERK);
+        super("name", 1, CommandCategory.PERK);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("name")
+                .name(getName())
                 .description("Change your nickname on this server")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("new_nick")

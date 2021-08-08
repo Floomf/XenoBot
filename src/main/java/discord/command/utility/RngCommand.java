@@ -5,9 +5,6 @@ import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.util.MessageUtils;
-import discord4j.core.event.domain.InteractionCreateEvent;
-import discord4j.core.object.command.ApplicationCommandInteraction;
-import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -17,13 +14,13 @@ import discord4j.rest.util.ApplicationCommandOptionType;
 public class RngCommand extends AbstractCommand {
 
     public RngCommand() {
-        super(new String[]{"rng"}, 1, CommandCategory.UTILITY);
+        super("rng", 1, CommandCategory.UTILITY);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("rng")
+                .name(getName())
                 .description("Generate a random number")
                 .addOption(ApplicationCommandOptionData.builder()
                     .name("max")

@@ -19,13 +19,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class HelpCommand extends AbstractCommand {
 
     public HelpCommand() {
-        super(new String[]{"help"}, 0, CommandCategory.HIDDEN);
+        super("help", 0, CommandCategory.HIDDEN);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("help")
+                .name(getName())
                 .description("View all available commands")
                 .build();
     }
@@ -73,25 +73,27 @@ public class HelpCommand extends AbstractCommand {
                     || (command.getCategory() == CommandCategory.ADMIN //take out admin if not owner
                     && !message.getAuthorAsMember().block().equals(message.getGuild().block().getOwner().block())));
 
-            channel.createEmbed(MessageUtils.getEmbed("Available Commands", "*For info on a command, use* **`!help [command]`**",
-                    DiscordColor.PURPLE)
-                    .andThen(embed -> {
-                        for (CommandCategory c : CommandCategory.values()) {
-                            StringBuilder sb = new StringBuilder();
-                            commands.stream().filter(cmd -> cmd.getCategory() == c)
-                                    .forEach(cmd -> {
-                                        if (cmd.buildSlashCommand() != null) {
-                                            sb.append("`/");
-                                        } else {
-                                            sb.append("`!");
-                                        }
-                                        sb.append(cmd.getName()).append("`  ");
-                                    });
-                            if (sb.length() > 0) { //skip over empty categories
-                                embed.addField(c.toString(), sb.toString(), false);
+            channel.createMessage(spec -> {
+                spec.addEmbed(MessageUtils.getEmbed("Available Commands", "*For info on a command, use* **`!help [command]`**",
+                        DiscordColor.PURPLE)
+                        .andThen(embed -> {
+                            for (CommandCategory c : CommandCategory.values()) {
+                                StringBuilder sb = new StringBuilder();
+                                commands.stream().filter(cmd -> cmd.getCategory() == c)
+                                        .forEach(cmd -> {
+                                            if (cmd.buildSlashCommand() != null) {
+                                                sb.append("`/");
+                                            } else {
+                                                sb.append("`!");
+                                            }
+                                            sb.append(cmd.getName()).append("`  ");
+                                        });
+                                if (sb.length() > 0) { //skip over empty categories
+                                    embed.addField(c.toString(), sb.toString(), false);
+                                }
                             }
-                        }
-                    })).block();
+                        }));
+            }).block();
 
         }
     }

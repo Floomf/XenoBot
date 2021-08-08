@@ -1,21 +1,18 @@
 package discord.command;
 
 import discord.core.command.InteractionContext;
-import discord4j.core.event.domain.InteractionCreateEvent;
-import discord4j.core.object.command.ApplicationCommandInteraction;
-import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public abstract class AbstractCommand {
 
-    private final String[] names;
+    private final String name;
     private final int argsRequired;
     private final CommandCategory category;
 
-    public AbstractCommand(String[] names, int argsNeeded, CommandCategory category) {
-        this.names = names;
+    public AbstractCommand(String name, int argsNeeded, CommandCategory category) {
+        this.name = name;
         this.argsRequired = argsNeeded;
         this.category = category;
     }
@@ -41,11 +38,7 @@ public abstract class AbstractCommand {
     public abstract String getUsage(String alias);
 
     public String getName() {
-        return names[0];
-    }
-
-    public String[] getNames() {
-        return names;
+        return name;
     }
 
     public int getArgsRequired() {

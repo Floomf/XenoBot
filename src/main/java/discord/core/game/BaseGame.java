@@ -6,8 +6,12 @@ import discord.util.BotUtils;
 import discord.util.DiscordColor;
 import discord.util.MessageUtils;
 import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.interaction.ButtonInteractEvent;
+import discord4j.core.event.domain.interaction.ComponentInteractEvent;
+import discord4j.core.event.domain.interaction.SelectMenuInteractEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -35,6 +39,9 @@ public abstract class BaseGame {
     private int msgDeleteInterval;
     private boolean typingGame;
 
+    //TODO BETTER SOLUTION
+    protected ComponentInteractEvent componentEvent = null;
+
     public BaseGame(String gameTitle, TextChannel channel, int betAmount) {
         this.gameTitle = gameTitle;
         this.channel = channel;
@@ -49,6 +56,10 @@ public abstract class BaseGame {
     }
 
     abstract protected String getFirstDisplay();
+
+    protected LayoutComponent[] getComponents() {
+        return new LayoutComponent[0];
+    }
 
     abstract protected void setup();
 
@@ -73,10 +84,13 @@ public abstract class BaseGame {
         if (!useEmbed()) {
             gameMessage = channel.createMessage(getFirstDisplay()).block();
         } else {
-            gameMessage = channel.createEmbed(embed -> {
-                embed.setAuthor(gameTitle, "", BotUtils.BOT_AVATAR_URL);// gameMessage.getClient().getSelf().block().getAvatarUrl());
-                embed.setDescription(getFirstDisplay());
-                embed.setColor(Color.DISCORD_WHITE);
+            gameMessage = channel.createMessage(spec -> {
+                spec.addEmbed(embed -> {
+                    embed.setAuthor(gameTitle, "", BotUtils.BOT_AVATAR_URL);// gameMessage.getClient().getSelf().block().getAvatarUrl());
+                    embed.setDescription(getFirstDisplay());
+                    embed.setColor(Color.DISCORD_WHITE);
+                });
+                spec.setComponents(getComponents());
             }).block();
         }
         if (gameMessage == null) { //somehow couldn't send message
@@ -87,24 +101,33 @@ public abstract class BaseGame {
         onStart();
     }
 
+    //Used for multiplayer games, coming from GameRequest
     public final void startFromMessage(Message message) {
         gameMessage = message;
         active = true;
         turn = 1;
         setup();
         if (!useEmbed()) {
-            gameMessage.edit(spec -> spec.setContent(getFirstDisplay())).block();
+            gameMessage.edit(spec -> {
+                spec.setContent(getFirstDisplay());
+                spec.setComponents(getComponents());
+            }).block();
         } else {
-            gameMessage.edit(spec -> spec.setEmbed(MessageUtils.getEmbed(gameTitle, getFirstDisplay(), Color.DISCORD_WHITE))).block();
+            gameMessage.edit(spec -> {
+                spec.addEmbed(MessageUtils.getEmbed(gameTitle, getFirstDisplay(), Color.DISCORD_WHITE));
+                spec.setComponents(getComponents());
+            }).block();
         }
         idleTimerThread.start();
         onStart();
     }
 
+    //Used for singleplayer games, not from GameRequest
     public final void startFromInteraction(InteractionContext context) {
         active = true;
         turn = 1;
         setup();
+        //Only way I know how to store the message from an interaction
         context.getChannel().getClient().on(MessageCreateEvent.class)
                 .map(MessageCreateEvent::getMessage)
                 .filter(message -> message.getInteraction().map(interaction -> interaction.getId().equals(context.event.getInteraction().getId())).orElse(false))
@@ -114,16 +137,19 @@ public abstract class BaseGame {
                     idleTimerThread.start();
                     onStart();
                 });
-        if (!useEmbed()) {
-            context.event.reply(getFirstDisplay()).block();
-        } else {
-            context.reply(MessageUtils.getEmbed(gameTitle, getFirstDisplay(), Color.DISCORD_WHITE));
-        }
+        context.event.reply(spec -> {
+            if (!useEmbed()) {
+                spec.setContent(getFirstDisplay());
+            } else {
+                spec.addEmbed(MessageUtils.getEmbed(gameTitle, getFirstDisplay(), Color.DISCORD_WHITE));
+            }
+            spec.setComponents(getComponents());
+        }).block();
     }
 
     protected final void tie(String tieMessage) {
-        setGameDisplay(tieMessage, DiscordColor.ORANGE);
         end();
+        setGameDisplay(tieMessage, DiscordColor.ORANGE);
     }
 
     protected void end() {
@@ -174,6 +200,26 @@ public abstract class BaseGame {
                 .subscribe(e -> onPlayerReaction(e.getEmoji(), e.getMember().get()));
     }
 
+    protected final void registerComponentListener() {
+        channel.getClient().on(ComponentInteractEvent.class)
+                .takeUntil(e -> !active)
+                .filter(e -> e.getMessageId().equals(gameMessage.getId()) && playerIsInGame(e.getInteraction().getMember().get()))
+                .subscribe(event -> {
+                    componentEvent = event;
+                    onPlayerInput(componentEvent.getCustomId(), event.getInteraction().getMember().get());
+                });
+    }
+
+    protected final void registerSelectMenuListener() {
+        channel.getClient().on(SelectMenuInteractEvent.class)
+                .takeUntil(e -> !active)
+                .filter(e -> e.getMessageId().equals(gameMessage.getId()) && playerIsInGame(e.getInteraction().getMember().get()))
+                .subscribe(event -> {
+                    componentEvent = event;
+                    onPlayerInput(event.getValues().get(0), event.getInteraction().getMember().get());
+                });
+    }
+
     protected final void addEmojiReaction(String emoji) {
         gameMessage.addReaction(ReactionEmoji.unicode(emoji)).block();
     }
@@ -189,19 +235,36 @@ public abstract class BaseGame {
     }
 
     private void setEntireMessage(String outside, String embedText, Color color) {
-        gameMessage.edit(spec -> {
-            if (!useEmbed()) {
-                spec.setContent(outside + embedText);
-                spec.setEmbed(null);
-            } else {
-                spec.setContent(outside);
-                spec.setEmbed(embed -> {
-                    embed.setDescription(embedText);
-                    embed.setAuthor(gameTitle, "", BotUtils.BOT_AVATAR_URL);// gameMessage.getClient().getSelf().block().getAvatarUrl());
-                    embed.setColor(color);
-                });
-            }
-        }).block();
+        if (componentEvent != null) {
+            componentEvent.edit(spec -> {
+                if (!useEmbed()) {
+                    spec.setContent(outside + embedText);
+                } else {
+                    spec.setContent(outside);
+                    spec.addEmbed(MessageUtils.getEmbed(gameTitle, embedText, color));
+                }
+                if (!active) {
+                    spec.setComponents();
+                } else {
+                    spec.setComponents(getComponents());
+                }
+            }).doOnError(Throwable::printStackTrace).onErrorResume(e -> Mono.empty()).block();
+            componentEvent = null;
+        } else {
+            gameMessage.edit(spec -> {
+                if (!useEmbed()) {
+                    spec.setContent(outside + embedText);
+                } else {
+                    spec.setContent(outside);
+                    spec.addEmbed(MessageUtils.getEmbed(gameTitle, embedText, color));
+                }
+                if (!active) {
+                    spec.setComponents();
+                } else {
+                    spec.setComponents(getComponents());
+                }
+            }).block();
+        }
     }
 
     private void setEntireMessage(String outside, String embedText) {

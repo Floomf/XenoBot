@@ -11,7 +11,7 @@ import discord4j.core.object.entity.Message;
 public class PruneCommand extends AbstractCommand {
 
     public PruneCommand() {
-        super(new String[]{"prune"}, 2, CommandCategory.ADMIN);
+        super("prune", 2, CommandCategory.ADMIN);
     }
 
     @Override

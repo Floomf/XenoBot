@@ -12,7 +12,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class ConnectFourCommand extends AbstractCommand {
 
     public ConnectFourCommand() {
-        super(new String[]{"connect4", "c4"}, 1, CommandCategory.GAME);
+        super("connect4", 1, CommandCategory.GAME);
     }
 
     @Override

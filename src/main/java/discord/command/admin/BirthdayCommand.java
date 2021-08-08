@@ -12,14 +12,14 @@ import discord4j.core.object.entity.channel.TextChannel;
 public class BirthdayCommand extends AbstractCommand {
 
     public BirthdayCommand() {
-        super(new String[]{"birthday", "bday"}, 4, CommandCategory.ADMIN);
+        super("birthday", 4, CommandCategory.ADMIN);
     }
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        User mention = message.getUserMentions().filter(user -> !user.isBot()).blockFirst();
+        User[] mentions = message.getUserMentions().stream().filter(user -> !user.isBot()).toArray(User[]::new);
 
-        if (mention == null) {
+        if (mentions.length == 0) {
             MessageUtils.sendErrorMessage(channel, "Couldn't identify any user. Please @mention them.");
             return;
         }
@@ -35,7 +35,7 @@ public class BirthdayCommand extends AbstractCommand {
             return;
         }
 
-        UserManager.getDUserFromUser(mention).setBirthday(day, month, year);
+        UserManager.getDUserFromUser(mentions[0]).setBirthday(day, month, year);
         UserManager.saveDatabase();
         MessageUtils.sendInfoMessage(channel, "Birthday set to **" + day + "/" + month + "/" + year + "**.");
     }

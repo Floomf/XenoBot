@@ -16,13 +16,13 @@ import discord4j.rest.util.ApplicationCommandOptionType;
 public class BlackjackCommand extends AbstractCommand {
 
     public BlackjackCommand() {
-        super(new String[]{"blackjack", "bj"}, 1, CommandCategory.GAME);
+        super("blackjack", 1, CommandCategory.GAME);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("blackjack")
+                .name(getName())
                 .description("Play a hand of Blackjack")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("bet")

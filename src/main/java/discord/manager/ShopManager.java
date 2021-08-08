@@ -5,16 +5,16 @@ import discord.data.object.user.DUser;
 import discord.util.DiscordColor;
 import discord.util.MessageUtils;
 import discord4j.core.object.entity.Role;
-import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public class ShopManager {
 
-    public static Consumer<EmbedCreateSpec> getShopEmbedFor(DUser dUser) {
+    public static Consumer<LegacyEmbedCreateSpec> getShopEmbedFor(DUser dUser) {
         //there are some temp final variables, but how else to we do it when using lambdas?
-        Consumer<EmbedCreateSpec> embed = MessageUtils.getEmbed("The Realm Shop 🛒",
+        Consumer<LegacyEmbedCreateSpec> embed = MessageUtils.getEmbed("The Realm Shop 🛒",
                 "💰 Balance: **" + String.format("$%,d", dUser.getBalance())+"**\n*To buy an item, use* **`/shop buy [index]`**",
                 DiscordColor.PURPLE);
         List<Role> roles = dUser.asGuildMember().getGuild().block().getRoles().collectList().block();

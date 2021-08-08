@@ -23,12 +23,7 @@ public class XPChecker implements Runnable {
 
     @Override
     public void run() {
-        //if (guild.getClient().on {
-            System.out.println("Checking all guild users to add xp");
-            checkVoiceChannels();
-        //} else {
-            //System.out.println("Client isn't ready, won't check users");
-        //}
+        checkVoiceChannels();
     }
 
     private void checkVoiceChannels() {
@@ -37,9 +32,10 @@ public class XPChecker implements Runnable {
         for (VoiceChannel channel : channels) {
             checkUsers(channel.getVoiceStates().collectList().block()); //tested it and it wasn't null with empty voice channels
         }
-        if (saveCounter == 20) {
+        if (saveCounter == 30) {
+            System.out.println("Periodically saving user database");
             UserManager.saveDatabase();
-            saveCounter = 1;
+            saveCounter = 0;
         } else {
             saveCounter++;
         }

@@ -49,7 +49,6 @@ public class Progress {
     @JsonCreator
     protected Progress(@JsonProperty("level") int level,
                        @JsonProperty("xp") int xp,
-                       //@JsonProperty("xpTotalForLevelUp") int xpTotalForLevelUp,
                        @JsonProperty("prestige") Prestige prestige,
                        @JsonProperty("reincarnation") Reincarnation reincarnation) {
         this.level = level;
@@ -165,7 +164,6 @@ public class Progress {
 
     public void addPeriodicXP(int userAmount) {
         addXP(getXPRate(userAmount));
-        System.out.println("+" + getXPRate(userAmount) + "xp to " + user.getName().getNick());
     }
 
     private void checkXP() {

@@ -23,13 +23,13 @@ import discord4j.rest.util.ApplicationCommandOptionType;
 public class TopCommand extends AbstractCommand {
 
     public TopCommand() {
-        super(new String[]{"top"}, 1, CommandCategory.INFO);
+        super("top", 1, CommandCategory.INFO);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("top")
+                .name(getName())
                 .description("View the top users")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("xp")
@@ -165,21 +165,20 @@ public class TopCommand extends AbstractCommand {
                 totalXP += user.getProg().getTotalXP();
             }
             int finalTotalXP = totalXP; //peepoo
-            channel.createEmbed(MessageUtils.getEmbed("Top " + amount + " Progressed Users 📈", desc.toString(), DiscordColor.CYAN)
-                    .andThen(embed -> embed.setFooter(String.format("%,d", finalTotalXP) + " XP has been earned on this guild.", ""))).block();
+            channel.createMessage(spec -> {
+                spec.addEmbed(MessageUtils.getEmbed("Top " + amount + " Progressed Users 📈", desc.toString(), DiscordColor.CYAN)
+                        .andThen(embed -> embed.setFooter(String.format("%,d", finalTotalXP) + " XP has been earned on this guild.", "")));
+            }).block();
         } else {
-            channel.createEmbed(MessageUtils.getEmbed("Top " + amount + " Richest Users 💰", desc.toString(), DiscordColor.CYAN)).block();
+            channel.createMessage(spec -> {
+                spec.addEmbed(MessageUtils.getEmbed("Top " + amount + " Richest Users 💰", desc.toString(), DiscordColor.CYAN));
+            }).block();
         }
     }
 
     @Override
     public String getUsage(String alias) {
         return BotUtils.buildUsage(alias, "[xp/balance]", "View the top users on this guild, sorted by total XP or current balance.");
-    }
-
-    @Override
-    public boolean isSupportedGlobally() {
-        return false;
     }
 
 }

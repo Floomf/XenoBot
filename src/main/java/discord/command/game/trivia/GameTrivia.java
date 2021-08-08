@@ -2,6 +2,9 @@ package discord.command.game.trivia;
 
 import discord.core.game.GameEmoji;
 import discord.core.game.MultiplayerGame;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.LayoutComponent;
+import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
@@ -81,17 +84,37 @@ public class GameTrivia extends MultiplayerGame {
     }
 
     @Override
+    protected LayoutComponent[] getComponents() {
+        if (questionsJSON != null) {
+            return new LayoutComponent[]{
+                    ActionRow.of(SelectMenu.of("trivia",
+                            SelectMenu.Option.of(" ", currentChoices[0]).withDescription(currentChoices[0]),
+                            SelectMenu.Option.of(" ", currentChoices[1]).withDescription(currentChoices[1]),
+                            SelectMenu.Option.of(" ", currentChoices[2]).withDescription(currentChoices[2]),
+                            SelectMenu.Option.of(" ", currentChoices[3]).withDescription(currentChoices[3]))
+                            .withPlaceholder("Click here to select your answer"))
+            };
+        } else {
+            return new LayoutComponent[]{
+                    ActionRow.of(SelectMenu.of("trivia",
+                            SelectMenu.Option.of(" ", String.valueOf(0)).withDescription(shuffledCategories[0].getName()),
+                            SelectMenu.Option.of(" ", String.valueOf(1)).withDescription(shuffledCategories[1].getName()),
+                            SelectMenu.Option.of(" ", String.valueOf(2)).withDescription(shuffledCategories[2].getName()),
+                            SelectMenu.Option.of(" ", String.valueOf(3)).withDescription(shuffledCategories[3].getName()))
+                            .withPlaceholder("Click here to select a category"))
+            };
+        }
+    }
+
+    @Override
     protected String getFirstDisplay() {
-        return "First, agree on a **category**!\nReact with your choice below.\n\n" + getCategories();
+        return "First, agree on a **category**!\nSelect your choice below." +
+                "\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B";
     }
 
     @Override
     protected void onStart() {
-        super.registerReactionListener();
-        super.addEmojiReaction(GameEmoji.A);
-        super.addEmojiReaction(GameEmoji.B);
-        super.addEmojiReaction(GameEmoji.C);
-        super.addEmojiReaction(GameEmoji.D);
+        super.registerSelectMenuListener();
     }
 
     private static String getNewToken() {
@@ -133,28 +156,21 @@ public class GameTrivia extends MultiplayerGame {
         return StringEscapeUtils.unescapeHtml4(input);
     }
 
-    private int getIndexFromLetterEmoji(String emoji) {
-        if (emoji.length() != 2) {
-            return -1;
-        }
-        return emoji.charAt(1) - '\uDDE6';
-    }
-
-    private String getGuessFromEmoji(String emoji) {
-        return currentChoices[getIndexFromLetterEmoji(emoji)];
+    private String trim(String input) {
+        return input.length() <= 100 ? input : input.substring(0, 99) + ".."; //sub menus only have options with 100 chars max
     }
 
     private void setupNextQuestion() {
         currentQuestionJSON = questionsJSON.getJSONObject(super.getTurn() - 1);
 
         int start = (int) (Math.random() * 4);
-        currentChoices[start] = decode(currentQuestionJSON.getString("correct_answer"));
+        currentChoices[start] = trim(decode(currentQuestionJSON.getString("correct_answer")));
         for (int i = 0; i < 3; i++) {
             start++;
             if (start == currentChoices.length) {
                 start = 0;
             }
-            currentChoices[start] = decode(currentQuestionJSON.getJSONArray("incorrect_answers").getString(i));
+            currentChoices[start] = trim(decode(currentQuestionJSON.getJSONArray("incorrect_answers").getString(i)));
         }
     }
 
@@ -166,11 +182,11 @@ public class GameTrivia extends MultiplayerGame {
         } else {
             guessedPlayers.clear();
             setupNextQuestion();
-            startCooldownTimer();
+            //startCooldownTimer();
         }
     }
 
-    private void startCooldownTimer() {
+    /*private void startCooldownTimer() {
         cooldown = true;
         TimerTask task = new TimerTask() {
             @Override
@@ -182,7 +198,7 @@ public class GameTrivia extends MultiplayerGame {
         cooldownTimer.cancel();
         cooldownTimer = new Timer();
         cooldownTimer.schedule(task, 1250);
-    }
+    }*/
 
     private void startQuestionTimer() {
         TimerTask task = new TimerTask() {
@@ -228,7 +244,8 @@ public class GameTrivia extends MultiplayerGame {
 
     protected void onTurn(String input, Member guessingPlayer) {
         //if right, add point, next question
-        if (getGuessFromEmoji(input).equals(decode(currentQuestionJSON.getString("correct_answer")))) {
+        //if (getGuessFromEmoji(input).equals(decode(currentQuestionJSON.getString("correct_answer")))) {
+        if (input.equals(decode(currentQuestionJSON.getString("correct_answer")))) {
             scoresMap.put(guessingPlayer, scoresMap.get(guessingPlayer) + 1);
             if (getTurn() == questionsJSON.length()) {
                 findWinner();
@@ -255,32 +272,24 @@ public class GameTrivia extends MultiplayerGame {
     }
 
     @Override
-    public void onPlayerReaction(ReactionEmoji emoji, Member player) {
-        String raw = emoji.asUnicodeEmoji().map(ReactionEmoji.Unicode::getRaw).orElse("");
-
-        if (raw.equals(GameEmoji.EXIT)) {
-            questionTimer.cancel();
-            win(getForfeitMessage(player), getOtherPlayer(player));
-        } else if (questionsJSON == null) { //still selecting category
-            int index = getIndexFromLetterEmoji(raw);
-            if (index < 0 || index >= 4) {
-                return;
-            }
+    public void onPlayerInput(String input, Member player) {
+        if (questionsJSON == null) { //still selecting category
+            int index = Integer.parseInt(input);
 
             if (index == selectedCategoryIndex && player.getId().asLong() != selectedCategoryPlayerID) {
                 generateQuestions(shuffledCategories[index]);
                 setupNextQuestion();
-                super.setInfoDisplay("Start! Answer by clicking below.");
+                super.setInfoDisplay("🏁 Begin!");
                 startQuestionTimer();
             } else {
                 selectedCategoryIndex = index;
                 selectedCategoryPlayerID = player.getId().asLong();
                 super.setGameDisplay(player.getMention() + " chose **" + shuffledCategories[index].getName() + "**!"
                         + "\nIf you agree " + super.getOtherPlayer(player).getMention()
-                        + ", select it as well.\n\n" + getCategories());
+                        + ", select it as well.\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B");
             }
-        } else if (isValidInput(raw, player)) {
-            onTurn(raw, player);
+        } else if (isValidInput(input, player)) {
+            onTurn(input, player);
         }
     }
 
@@ -288,24 +297,13 @@ public class GameTrivia extends MultiplayerGame {
     protected boolean isValidInput(String input) {return true;}
 
     protected boolean isValidInput(String input, Member guessingPlayer) {
-        return !cooldown && getIndexFromLetterEmoji(input) >= 0 && getIndexFromLetterEmoji(input) < currentChoices.length
-                && !guessedPlayers.contains(guessingPlayer.getId().asLong());
-    }
-
-    private String getCategories() {
-        return GameEmoji.A + " " + shuffledCategories[0].getName()
-                + "\n" + GameEmoji.B + " " + shuffledCategories[1].getName()
-                + "\n" + GameEmoji.C + " " + shuffledCategories[2].getName()
-                + "\n" + GameEmoji.D + " " + shuffledCategories[3].getName();
+        return !cooldown && !guessedPlayers.contains(guessingPlayer.getId().asLong());
     }
 
     @Override
     protected String getBoard() {
-        return "**" + decode(currentQuestionJSON.getString("question")) + "**\n"
-                + "\n" + GameEmoji.A + " " + currentChoices[0]
-                + "\n" + GameEmoji.B + " " + currentChoices[1]
-                + "\n" + GameEmoji.C + " " + currentChoices[2]
-                + "\n" + GameEmoji.D + " " + currentChoices[3];
+        return "**" + decode(currentQuestionJSON.getString("question"))
+                + "**\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B"; //select menu fills up this space
     }
 
 }

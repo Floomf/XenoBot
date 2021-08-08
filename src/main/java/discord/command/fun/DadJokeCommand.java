@@ -13,13 +13,13 @@ import discord4j.core.object.entity.Message;
 public class DadJokeCommand extends AbstractCommand {
 
     public DadJokeCommand() {
-        super(new String[]{"dadjoke"}, 0, CommandCategory.FUN);
+        super("dadjoke", 0, CommandCategory.FUN);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("dadjoke")
+                .name(getName())
                 .description("Read a random dad joke")
                 .build();
     }

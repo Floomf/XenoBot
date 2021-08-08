@@ -17,13 +17,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class ReincarnateCommand extends AbstractCommand {
 
     public ReincarnateCommand() {
-        super(new String[]{"reincarnate"}, 0, CommandCategory.HIDDEN);
+        super("reincarnate", 0, CommandCategory.HIDDEN);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("reincarnate")
+                .name(getName())
                 .description("Reincarnate into a new life, resetting your unlocks/progress, but gain a permanent 50% XP boost")
                 .build();
     }

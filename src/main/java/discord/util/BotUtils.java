@@ -14,6 +14,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
@@ -38,6 +39,11 @@ public class BotUtils {
     public static String getGuildEmojiString(Guild guild, String emojiName) {
         return guild.getClient().getGuildById(EventsHandler.THE_REALM_ID).flatMapMany(Guild::getEmojis)
                 .filter(e -> e.getName().equals(emojiName)).map(GuildEmoji::asFormat).switchIfEmpty(Mono.just("")).blockFirst();
+    }
+
+    public static ReactionEmoji getGuildEmoji(Guild guild, String emojiName) {
+        return ReactionEmoji.custom(guild.getClient().getGuildById(EventsHandler.THE_REALM_ID).flatMapMany(Guild::getEmojis)
+                .filter(e -> e.getName().equals(emojiName)).blockFirst());
     }
 
     public static String getRandomGuildEmoji(Guild guild, String[] emojiNames) {

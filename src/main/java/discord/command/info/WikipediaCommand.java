@@ -4,6 +4,7 @@ import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.core.command.InteractionContext;
 import discord.util.BotUtils;
+import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -17,13 +18,13 @@ import kong.unirest.json.JSONObject;
 public class WikipediaCommand extends AbstractCommand {
 
     public WikipediaCommand() {
-        super(new String[]{"wikipedia"}, 1, CommandCategory.INFO);
+        super("wikipedia", 1, CommandCategory.INFO);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("wikipedia")
+                .name(getName())
                 .description("Search for a Wikipedia page")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("query")
@@ -56,7 +57,7 @@ public class WikipediaCommand extends AbstractCommand {
                 System.out.println(text);
                 text = text.replaceAll("\\n\\n\\n(.+)\\n\\n\\n", "\n**__$1__**\n\n\n");
                 text = text.replaceAll("\\n\\n\\n(.+)\\n", "\n**$1:**\n");
-                text = text.substring(0, Math.min(text.length(), 2048));
+                text = text.substring(0, Math.min(text.length(), Embed.MAX_DESCRIPTION_LENGTH));
 
                 int count = 0;
                 for (int i = 0; i < text.length(); i++) {

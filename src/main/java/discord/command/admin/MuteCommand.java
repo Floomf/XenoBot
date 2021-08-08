@@ -18,14 +18,14 @@ import java.util.concurrent.TimeUnit;
 public class MuteCommand extends AbstractCommand {
 
     public MuteCommand() {
-        super(new String[]{"mute", "silence"}, 2, CommandCategory.ADMIN);
+        super("mute", 2, CommandCategory.ADMIN);
     }
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        User mention = message.getUserMentions().filter(user -> !user.isBot()).blockFirst();
+        User[] mentions = message.getUserMentions().stream().filter(user -> !user.isBot()).toArray(User[]::new);
 
-        if (mention == null) {
+        if (mentions.length == 0) {
             MessageUtils.sendErrorMessage(channel, "Couldn't identify any user. Please @mention them.");
             return;
         }
@@ -38,7 +38,7 @@ public class MuteCommand extends AbstractCommand {
             return;
         }
 
-        Member mutedMember = mention.asMember(message.getGuild().block().getId()).block();
+        Member mutedMember = mentions[0].asMember(message.getGuild().block().getId()).block();
         mutedMember.edit(spec -> spec.setMute(true)).block();
 
         channel.createMessage(spec -> {

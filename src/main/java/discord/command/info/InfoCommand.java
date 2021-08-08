@@ -1,22 +1,28 @@
 package discord.command.info;
 
 import discord.core.command.CommandManager;
-import discord.manager.UserManager;
+import discord.core.command.InteractionContext;
 import discord.util.BotUtils;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 
-
 import discord.util.DiscordColor;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public class InfoCommand extends AbstractCommand {
 
     private static final long START_TIME = System.currentTimeMillis();
 
     public InfoCommand() {
-        super(new String[]{"info", "stats", "uptime", "xeno"}, 0, CommandCategory.INFO);
+        super("xeno", 0, CommandCategory.INFO);
+    }
+
+    @Override
+    public ApplicationCommandRequest buildSlashCommand() {
+        return ApplicationCommandRequest.builder()
+                .name(getName())
+                .description("View information about Xeno")
+                .build();
     }
 
     private static String formatElapsedTime(long millis) {
@@ -46,18 +52,21 @@ public class InfoCommand extends AbstractCommand {
     }
 
     @Override
-    public void execute(Message message, TextChannel channel, String[] args) {
-        channel.createEmbed(embed -> {
-            embed.setAuthor(message.getClient().getSelf().block().getUsername(), "", message.getClient().getSelf().block().getAvatarUrl());
-            embed.setThumbnail(message.getClient().getSelf().block().getAvatarUrl());
+    public void execute(InteractionContext context) {
+        context.reply(embed -> {
+            embed.setAuthor(context.getChannel().getClient().getSelf().block().getUsername(), "",
+                    context.getChannel().getClient().getSelf().block().getAvatarUrl());
+            embed.setThumbnail(context.getChannel().getClient().getSelf().block().getAvatarUrl());
             embed.setColor(DiscordColor.CYAN);
+            embed.setDescription("*Hi there!*");
 
+            embed.addField("Developer 👨‍💻", "<@98235887866908672>", true);
             embed.addField("Version 🏷", BotUtils.getVersion(), true);
             embed.addField("Uptime 🕓", formatElapsedTime(System.currentTimeMillis() - START_TIME), true);
-            embed.addField("Guilds 🏘", String.valueOf(message.getClient().getGuilds().collectList().block().size()), true);
-            embed.addField("Users 🚹", String.valueOf(UserManager.getDUsers().size()), true);
-            embed.addField("Commands ⌨", String.valueOf(CommandManager.getAllCommands().size()), true);
-        }).block();
+            embed.addField("Guilds 🏘", String.valueOf(context.getChannel().getClient().getGuilds().collectList().block().size()), true);
+            embed.addField("Commands ⌨", CommandManager.getAllCommands().size()
+                    + " (" + CommandManager.getGlobalCommandsCount() + " global)", true);
+        });
     }
 
     @Override

@@ -117,11 +117,11 @@ public class GameManager {
 
         GameRequest request = new GameRequest(gameTitle, gameType, context.getChannel(), new Member[] {player, opponent.get()}, (int) bet);
         REQUESTS.add(request);
-        request.createFromInteraction(context);
+        request.create(context);
     }
 
     public static void createMultiPlayerGame(Class<? extends BaseGame> gameType, String gameTitle, TextChannel channel, Message message, String[] args) {
-        Member player = message.getAuthorAsMember().block();
+        /*Member player = message.getAuthorAsMember().block();
 
         if (REQUESTS.stream().anyMatch(r -> r.isCreatedBy(player))) {
             MessageUtils.sendErrorMessage(channel, "You've already created a pending game request!");
@@ -165,7 +165,7 @@ public class GameManager {
 
         GameRequest request = new GameRequest(gameTitle, gameType, channel, new Member[] {player, opponent}, betAmount);
         REQUESTS.add(request);
-        request.create();
+        request.create();*/
     }
 
     public static ApplicationCommandRequest buildMultiplayerGameSlashCommand(String commandName, String gameTitle, boolean canBet) {

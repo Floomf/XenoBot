@@ -16,7 +16,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 public class MultiplierCommand extends AbstractCommand {
 
     public MultiplierCommand() {
-        super(new String[]{"multiplier", "mult"}, 2, CommandCategory.ADMIN);
+        super("multiplier", 2, CommandCategory.ADMIN);
     }
 
     @Override

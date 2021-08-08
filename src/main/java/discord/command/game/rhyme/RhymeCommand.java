@@ -12,7 +12,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class RhymeCommand extends AbstractCommand {
 
     public RhymeCommand() {
-        super(new String[]{"rhyme", "rhymes"}, 1, CommandCategory.GAME);
+        super("rhyme", 1, CommandCategory.GAME);
     }
 
     @Override

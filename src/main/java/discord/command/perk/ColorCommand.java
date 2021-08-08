@@ -37,13 +37,13 @@ public class ColorCommand extends AbstractCommand {
     public static final int LEVEL_REQUIRED = Progress.MAX_LEVEL;
 
     public ColorCommand() {
-        super(new String[]{"color"}, 1, CommandCategory.PERK);
+        super("color", 1, CommandCategory.PERK);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("color")
+                .name(getName())
                 .description("Change the color of your name on this server")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("set")
@@ -58,7 +58,7 @@ public class ColorCommand extends AbstractCommand {
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("list")
-                        .description("View your available name colors")
+                        .description("View your available colors")
                         .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
                         .build())
                 .build();
@@ -163,21 +163,23 @@ public class ColorCommand extends AbstractCommand {
             Collections.reverse(unlockedColorMentions);
             Collections.reverse(purchasedColorMentions);
 
-            channel.createEmbed(MessageUtils.getEmbed("Available Colors", "", Color.WHITE)
-                    .andThen(embed -> {
-                        embed.addField("Default", defaultColorMentions.toString().replace("[", "").replace("]", ""), false);
-                        if (unlockedColorMentions.size() > 0) {
-                            embed.addField("Unlocked [" + unlockedColors.length + "/" + ColorManager.COLORS_UNLOCKS.length + "]",
-                                    unlockedColorMentions.toString().replace("[", "").replace("]", ""), false);
-                        }
+            channel.createMessage(spec -> {
+                spec.addEmbed(MessageUtils.getEmbed("Available Colors", "", Color.WHITE)
+                        .andThen(embed -> {
+                            embed.addField("Default", defaultColorMentions.toString().replace("[", "").replace("]", ""), false);
+                            if (unlockedColorMentions.size() > 0) {
+                                embed.addField("Unlocked [" + unlockedColors.length + "/" + ColorManager.COLORS_UNLOCKS.length + "]",
+                                        unlockedColorMentions.toString().replace("[", "").replace("]", ""), false);
+                            }
                             embed.addField("Purchased [" + purchasedColorMentions.size() + "/9]", //hardcoded
                                     purchasedColorMentions.isEmpty() ? "`!shop`"
                                             : purchasedColorMentions.toString().replace("[", "").replace("]", ""), false);
-                        embed.setFooter(unlockedColors.length == ColorManager.COLORS_UNLOCKS.length
-                                ? "You've unlocked every unlockable color. Astounding."
-                                : (user.getProg().isMaxLevel() ? "Prestige to unlock more colors."
-                                : "Keep leveling to unlock more colors."), "");
-                    })).block();
+                            embed.setFooter(unlockedColors.length == ColorManager.COLORS_UNLOCKS.length
+                                    ? "You've unlocked every unlockable color. Astounding."
+                                    : (user.getProg().isMaxLevel() ? "Prestige to unlock more colors."
+                                    : "Keep leveling to unlock more colors."), "");
+                        }));
+            }).block();
             return;
         } else if (name.equals("none")) {
             message.getAuthorAsMember().block().edit(spec -> spec.setRoles(ColorManager.getMemberRolesNoColor(message.getAuthorAsMember().block()))).block();

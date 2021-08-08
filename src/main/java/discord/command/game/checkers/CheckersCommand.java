@@ -12,7 +12,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class CheckersCommand extends AbstractCommand {
 
     public CheckersCommand() {
-        super(new String[]{"checkers"}, 1, CommandCategory.GAME);
+        super("checkers", 1, CommandCategory.GAME);
     }
 
     @Override

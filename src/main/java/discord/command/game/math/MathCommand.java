@@ -12,7 +12,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class MathCommand extends AbstractCommand {
 
     public MathCommand() {
-        super(new String[]{"math"}, 0, CommandCategory.GAME);
+        super("math", 0, CommandCategory.GAME);
     }
 
     @Override

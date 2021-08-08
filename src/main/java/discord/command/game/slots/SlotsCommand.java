@@ -16,13 +16,13 @@ import discord4j.rest.util.ApplicationCommandOptionType;
 public class SlotsCommand extends AbstractCommand {
 
     public SlotsCommand() {
-        super(new String[]{"slots"}, 1, CommandCategory.GAME);
+        super("slots", 1, CommandCategory.GAME);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("slots")
+                .name(getName())
                 .description("Take a spin at a slot machine")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("bet")

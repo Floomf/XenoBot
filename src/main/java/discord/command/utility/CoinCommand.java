@@ -12,13 +12,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class CoinCommand extends AbstractCommand {
 
     public CoinCommand() {
-        super(new String[]{"flip"}, 0, CommandCategory.UTILITY);
+        super("flip", 0, CommandCategory.UTILITY);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("flip")
+                .name(getName())
                 .description("Flip a coin")
                 .build();
     }

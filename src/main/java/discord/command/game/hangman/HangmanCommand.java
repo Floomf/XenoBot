@@ -12,7 +12,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class HangmanCommand extends AbstractCommand {
 
     public HangmanCommand() {
-        super(new String[]{"hangman", "hm"}, 0, CommandCategory.GAME);
+        super("hangman", 0, CommandCategory.GAME);
     }
 
     @Override

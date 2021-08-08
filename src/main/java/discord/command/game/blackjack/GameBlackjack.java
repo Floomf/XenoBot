@@ -1,12 +1,13 @@
 package discord.command.game.blackjack;
 
-import discord.core.game.GameEmoji;
 import discord.core.game.SingleplayerGame;
 import discord.manager.UserManager;
 import discord.util.BotUtils;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.object.reaction.ReactionEmoji;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -64,6 +65,15 @@ public class GameBlackjack extends SingleplayerGame {
     }
 
     @Override
+    protected LayoutComponent[] getComponents() {
+        return new LayoutComponent[] {
+                ActionRow.of(Button.success("hit", "Hit"),
+                        Button.primary("stay", "Stay"),
+                        Button.danger("double_down", "Double down"))
+        };
+    }
+
+    @Override
     protected String getFirstDisplay() {
         return "**Hand dealt!** What's your move?\n\n" + getBoard();
     }
@@ -85,16 +95,12 @@ public class GameBlackjack extends SingleplayerGame {
             lose("**Dealer blackjack!**\n\n" + getBoard());
             return;
         }
-
-        super.registerReactionListener();
-        getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.H)).block();
-        getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.S)).block();
-        getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.D)).block();
+        super.registerComponentListener();
     }
 
     @Override
     protected void onTurn(String input) {
-        if (input.equals(GameEmoji.H)) {
+        if (input.equals("hit")) {
             Card card = drawCard();
             playerHand.addCard(card);
             if (playerHand.hasBusted()) {
@@ -102,11 +108,11 @@ public class GameBlackjack extends SingleplayerGame {
             } else {
                 super.setInfoDisplay("Drew a **" + card.toString() + "**! Hit or stand?");
             }
-        } else if (input.equals(GameEmoji.S)) {
+        } else if (input.equals("stay")) {
             dealerHand.setHidden(false);
             super.setInfoDisplay("You stood.");
             commitStand();
-        } else if (input.equals(GameEmoji.D)) {
+        } else if (input.equals("double_down")) {
             super.setBetAmount(super.getBetAmount() * 2);
             Card card = drawCard();
             playerHand.addCard(card);
@@ -152,7 +158,7 @@ public class GameBlackjack extends SingleplayerGame {
 
     @Override
     protected boolean isValidInput(String input) {
-        if (input.equals(GameEmoji.D)) {
+        if (input.equals("double_down")) {
             return gameDeck.size() == 48 && UserManager.getDUserFromMember(getPlayer()).getBalance() >= getBetAmount() * 2;
         }
         return true;

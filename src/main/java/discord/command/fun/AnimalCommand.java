@@ -15,13 +15,13 @@ import kong.unirest.Unirest;
 public class AnimalCommand extends AbstractCommand {
 
     public AnimalCommand() {
-        super(new String[]{"animal"}, 0, CommandCategory.FUN);
+        super("animal", 0, CommandCategory.FUN);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("animal")
+                .name(getName())
                 .description("View a random animal image")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("name")

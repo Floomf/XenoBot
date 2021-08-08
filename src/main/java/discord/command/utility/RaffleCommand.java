@@ -10,9 +10,7 @@ import java.util.List;
 import discord.util.MessageUtils;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.Status;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -22,13 +20,13 @@ import discord4j.rest.util.ApplicationCommandOptionType;
 public class RaffleCommand extends AbstractCommand {
 
     public RaffleCommand() {
-        super(new String[]{"raffle"}, 1, CommandCategory.UTILITY);
+        super("raffle", 1, CommandCategory.UTILITY);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("raffle")
+                .name(getName())
                 .description("Randomly pick a user from a specified pool (Not including bots)")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("pool")
@@ -69,40 +67,6 @@ public class RaffleCommand extends AbstractCommand {
         Member winner = raffleUsers.get((int) (Math.random() * raffleUsers.size()));
         context.reply(MessageUtils.getEmbed("Winner! 🎉", winner.getMention(), winner.getColor().block())
                 .andThen(embed -> embed.setImage(winner.getAvatarUrl())));
-    }
-
-    @Override
-    public void execute(Message message, TextChannel channel, String[] args) {
-        String poolType = args[0].toLowerCase();
-
-        if (!poolType.matches("all|online|voice")) {
-            MessageUtils.sendErrorMessage(channel, "Unknown pool type. Type `!raffle` for help.");
-            return;
-        }
-
-        List<Member> raffleUsers = message.getGuild().block().getMembers().collectList().block();
-
-        if (poolType.equals("online")) {
-            raffleUsers.removeIf(user -> user.getPresence().block().getStatus().equals(Status.OFFLINE));
-        } else if (poolType.equals("voice")) {
-            if (message.getAuthorAsMember().block().getVoiceState().blockOptional().isEmpty()) {
-                MessageUtils.sendErrorMessage(channel, "You aren't connected to any voice channel on this guild.");
-                return;
-            }
-            raffleUsers = message.getAuthorAsMember().block().getVoiceState().block().getChannel().block()
-                    .getVoiceStates().flatMap(VoiceState::getMember).collectList().block();
-        }
-
-        raffleUsers.removeIf(user -> user.equals(message.getAuthorAsMember().block()) || user.isBot());
-
-        if (raffleUsers.isEmpty()) {
-            MessageUtils.sendErrorMessage(channel, "There aren't any valid users in the selected pool!");
-            return;
-        }
-
-        Member winner = raffleUsers.get((int) (Math.random() * raffleUsers.size())).asMember(message.getGuild().block().getId()).block();
-        channel.createEmbed(MessageUtils.getEmbed("Winner! 🎉", winner.getMention(), winner.getColor().block())
-                .andThen(embed -> embed.setImage(winner.getAvatarUrl()))).block();
     }
 
     @Override

@@ -19,7 +19,7 @@ public enum ShopItem {
     EXTENDED_EMOJIS("Extended Length For `/emoji`", 4000, Category.MISC, 0);
 
     public enum Category {
-        NAME_COLOR("Name Colors 🌈"), XP_MULTIPLIER("Temporary XP Multipliers ⏲️"),
+        NAME_COLOR("Name/Poll Colors 🌈"), XP_MULTIPLIER("Temporary XP Multipliers ⏲️"),
         MISC("Miscellaneous ❓");
 
         private final String name;

@@ -2,6 +2,7 @@ package discord.listener;
 
 import discord.command.utility.TagCommand;
 import discord.data.object.BirthdayScheduler;
+import discord.manager.PollManager;
 import discord.util.BotUtils;
 import discord.util.DiscordColor;
 import discord.util.MessageUtils;
@@ -25,17 +26,13 @@ public class EventsHandler {
     //TODO seperate into different classes?
     public static void onGuildCreateEvent(GuildCreateEvent event) {
         if (event.getGuild().getId().equals(THE_REALM_ID)) {
-            event.getClient().updatePresence(Presence.online(Activity.listening("/help"))).block();
+            //event.getClient().updatePresence(Presence.online(Activity.listening("/help"))).block();
             BotUtils.BOT_AVATAR_URL = event.getClient().getSelf().block().getAvatarUrl();
             UserManager.createDatabase(event.getGuild());
+            PollManager.loadPolls(event.getClient());
             new XPScheduler(event.getGuild()).checkAnyChannelHasEnoughUsers();
             new BirthdayScheduler(event.getGuild());
             TagCommand.GAMES_ROLE_POSITION = event.getGuild().getRoleById(TagCommand.GAMES_ROLE_ID).block().getRawPosition();
-
-            /*event.getGuild().getChannelById(Snowflake.of(813153135161114675L)).cast(TextChannel.class)
-                    .block().getMessageById(Snowflake.of(813245622848716820L)).block().edit(spec ->
-                    spec.setEmbed(MessageUtils.getEmbed("Go focus up!", "When you are finally done concentrating, " +
-                            "react with \uD83C\uDF89 to restore full server view.", DiscordColor.PURPLE))).block();*/
 
             //CommandManager.createCommands();
             //CommandManager.createInteractions(event.getClient().getRestClient().getApplicationId().block(), event.getClient().getRestClient());
@@ -44,7 +41,7 @@ public class EventsHandler {
 
     //if the user changes their discord username, we can force their old name as nickname if not done already
     public static void onPresenceUpdateEvent(PresenceUpdateEvent event) {
-        if (event.getGuildId().equals(THE_REALM_ID)) {
+        /*if (event.getGuildId().equals(THE_REALM_ID)) {
             if (!event.getNewUsername().orElse(event.getOldUser().get().getUsername())
                     .equalsIgnoreCase(event.getOldUser().get().getUsername())) {
                 DUser user = UserManager.getDUserFromUser(event.getUser().block());
@@ -53,7 +50,7 @@ public class EventsHandler {
             }
 
 
-        }
+        }*/
     }
 
 }

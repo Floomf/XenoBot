@@ -5,7 +5,6 @@ import discord.command.AbstractCommand;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import discord.command.CommandCategory;
 import discord.listener.EventsHandler;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -24,19 +23,16 @@ public class CommandManager {
         for (Class<? extends AbstractCommand> command : reflections.getSubTypesOf(AbstractCommand.class)) {
             try {
                 AbstractCommand cmd = command.newInstance();
-                for (String alias : cmd.getNames()) {
-                    //keys are command names, all point to same command object
-                    commands.put(alias, cmd);
-                }
+                commands.put(cmd.getName(), cmd);
             } catch (InstantiationException | IllegalAccessException ex) {
                 ex.printStackTrace();
             }
         }
     }
 
-    public static void createGuildSlashCommands(RestClient restClient, Snowflake guildID) {
+    public static void registerGuildSlashCommands(RestClient restClient, Snowflake guildID) {
         if (guildID.equals(EventsHandler.THE_REALM_ID)) {
-            createSlashCommands(restClient);
+            registerSlashCommands(restClient);
         } else {
             commands.values().stream().forEach(command -> {
                 ApplicationCommandRequest request = command.buildOutsideGuildSlashCommand();
@@ -48,7 +44,7 @@ public class CommandManager {
         }
     }
 
-    public static void createSlashCommands(RestClient restClient) {
+    public static void registerSlashCommands(RestClient restClient) {
        commands.values().forEach(command -> {
            ApplicationCommandRequest request = command.buildSlashCommand();
            if (request != null) {
@@ -70,6 +66,10 @@ public class CommandManager {
 
     public static HashSet<AbstractCommand> getAllCommands() {
         return new HashSet<>(commands.values());
+    }
+
+    public static long getGlobalCommandsCount() {
+        return commands.values().stream().filter(command -> command.isSupportedGlobally() || command.buildOutsideGuildSlashCommand() != null).count();
     }
 
 }

@@ -14,14 +14,14 @@ import java.util.List;
 public class XPCommand extends AbstractCommand {
 
     public XPCommand() {
-        super(new String[]{"givexp", "gxp"}, 2, CommandCategory.ADMIN);
+        super( "gxp", 2, CommandCategory.ADMIN);
     }
 
     @Override
     public void execute(Message message, TextChannel channel, String[] args) {
-        List<User> users = message.getUserMentions().filter(user -> !user.isBot()).collectList().block();
+        User[] mentions = message.getUserMentions().stream().filter(user -> !user.isBot()).toArray(User[]::new);
 
-        if (users.isEmpty()) {
+        if (mentions.length == 0) {
             MessageUtils.sendErrorMessage(channel, "Couldn't identify any user. Please @mention at least one.");
             return;
         }
@@ -36,7 +36,7 @@ public class XPCommand extends AbstractCommand {
             return;
         }
 
-        for (User user : users) {
+        for (User user : mentions) {
             UserManager.getDUserFromID(user.getId().asLong()).getProg().addXP(xp);
             MessageUtils.sendInfoMessage(channel, "Gave " + user.getUsername() + " **" + xp + "**XP");
         }

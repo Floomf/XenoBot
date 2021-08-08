@@ -12,7 +12,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class MemoryCommand extends AbstractCommand {
 
     public MemoryCommand() {
-        super(new String[]{"match"}, 1, CommandCategory.GAME);
+        super("match", 1, CommandCategory.GAME);
     }
 
     @Override

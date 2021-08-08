@@ -14,13 +14,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class PrestigeCommand extends AbstractCommand {
 
     public PrestigeCommand() {
-        super(new String[]{"prestige"}, 0, CommandCategory.HIDDEN);
+        super("prestige", 0, CommandCategory.HIDDEN);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("prestige")
+                .name(getName())
                 .description("Prestige and reset back to level one")
                 .build();
     }

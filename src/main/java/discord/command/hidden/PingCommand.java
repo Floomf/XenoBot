@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit;
 public class PingCommand extends AbstractCommand {
 
     public PingCommand() {
-        super(new String[]{"ping"}, 0, CommandCategory.HIDDEN);
+        super("ping", 0, CommandCategory.HIDDEN);
     }
 
     @Override

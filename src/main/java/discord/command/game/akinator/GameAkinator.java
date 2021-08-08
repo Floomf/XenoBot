@@ -5,13 +5,14 @@ import com.markozajc.akiwrapper.AkiwrapperBuilder;
 import com.markozajc.akiwrapper.core.entities.Guess;
 import com.markozajc.akiwrapper.core.entities.Server;
 import com.markozajc.akiwrapper.core.exceptions.ServerNotFoundException;
-import discord.core.game.GameEmoji;
 import discord.core.game.SingleplayerGame;
 import discord.util.BotUtils;
 import discord.util.DiscordColor;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.object.reaction.ReactionEmoji;
 
 import java.net.URL;
 import java.util.*;
@@ -19,9 +20,9 @@ import java.util.*;
 public class GameAkinator extends SingleplayerGame {
 
     private Akiwrapper aw;
-    private final HashMap<String, Akiwrapper.Answer> answerMap = new HashMap<>();
     private final List<Long> declinedGuesses = new ArrayList<>();
     private Guess currentGuess;
+    private boolean onlyYesNoButtons = true;
 
     private final static Server.GuessType[] GUESS_TYPES = {Server.GuessType.CHARACTER, Server.GuessType.OBJECT, Server.GuessType.ANIMAL};
     private int guessTypeIndex = 0;
@@ -41,36 +42,41 @@ public class GameAkinator extends SingleplayerGame {
     }
 
     @Override
-    protected boolean useEmbed() {
-        return true;
+    protected LayoutComponent[] getComponents() {
+        if (onlyYesNoButtons) {
+            return new LayoutComponent[]{
+                    ActionRow.of(Button.primary(Akiwrapper.Answer.YES.name(), "Yes"),
+                            Button.primary(Akiwrapper.Answer.NO.name(), "No"),
+                            Button.secondary("forfeit", "Exit"))
+            };
+        } else {
+            return new LayoutComponent[]{
+                    ActionRow.of(Button.primary(Akiwrapper.Answer.YES.name(), "Yes"),
+                            Button.primary(Akiwrapper.Answer.NO.name(), "No"),
+                            Button.primary(Akiwrapper.Answer.DONT_KNOW.name(), "Don't know"),
+                            Button.primary(Akiwrapper.Answer.PROBABLY.name(), "Probably"),
+                            Button.primary(Akiwrapper.Answer.PROBABLY_NOT.name(), "Unlikely")),
+                    ActionRow.of(Button.secondary("undo", "Undo last answer"),
+                            Button.secondary("forfeit", "Exit"))
+            };
+        }
     }
 
     @Override
     protected void setup() {
-        answerMap.put(GameEmoji.Y, Akiwrapper.Answer.YES);
-        answerMap.put(GameEmoji.N, Akiwrapper.Answer.NO);
-        answerMap.put(GameEmoji.D, Akiwrapper.Answer.DONT_KNOW);
-        answerMap.put(GameEmoji.P, Akiwrapper.Answer.PROBABLY);
-        answerMap.put(GameEmoji.U, Akiwrapper.Answer.PROBABLY_NOT);
+
     }
 
     @Override
     protected String getFirstDisplay() {
         return "**Let's begin!**\nThink of any character/object/animal and answer below."
-                + "\n\nAre you thinking of " + (guessTypeIndex == 0 ? "a **" : "an **") + GUESS_TYPES[guessTypeIndex].name().toLowerCase() + "**?"
-                + "\n\n:regional_indicator_y: Yes\n:regional_indicator_n: No";
+                + "\n\nAre you thinking of " + (guessTypeIndex == 0 ? "a **" : "an **")
+                + GUESS_TYPES[guessTypeIndex].name().toLowerCase() + "**?";
     }
 
     @Override
     protected void onStart() {
-        super.registerReactionListener();
-        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.Y)).block();
-        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.N)).block();
-        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.D)).block();
-        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.P)).block();
-        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.U)).block();
-        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.LEFT_ARROW)).block();
-        super.getGameMessage().addReaction(ReactionEmoji.unicode(GameEmoji.EXIT)).block();
+        super.registerComponentListener();
     }
 
     @Override
@@ -80,37 +86,42 @@ public class GameAkinator extends SingleplayerGame {
             return;
         }
 
-        if (input.equals(GameEmoji.LEFT_ARROW)) {
+        if (input.equals("undo")) {
             aw.undoAnswer();
             super.setInfoDisplay("");
             return;
         }
 
         if (currentGuess != null) {
-            if (input.equals(GameEmoji.Y)) {
-                super.getGameMessage().edit(spec -> spec.setEmbed(embed -> {
-                    embed.setAuthor("Akinator \uD83E\uDDDE\u200D♂️", "", getGameMessage().getClient().getSelf().block().getAvatarUrl());
-                    embed.setDescription(":grin: I win! Your " + GUESS_TYPES[guessTypeIndex].name().toLowerCase() + " was:\n\n**"
-                            + currentGuess.getName() + "**\n" + Optional.ofNullable(currentGuess.getDescription()).orElse(""));
-                    embed.setImage(Optional.ofNullable(currentGuess.getImage().toString()).orElse(""));
-                    embed.setColor(DiscordColor.GREEN);
-                })).block();
+            if (input.equals(Akiwrapper.Answer.YES.name())) {
+                super.getGameMessage().edit(spec -> {
+                    spec.addEmbed(embed -> {
+                        embed.setAuthor("Akinator \uD83E\uDDDE\u200D♂️", "", getGameMessage().getClient().getSelf().block().getAvatarUrl());
+                        embed.setDescription(":grin: I win! Your " + GUESS_TYPES[guessTypeIndex].name().toLowerCase() + " was:\n\n**"
+                                + currentGuess.getName() + "**\n" + Optional.ofNullable(currentGuess.getDescription()).orElse(""));
+                        embed.setImage(Optional.ofNullable(currentGuess.getImage().toString()).orElse(""));
+                        embed.setColor(DiscordColor.GREEN);
+                    });
+                    spec.setComponents();
+                }).block();
                 super.end();
                 return;
-            } else if (input.equals(GameEmoji.N)) {
+            } else if (input.equals(Akiwrapper.Answer.NO.name())) {
                 declinedGuesses.add(currentGuess.getIdLong());
                 currentGuess = null;
+                onlyYesNoButtons = false;
             }
         } else {
-            aw.answerCurrentQuestion(answerMap.get(input));
+            aw.answerCurrentQuestion(Akiwrapper.Answer.valueOf(input));
         }
 
         if (aw.getCurrentQuestion() == null || aw.getCurrentQuestion().getProgression() > 85) {
             List<Guess> currentGuesses = aw.getGuesses();
             for (Guess guess : currentGuesses) {
                 if (!declinedGuesses.contains(guess.getIdLong()) && (aw.getCurrentQuestion() == null || guess.getProbability() > 0.80)) {
-                    sendGuessMessage(guess);
+                    onlyYesNoButtons = true;
                     currentGuess = guess;
+                    editMessageToGuess(guess);
                     return;
                 }
             }
@@ -123,29 +134,32 @@ public class GameAkinator extends SingleplayerGame {
         }
     }
 
-    private void sendGuessMessage(Guess guess) {
-        super.getGameMessage().edit(spec -> spec.setEmbed(embed -> {
-            embed.setAuthor("Akinator \uD83E\uDDDE\u200D♂️", "", BotUtils.BOT_AVATAR_URL);
-            embed.setDescription(":grinning: I've got it! Is it **" + guess.getName() + "?**\n\n:regional_indicator_y: Yes\n:regional_indicator_n: No");
-            embed.setImage(Optional.ofNullable(guess.getImage()).map(URL::toString).orElse(""));
-            embed.setColor(DiscordColor.ORANGE);
-        })).block();
+    private void editMessageToGuess(Guess guess) {
+        super.componentEvent.edit(spec -> {
+            spec.addEmbed(embed -> {
+                embed.setAuthor("Akinator \uD83E\uDDDE\u200D♂️", "", BotUtils.BOT_AVATAR_URL);
+                embed.setDescription(":grinning: I've got it! Is it **" + guess.getName() + "?**");
+                embed.setImage(Optional.ofNullable(guess.getImage()).map(URL::toString).orElse(""));
+                embed.setColor(DiscordColor.ORANGE);
+            });
+            spec.setComponents(getComponents());
+        }).block();
     }
 
     private void handleGuessType(String input) {
-        if (input.equals(GameEmoji.Y)) {
+        if (input.equals(Akiwrapper.Answer.YES.name())) {
             try {
-                super.setGameDisplay("**Lets see..**");
-                aw = new AkiwrapperBuilder().setFilterProfanity(false).setGuessType(GUESS_TYPES[guessTypeIndex]).build();
+                super.setGameDisplay("**Let me think..**");
+                aw = new AkiwrapperBuilder().setGuessType(GUESS_TYPES[guessTypeIndex]).build();
+                onlyYesNoButtons = false;
                 super.setInfoDisplay("");
             } catch (ServerNotFoundException e) {
                 this.lose("Something went wrong. Akinator is dead.");
             }
-        } else if (input.equals(GameEmoji.N)) {
+        } else if (input.equals(Akiwrapper.Answer.NO.name())) {
             guessTypeIndex = (guessTypeIndex + 1) % GUESS_TYPES.length; //allows looping back to first element
             super.setGameDisplay("Are you thinking of " + (guessTypeIndex == 0 ? "a **" : "an **")
-                    + GUESS_TYPES[guessTypeIndex].name().toLowerCase() + "**?"
-                    + "\n\n:regional_indicator_y: Yes\n:regional_indicator_n: No");
+                    + GUESS_TYPES[guessTypeIndex].name().toLowerCase() + "**?");
         }
     }
 
@@ -165,13 +179,15 @@ public class GameAkinator extends SingleplayerGame {
 
     @Override
     protected boolean isValidInput(String input) {
-        return (currentGuess == null && aw != null) || input.equals(GameEmoji.Y) || input.equals(GameEmoji.N);
+        return (currentGuess == null && aw != null) || input.equals(Akiwrapper.Answer.YES.name()) || input.equals(Akiwrapper.Answer.NO.name());
     }
 
     @Override
     protected String getBoard() {
-        return getEmojiForProgression() + " **" + aw.getCurrentQuestion().getQuestion() + "**\n\n"
+        return getEmojiForProgression() + " **__Question " + (aw.getCurrentQuestion().getStep() + 1) + "__**\n" + aw.getCurrentQuestion().getQuestion();
+
+                /*+ "**\n\n"
                 + ":regional_indicator_y: Yes\n:regional_indicator_n: No\n:regional_indicator_d: Don't know\n"
-                + ":regional_indicator_p: Probably\n:regional_indicator_u: Unlikely\n\n:arrow_left: (Undo last answer)";
+                + ":regional_indicator_p: Probably\n:regional_indicator_u: Unlikely\n\n:arrow_left: (Undo last answer)";*/
     }
 }

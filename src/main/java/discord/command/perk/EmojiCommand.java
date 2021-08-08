@@ -22,13 +22,13 @@ public class EmojiCommand extends AbstractCommand {
     public static final int LEVEL_REQUIRED = 50;
 
     public EmojiCommand() {
-        super(new String[]{"emoji"}, 1, CommandCategory.PERK);
+        super("emoji", 1, CommandCategory.PERK);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("emoji")
+                .name(getName())
                 .description("Set emoji(s) next to your name")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("set")

@@ -12,7 +12,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class TriviaCommand extends AbstractCommand {
 
     public TriviaCommand() {
-        super(new String[]{"trivia"}, 1, CommandCategory.GAME);
+        super("trivia", 1, CommandCategory.GAME);
     }
 
     @Override

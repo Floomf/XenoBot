@@ -1,10 +1,8 @@
 package discord.util;
 
-import discord.Main;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
 
@@ -12,7 +10,7 @@ import java.util.function.Consumer;
 
 public class MessageUtils {
 
-    public static Consumer<EmbedCreateSpec> getEmbed(String title, String desc, Color color) {
+    public static Consumer<LegacyEmbedCreateSpec> getEmbed(String title, String desc, Color color) {
         return embed -> {
             embed.setAuthor(title, "", BotUtils.BOT_AVATAR_URL);
             embed.setDescription(desc);
@@ -20,20 +18,22 @@ public class MessageUtils {
         };
     }
 
-    public static Consumer<EmbedCreateSpec> getEmbed(String title, String desc) {
+    public static Consumer<LegacyEmbedCreateSpec> getEmbed(String title, String desc) {
         return getEmbed(title, desc, Color.DISCORD_WHITE);
     }
 
-    public static Consumer<EmbedCreateSpec> getErrorEmbed(String message) {
+    public static Consumer<LegacyEmbedCreateSpec> getErrorEmbed(String message) {
         return getEmbed("Error", message, DiscordColor.RED);
     }
 
-    public static Consumer<EmbedCreateSpec> getInfoEmbed(String message) {
+    public static Consumer<LegacyEmbedCreateSpec> getInfoEmbed(String message) {
         return getEmbed("Info", message, DiscordColor.GREEN);
     }
 
-    public static void sendMessage(MessageChannel channel, Consumer<EmbedCreateSpec> embed) {
-        channel.createEmbed(embed).onErrorResume(e -> Mono.empty()).block();
+    public static void sendMessage(MessageChannel channel, Consumer<LegacyEmbedCreateSpec> embed) {
+        channel.createMessage(spec -> {
+            spec.addEmbed(embed);
+        }).onErrorResume(e -> Mono.empty()).block();
     }
 
     public static void sendMessage(MessageChannel channel, String title, String desc, Color color) {

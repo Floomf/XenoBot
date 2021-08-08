@@ -22,13 +22,13 @@ import discord4j.rest.util.ApplicationCommandOptionType;
 public class PrefCommand extends AbstractCommand {
 
     public PrefCommand() {
-        super(new String[]{"preference"}, 1, CommandCategory.UTILITY);
+        super("preference", 1, CommandCategory.UTILITY);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("preference")
+                .name(getName())
                 .description("Change one of your preferences")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("pref")

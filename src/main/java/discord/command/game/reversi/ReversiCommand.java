@@ -12,7 +12,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class ReversiCommand extends AbstractCommand {
 
     public ReversiCommand() {
-        super(new String[]{"reversi"}, 1, CommandCategory.GAME);
+        super("reversi", 1, CommandCategory.GAME);
     }
 
     @Override

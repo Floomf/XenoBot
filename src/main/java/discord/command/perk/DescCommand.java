@@ -16,13 +16,13 @@ import discord4j.rest.util.ApplicationCommandOptionType;
 public class DescCommand extends AbstractCommand {
 
     public DescCommand() {
-        super(new String[]{"description"}, 1, CommandCategory.PERK);
+        super("description", 1, CommandCategory.PERK);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("description")
+                .name(getName())
                 .description("Change your description on your profile")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("new_desc")

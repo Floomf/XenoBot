@@ -15,13 +15,13 @@ public class FocusCommand extends AbstractCommand {
     public static final Snowflake UNFOCUS_MESSAGE_ID = Snowflake.of(813245622848716820L);
 
     public FocusCommand() {
-        super(new String[] {"focus"}, 0, CommandCategory.UTILITY);
+        super("focus", 0, CommandCategory.UTILITY);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("focus")
+                .name(getName())
                 .description("Enable focus mode for you (hiding all activity/pings on this server)")
                 .build();
     }

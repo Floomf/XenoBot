@@ -18,13 +18,13 @@ import java.time.LocalDate;
 public class TodayCommand extends AbstractCommand {
 
     public TodayCommand() {
-        super(new String[]{"today"}, 0, CommandCategory.FUN);
+        super("today", 0, CommandCategory.FUN);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("today")
+                .name(getName())
                 .description("View a random fact about today in history")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("event")

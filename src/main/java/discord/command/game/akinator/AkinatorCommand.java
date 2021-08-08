@@ -12,13 +12,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class AkinatorCommand extends AbstractCommand {
 
     public AkinatorCommand() {
-        super(new String[]{"akinator", "aki"}, 0, CommandCategory.GAME);
+        super("akinator", 0, CommandCategory.GAME);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("akinator")
+                .name(getName())
                 .description("Play Akinator")
                 .build();
     }

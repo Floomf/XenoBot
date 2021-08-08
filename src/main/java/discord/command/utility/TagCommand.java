@@ -2,21 +2,17 @@ package discord.command.utility;
 
 import discord.core.command.InteractionContext;
 import discord.util.BotUtils;
-import discord.core.command.CommandHandler;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import discord.util.MessageUtils;
 import discord4j.common.util.Snowflake;
-import discord4j.core.object.command.ApplicationCommandOptionChoice;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
@@ -29,12 +25,14 @@ public class TagCommand extends AbstractCommand {
     public static final Snowflake GAMES_ROLE_ID = Snowflake.of(621486907620196392L);
     public static int GAMES_ROLE_POSITION;
 
-    private final ArrayList<String> TAGS = new ArrayList<>();
+    public TagCommand() {
+        super("tag", 1, CommandCategory.UTILITY);
+    }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("tag")
+                .name(getName())
                 .description("Toggle various tags (roles) on your profile")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("name")
@@ -58,20 +56,6 @@ public class TagCommand extends AbstractCommand {
             e.printStackTrace();
         }
         return choices;
-    }
-
-    public TagCommand() {
-        super(new String[]{"tag", "label"}, 1, CommandCategory.UTILITY);
-        /*try {
-            Files.lines(Paths.get("tags.txt")).forEachOrdered(line -> {
-                if (!line.trim().isEmpty()) {
-                    tags.add(line);
-                }
-            });
-            System.out.println(tags.size() + " tags loaded.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
     }
 
     @Override

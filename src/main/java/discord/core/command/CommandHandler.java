@@ -7,7 +7,7 @@ import discord.manager.UserManager;
 import discord.data.object.user.Progress;
 import discord.listener.EventsHandler;
 import discord.util.MessageUtils;
-import discord4j.core.event.domain.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.SlashCommandEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -21,30 +21,30 @@ public class CommandHandler {
 
     public static void onMessageEvent(MessageCreateEvent event) {
         processCommand(event.getMessage());
-
     }
 
-    public static void onInteractionCreate(InteractionCreateEvent event) {
+    public static void onInteractionCreate(SlashCommandEvent event) {
+        InteractionContext context = new InteractionContext(event);
         if (event.getInteraction().getGuildId().isEmpty()) {
-            event.replyEphemeral("Sorry, but DM commands are currently disabled.").block();
+            context.replyEphemeral("Sorry, but DM commands are currently disabled.");
             return;
         }
 
         AbstractCommand command = CommandManager.getCommand(event.getCommandName());
-        InteractionContext context = new InteractionContext(event);
+        if (command == null) return;
 
         LoggerFactory.getLogger(CommandHandler.class).info(event.getInteraction().getUser().getTag() + " issued /" + event.getCommandName()
                 + " on " + context.getGuild().getName() + " (ID: " + event.getInteraction().getGuildId().get().asString() + ")");
 
         if (UserManager.databaseContainsUser(event.getInteraction().getUser())
                 && context.getDUser().getProg().getTotalLevelThisLife() < command.getLevelRequired()) {
-            event.replyEphemeral("You must be level **" + command.getLevelRequired()
-                    + "** to use this command! You can type `/profile` to view your progress.").block();
+            context.replyEphemeral("You must be level **" + command.getLevelRequired()
+                    + "** to use this command! You can type `/profile` to view your progress.");
             return;
         }
 
         if (GameManager.playerIsInTypingGame(context.getMember())) {
-            event.replyEphemeral("You can't use commands while in your game! First finish it or type **ff** to forfeit.").block();
+            context.replyEphemeral("You can't use commands while in your game! First finish it or type **ff** to forfeit.");
             return;
         }
 

@@ -19,13 +19,13 @@ import discord4j.rest.util.ApplicationCommandOptionType;
 public class ShopCommand extends AbstractCommand {
 
     public ShopCommand() {
-        super(new String[]{"shop"}, 0, CommandCategory.PERK);
+        super("shop", 0, CommandCategory.PERK);
     }
 
     @Override
     public ApplicationCommandRequest buildSlashCommand() {
         return ApplicationCommandRequest.builder()
-                .name("shop")
+                .name(getName())
                 .description("View the top users on this server")
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("view")
@@ -103,7 +103,9 @@ public class ShopCommand extends AbstractCommand {
             MessageUtils.sendInfoMessage(channel, "Successfully purchased. Enjoy!");
             UserManager.saveDatabase();
         } else {
-            channel.createEmbed(ShopManager.getShopEmbedFor(UserManager.getDUserFromMessage(message))).block();
+            channel.createMessage(spec -> {
+                spec.addEmbed(ShopManager.getShopEmbedFor(UserManager.getDUserFromMessage(message)));
+            }).block();
         }
     }
 

@@ -4,24 +4,20 @@ import discord.data.object.user.DUser;
 import discord.manager.UserManager;
 import discord.util.MessageUtils;
 import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.SlashCommandEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.core.spec.MessageCreateSpec;
-import discord4j.discordjson.json.AllowedMentionsData;
-import discord4j.discordjson.json.EmbedData;
-import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.WebhookMessageEditRequest;
+import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
+import discord4j.discordjson.json.*;
 import discord4j.rest.util.AllowedMentions;
+import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -29,9 +25,9 @@ import java.util.function.Consumer;
 
 public class InteractionContext {
 
-    public InteractionCreateEvent event;
+    public SlashCommandEvent event;
 
-    public InteractionContext(InteractionCreateEvent event) {
+    public InteractionContext(SlashCommandEvent event) {
         this.event = event;
     }
 
@@ -52,11 +48,15 @@ public class InteractionContext {
     }
 
     public ApplicationCommandInteractionOption getSubCommand() {
-        return event.getInteraction().getCommandInteraction().getOptions().get(0);
+        return event.getOptions().get(0);
+    }
+
+    public List<ApplicationCommandInteractionOption> getOptions() {
+        return event.getOptions();
     }
 
     public Optional<ApplicationCommandInteractionOption> getOption(String name) {
-        return event.getInteraction().getCommandInteraction().getOption(name);
+        return event.getOption(name);
     }
 
     public String getOptionAsString(String name) {
@@ -95,14 +95,26 @@ public class InteractionContext {
         event.acknowledge().block();
     }
 
-    public void reply(String content, Consumer<EmbedCreateSpec> embed) {
+    public void reply(String content, Consumer<LegacyEmbedCreateSpec> embed, LayoutComponent[] components, boolean isEphemeral) {
         event.reply(spec -> {
             spec.setContent(content);
-            spec.addEmbed(embed);
-        }).block();
+            if (embed != null) { //bad?
+                spec.addEmbed(embed);
+            }
+            spec.setComponents(components);
+            spec.setEphemeral(isEphemeral);
+        }).doOnError(Throwable::printStackTrace).onErrorResume(e -> Mono.empty()).block();
     }
 
-    public void reply(Consumer<EmbedCreateSpec> embed) {
+    public void reply(String content, Consumer<LegacyEmbedCreateSpec> embed, LayoutComponent[] components) {
+        reply(content, embed, components, false);
+    }
+
+    public void reply(String content, Consumer<LegacyEmbedCreateSpec> embed) {
+        reply(content, embed, new LayoutComponent[0]);
+    }
+
+    public void reply(Consumer<LegacyEmbedCreateSpec> embed) {
         reply(null, embed);
     }
 
@@ -110,16 +122,21 @@ public class InteractionContext {
         reply(MessageUtils.getInfoEmbed(info));
     }
 
+    //All error messages are private to the user
     public void replyWithError(String error) {
-        reply(MessageUtils.getErrorEmbed(error));
+        replyEphemeral(MessageUtils.getErrorEmbed(error));
+    }
+
+    public void replyEphemeral(Consumer<LegacyEmbedCreateSpec> embed) {
+        reply(null, embed, new LayoutComponent[0], true);
     }
 
     public void replyEphemeral(String content) {
-        event.replyEphemeral(content).block();
+        reply(content, null, new LayoutComponent[0], true);
     }
 
-    public Message edit(String content, Consumer<EmbedCreateSpec> embedSpec) {
-        EmbedCreateSpec spec = new EmbedCreateSpec();
+    public Message edit(String content, Consumer<LegacyEmbedCreateSpec> embedSpec) {
+        LegacyEmbedCreateSpec spec = new LegacyEmbedCreateSpec();
         embedSpec.accept(spec);
         MessageData data = event.getInteractionResponse().editInitialResponse(WebhookMessageEditRequest.builder()
                 .embeds(List.of(spec.asRequest()))
@@ -130,8 +147,8 @@ public class InteractionContext {
         return event.getClient().getMessageById(getChannel().getId(), Snowflake.of(data.id())).block();
     }
 
-    public Message edit(Consumer<EmbedCreateSpec> embedSpec) {
-        EmbedCreateSpec spec = new EmbedCreateSpec();
+    public Message edit(Consumer<LegacyEmbedCreateSpec> embedSpec) {
+        LegacyEmbedCreateSpec spec = new LegacyEmbedCreateSpec();
         embedSpec.accept(spec);
         MessageData data = event.getInteractionResponse().editInitialResponse(WebhookMessageEditRequest.builder()
                 .embeds(List.of(spec.asRequest())).build())
@@ -144,6 +161,10 @@ public class InteractionContext {
                 .content(content).build())
                 .block();
         return event.getClient().getMessageById(getChannel().getId(), Snowflake.of(data.id())).block();
+    }
+
+    public void createFollowupMessageEphemeral(String content) {
+        event.getInteractionResponse().createFollowupMessageEphemeral(content).block();
     }
 
 }

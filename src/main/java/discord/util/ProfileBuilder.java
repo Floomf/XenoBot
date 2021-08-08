@@ -10,14 +10,13 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import discord4j.core.object.entity.Role;
-import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.core.util.OrderUtil;
+import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 
 public class ProfileBuilder {
 
     private final DUser user;
     private final Progress prog;
-    private Consumer<EmbedCreateSpec> embed;
+    private Consumer<LegacyEmbedCreateSpec> embed;
 
     public ProfileBuilder(DUser user) {
         this.user = user;
@@ -127,7 +126,7 @@ public class ProfileBuilder {
         return this;
     }
 
-    public Consumer<EmbedCreateSpec> build() {
+    public Consumer<LegacyEmbedCreateSpec> build() {
         return embed;
     }
 

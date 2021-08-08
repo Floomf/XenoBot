@@ -18,7 +18,7 @@ public abstract class MultiplayerGame extends BaseGame {
         this.players = players;
         this.playerThisTurn = players[0];
         LoggerFactory.getLogger(getClass()).info("Game created with players: "
-                + players[0].getTag() + " , " + players[1].getTag());
+                + players[0].getTag() + ", " + players[1].getTag());
     }
 
     abstract protected String getForfeitMessage(Member forfeiter);
@@ -38,7 +38,7 @@ public abstract class MultiplayerGame extends BaseGame {
         return false;
     }
 
-    protected final synchronized void onPlayerInput(String input, Member player) {
+    protected synchronized void onPlayerInput(String input, Member player) {
         if (!super.isActive()) return;
 
         if (input.equals("forfeit") || input.equals("ff")) {
