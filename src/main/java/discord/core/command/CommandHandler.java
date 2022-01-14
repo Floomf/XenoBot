@@ -7,7 +7,7 @@ import discord.manager.UserManager;
 import discord.data.object.user.Progress;
 import discord.listener.EventsHandler;
 import discord.util.MessageUtils;
-import discord4j.core.event.domain.interaction.SlashCommandEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -23,7 +23,7 @@ public class CommandHandler {
         processCommand(event.getMessage());
     }
 
-    public static void onInteractionCreate(SlashCommandEvent event) {
+    public static void onInteractionCreate(ChatInputInteractionEvent event) {
         InteractionContext context = new InteractionContext(event);
         if (event.getInteraction().getGuildId().isEmpty()) {
             context.replyEphemeral("Sorry, but DM commands are currently disabled.");

@@ -15,7 +15,7 @@ import discord4j.core.object.presence.Status;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 public class RaffleCommand extends AbstractCommand {
 
@@ -32,7 +32,7 @@ public class RaffleCommand extends AbstractCommand {
                         .name("pool")
                         .description("The pool to pick from")
                         .required(true)
-                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
                         .addChoice(ApplicationCommandOptionChoiceData.builder().name("all").value("all").build())
                         .addChoice(ApplicationCommandOptionChoiceData.builder().name("online").value("online").build())
                         .addChoice(ApplicationCommandOptionChoiceData.builder().name("voice").value("voice").build())

@@ -4,12 +4,13 @@ import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.core.command.InteractionContext;
 import discord.util.BotUtils;
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 import kong.unirest.Unirest;
 
 public class AnimalCommand extends AbstractCommand {
@@ -26,7 +27,7 @@ public class AnimalCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("name")
                         .description("Animal name")
-                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(true)
                         .addChoice(ApplicationCommandOptionChoiceData.builder().name("Bird").value("bird").build())
                         .addChoice(ApplicationCommandOptionChoiceData.builder().name("Bunny").value("bunny").build())
@@ -36,7 +37,6 @@ public class AnimalCommand extends AbstractCommand {
                         .addChoice(ApplicationCommandOptionChoiceData.builder().name("Fox").value("fox").build())
                         .addChoice(ApplicationCommandOptionChoiceData.builder().name("Lizard").value("lizard").build())
                         .addChoice(ApplicationCommandOptionChoiceData.builder().name("Koala").value("koala").build())
-                        .addChoice(ApplicationCommandOptionChoiceData.builder().name("Monkey").value("monkey").build())
                         .addChoice(ApplicationCommandOptionChoiceData.builder().name("Panda").value("panda").build())
                         .build())
                 .build();
@@ -77,10 +77,6 @@ public class AnimalCommand extends AbstractCommand {
             case "koala":
                 return Unirest.get("https://some-random-api.ml/img/koala")
                         .asJson().getBody().getObject().getString("link");
-            case "monkey":
-                int length = (int) (Math.random() * 200) + 800;
-                int height = (int) (Math.random() * 200) + 600;
-                return "https://www.placemonkeys.com/" + length + "/" + height + "?random";
             case "lizard":
                 return Unirest.get("https://nekos.life/api/v2/img/lizard")
                         .asJson().getBody().getObject().getString("url");

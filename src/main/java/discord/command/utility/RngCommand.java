@@ -9,7 +9,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 public class RngCommand extends AbstractCommand {
 
@@ -25,7 +25,7 @@ public class RngCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                     .name("max")
                     .description("Max number (generates between 1-max)")
-                    .type(ApplicationCommandOptionType.INTEGER.getValue())
+                    .type(ApplicationCommandOption.Type.INTEGER.getValue())
                     .required(true)
                     .build())
                 .build();

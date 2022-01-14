@@ -12,7 +12,7 @@ import discord.util.MessageUtils;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 import java.util.*;
 
@@ -175,14 +175,14 @@ public class GameManager {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("opponent")
                         .description("Your opponent")
-                        .type(ApplicationCommandOptionType.USER.getValue())
+                        .type(ApplicationCommandOption.Type.USER.getValue())
                         .required(true)
                         .build());
         if (canBet) {
             request.addOption(ApplicationCommandOptionData.builder()
                     .name("bet")
                     .description("The bet (Type 0 for no bet)")
-                    .type(ApplicationCommandOptionType.INTEGER.getValue())
+                    .type(ApplicationCommandOption.Type.INTEGER.getValue())
                     .required(true)
                     .build())
                     .build();

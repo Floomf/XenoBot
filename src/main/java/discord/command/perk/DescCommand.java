@@ -11,7 +11,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 public class DescCommand extends AbstractCommand {
 
@@ -28,7 +28,7 @@ public class DescCommand extends AbstractCommand {
                         .name("new_desc")
                         .description("New description")
                         .required(true)
-                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
                         .build())
                 .build();
     }

@@ -18,7 +18,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 public class TopCommand extends AbstractCommand {
 
@@ -34,22 +34,22 @@ public class TopCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("xp")
                         .description("View the top users by XP earned")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("balance")
                         .description("View the top users by money earned")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("math")
                         .description("View the leaderboard for Quick Math")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("hangman")
                         .description("View the leaderboard for Hangman")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .build();
     }
@@ -62,12 +62,12 @@ public class TopCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("math")
                         .description("View the leaderboard for Quick Math")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("hangman")
                         .description("View the leaderboard for Hangman")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .build();
     }
@@ -78,10 +78,12 @@ public class TopCommand extends AbstractCommand {
         String type = context.getSubCommand().getName();
 
         if (type.equals("math")) {
-            context.reply(MessageUtils.getEmbed("Quick Math High Scores", GameMath.LEADERBOARD.toString(), DiscordColor.ORANGE));
+            context.reply(MessageUtils.getEmbed("Quick Math High Scores",
+                    GameMath.LEADERBOARD.toString(context.getGuild()), DiscordColor.ORANGE));
             return;
         } else if (type.equals("hangman")) {
-            context.reply(MessageUtils.getEmbed("Hangman Longest Win Streaks", GameHangman.LEADERBOARD.toString(), DiscordColor.ORANGE));
+            context.reply(MessageUtils.getEmbed("Hangman Longest Win Streaks",
+                    GameHangman.LEADERBOARD.toString(context.getGuild()), DiscordColor.ORANGE));
             return;
         }
 

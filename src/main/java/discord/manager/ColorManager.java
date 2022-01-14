@@ -15,58 +15,62 @@ public class ColorManager {
     //GUILD is responsible for creating roles for each color name
     //User objects actually don't store Unlockable objects
     public static final Unlockable[] COLORS_DEFAULT = {
-            new Unlockable("Red", 1, 0),
-            new Unlockable("Orange", 1, 0),
-            new Unlockable("Yellow", 1, 0),
-            new Unlockable("Green", 1, 0),
-            new Unlockable("Cyan", 1, 0),
-            new Unlockable("Blue", 1, 0),
-            new Unlockable("Purple", 1, 0),
-            new Unlockable("Magenta", 1, 0),
-            new Unlockable("Grey", 1, 0)
+            Unlockable.color("Red", 1, 0),
+            Unlockable.color("Orange", 1, 0),
+            Unlockable.color("Yellow", 1, 0),
+            Unlockable.color("Green", 1, 0),
+            Unlockable.color("Cyan", 1, 0),
+            Unlockable.color("Blue", 1, 0),
+            Unlockable.color("Purple", 1, 0),
+            Unlockable.color("Magenta", 1, 0),
+            Unlockable.color("Grey", 1, 0)
     };
 
     public static final Unlockable[] COLORS_UNLOCKS = {
-            new Unlockable("Forest", 1, 20),
-            new Unlockable("Vermilion", 1, 40),
-            new Unlockable("Bubble Gum", 1, 60),
-            new Unlockable("Azure", 1, 80),
-            new Unlockable("Lime", 2, 20),
-            new Unlockable("Heliotrope", 2, 40),
-            new Unlockable("Teal", 2, 60),
-            new Unlockable("Blood", 2, 80),
-            new Unlockable("Persimmon", 3, 20),
-            new Unlockable("Conifer", 3, 40),
-            new Unlockable("Orchid", 3, 60),
-            new Unlockable("Sunrise", 3, 80),
-            new Unlockable("Indochine", 4, 20),
-            new Unlockable("Turquoise", 4, 40),
-            new Unlockable("Cornflower", 4, 60),
-            new Unlockable("Flesh", 4, 80),
-            new Unlockable("Flamingo", 5, 20),
-            new Unlockable("Aquamarine", 5, 40),
-            new Unlockable("Gold", 5, 60),
-            new Unlockable("Ice", 5, 80),
-            new Unlockable("Olive", 6, 20),
-            new Unlockable("Violet", 6, 40),
-            new Unlockable("Azalea", 6, 60),
-            new Unlockable("Swiss Coffee", 6, 80),
-            new Unlockable("Hopbush", 7, 20),
-            new Unlockable("Discord", 7, 40),
-            new Unlockable("Holy Light", 7, 60),
-            new Unlockable("Scorpion", 7, 80),
-            new Unlockable("Quicksand", 8, 20),
-            new Unlockable("Mauve", 8, 40),
-            new Unlockable("Malibu", 8, 60),
-            new Unlockable("Swan", 8, 80),
-            new Unlockable("Salmon", 9, 20),
-            new Unlockable("Mint", 9, 40),
-            new Unlockable("Blizzard", 9, 60),
-            new Unlockable("Void", 9, 80)
+            Unlockable.color("Forest", 1, 20),
+            Unlockable.color("Vermilion", 1, 40),
+            Unlockable.color("Bubble Gum", 1, 60),
+            Unlockable.color("Azure", 1, 80),
+            Unlockable.color("Lime", 2, 20),
+            Unlockable.color("Heliotrope", 2, 40),
+            Unlockable.color("Teal", 2, 60),
+            Unlockable.color("Blood", 2, 80),
+            Unlockable.color("Persimmon", 3, 20),
+            Unlockable.color("Conifer", 3, 40),
+            Unlockable.color("Orchid", 3, 60),
+            Unlockable.color("Sunrise", 3, 80),
+            Unlockable.color("Indochine", 4, 20),
+            Unlockable.color("Turquoise", 4, 40),
+            Unlockable.color("Cornflower", 4, 60),
+            Unlockable.color("Flesh", 4, 80),
+            Unlockable.color("Flamingo", 5, 20),
+            Unlockable.color("Aquamarine", 5, 40),
+            Unlockable.color("Gold", 5, 60),
+            Unlockable.color("Ice", 5, 80),
+            Unlockable.color("Olive", 6, 20),
+            Unlockable.color("Violet", 6, 40),
+            Unlockable.color("Azalea", 6, 60),
+            Unlockable.color("Swiss Coffee", 6, 80),
+            Unlockable.color("Hopbush", 7, 20),
+            Unlockable.color("Discord", 7, 40),
+            Unlockable.color("Holy Light", 7, 60),
+            Unlockable.color("Scorpion", 7, 80),
+            Unlockable.color("Quicksand", 8, 20),
+            Unlockable.color("Mauve", 8, 40),
+            Unlockable.color("Malibu", 8, 60),
+            Unlockable.color("Swan", 8, 80),
+            Unlockable.color("Salmon", 9, 20),
+            Unlockable.color("Mint", 9, 40),
+            Unlockable.color("Blizzard", 9, 60),
+            Unlockable.color("Void", 9, 80)
     };
 
     public static Unlockable[] getDefaultColors() {
         return COLORS_DEFAULT;
+    }
+
+    public static Unlockable[] getUnlockableColors() {
+        return COLORS_UNLOCKS;
     }
 
     public static Unlockable[] getUnlockedColorsForDUser(DUser user) {

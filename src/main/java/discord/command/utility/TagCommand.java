@@ -18,7 +18,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 public class TagCommand extends AbstractCommand {
 
@@ -37,7 +37,7 @@ public class TagCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("name")
                         .description("The tag to toggle")
-                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(true)
                         .choices(getTagsAsChoices())
                         .build())

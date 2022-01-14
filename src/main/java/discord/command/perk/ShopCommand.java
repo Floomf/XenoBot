@@ -14,7 +14,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 public class ShopCommand extends AbstractCommand {
 
@@ -30,16 +30,16 @@ public class ShopCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("view")
                         .description("View the shop")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("buy")
                         .description("Buy an item from the shop")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .addOption(ApplicationCommandOptionData.builder()
                                 .name("item_id")
                                 .description("The item id")
-                                .type(ApplicationCommandOptionType.INTEGER.getValue())
+                                .type(ApplicationCommandOption.Type.INTEGER.getValue())
                                 .required(true)
                                 .build())
                         .build())

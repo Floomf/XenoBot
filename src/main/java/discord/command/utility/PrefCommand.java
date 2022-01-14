@@ -17,7 +17,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 public class PrefCommand extends AbstractCommand {
 
@@ -34,14 +34,14 @@ public class PrefCommand extends AbstractCommand {
                         .name("pref")
                         .description("The preference")
                         .required(true)
-                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
                         .addAllChoices(getPrefsAsChoices())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("value")
                         .description("true/false")
                         .required(true)
-                        .type(ApplicationCommandOptionType.BOOLEAN.getValue())
+                        .type(ApplicationCommandOption.Type.BOOLEAN.getValue())
                         .build())
                 .build();
     }

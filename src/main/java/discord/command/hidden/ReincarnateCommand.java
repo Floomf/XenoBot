@@ -38,12 +38,12 @@ public class ReincarnateCommand extends AbstractCommand {
             context.reply(MessageUtils.getEmbed( "Not yet..", "*I still have this life to live.*"));
             return;
         }
-
+        context.deferReply();
         if (dUser.getProg().getReincarnation().isMax()) {
-            context.reply(MessageUtils.getEmbed( "A Final Beginning", "You have been reborn into your last life: **"
+            context.editReply(MessageUtils.getNewEmbed( "A Final Beginning", "You have been reborn into your last life: **"
                     + dUser.getProg().getReincarnation().getRomaji() + "**.", DiscordColor.PINK));
         } else {
-            context.reply(MessageUtils.getEmbed( "A New Beginning", "You have been reborn into **"
+            context.editReply(MessageUtils.getNewEmbed( "A New Beginning", "You have been reborn into **"
                     + dUser.getProg().getReincarnation().getRomaji() + "**.", DiscordColor.PINK));
         }
         dUser.getProg().reincarnate();

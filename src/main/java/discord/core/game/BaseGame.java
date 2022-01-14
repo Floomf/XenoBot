@@ -6,9 +6,8 @@ import discord.util.BotUtils;
 import discord.util.DiscordColor;
 import discord.util.MessageUtils;
 import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.interaction.ButtonInteractEvent;
-import discord4j.core.event.domain.interaction.ComponentInteractEvent;
-import discord4j.core.event.domain.interaction.SelectMenuInteractEvent;
+import discord4j.core.event.domain.interaction.ComponentInteractionEvent;
+import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.component.LayoutComponent;
@@ -40,7 +39,7 @@ public abstract class BaseGame {
     private boolean typingGame;
 
     //TODO BETTER SOLUTION
-    protected ComponentInteractEvent componentEvent = null;
+    protected ComponentInteractionEvent componentEvent = null;
 
     public BaseGame(String gameTitle, TextChannel channel, int betAmount) {
         this.gameTitle = gameTitle;
@@ -201,7 +200,7 @@ public abstract class BaseGame {
     }
 
     protected final void registerComponentListener() {
-        channel.getClient().on(ComponentInteractEvent.class)
+        channel.getClient().on(ComponentInteractionEvent.class)
                 .takeUntil(e -> !active)
                 .filter(e -> e.getMessageId().equals(gameMessage.getId()) && playerIsInGame(e.getInteraction().getMember().get()))
                 .subscribe(event -> {
@@ -211,7 +210,7 @@ public abstract class BaseGame {
     }
 
     protected final void registerSelectMenuListener() {
-        channel.getClient().on(SelectMenuInteractEvent.class)
+        channel.getClient().on(SelectMenuInteractionEvent.class)
                 .takeUntil(e -> !active)
                 .filter(e -> e.getMessageId().equals(gameMessage.getId()) && playerIsInGame(e.getInteraction().getMember().get()))
                 .subscribe(event -> {

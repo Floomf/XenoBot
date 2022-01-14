@@ -4,7 +4,7 @@ import discord.data.object.user.DUser;
 import discord.manager.UserManager;
 import discord.util.MessageUtils;
 import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.interaction.SlashCommandEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.component.LayoutComponent;
@@ -13,6 +13,8 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.InteractionReplyEditSpec;
 import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 import discord4j.discordjson.json.*;
 import discord4j.rest.util.AllowedMentions;
@@ -25,9 +27,9 @@ import java.util.function.Consumer;
 
 public class InteractionContext {
 
-    public SlashCommandEvent event;
+    public ChatInputInteractionEvent event;
 
-    public InteractionContext(SlashCommandEvent event) {
+    public InteractionContext(ChatInputInteractionEvent event) {
         this.event = event;
     }
 
@@ -93,6 +95,14 @@ public class InteractionContext {
 
     public void acknowledge() {
         event.acknowledge().block();
+    }
+
+    public void deferReply() {
+        event.deferReply().block();
+    }
+
+    public void editReply(EmbedCreateSpec embed) {
+        event.editReply(InteractionReplyEditSpec.create().withEmbeds(embed)).block();
     }
 
     public void reply(String content, Consumer<LegacyEmbedCreateSpec> embed, LayoutComponent[] components, boolean isEphemeral) {

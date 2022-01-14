@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord.command.perk.ColorCommand;
-import discord.command.perk.DescCommand;
 import discord.command.perk.EmojiCommand;
 import discord.command.perk.NickCommand;
 import discord.data.object.ShopItem;
@@ -18,11 +17,47 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Color;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Progress {
+
+    final static Unlockable[] COMMAND_UNLOCKS = {
+            Unlockable.command("/name", 0, NickCommand.LEVEL_REQUIRED),
+            Unlockable.command("/emoji", 0, EmojiCommand.LEVEL_REQUIRED),
+            Unlockable.command("/color", 0, ColorCommand.LEVEL_REQUIRED)
+    };
+
+    public final static Unlockable[] BADGE_UNLOCKS = {
+            Unlockable.badge("★", 1, 1),
+            Unlockable.badge("✷", 2, 1),
+            Unlockable.badge("⁂", 3, 1),
+            Unlockable.badge("❖", 4, 1),
+            Unlockable.badge("✪", 5, 1),
+            Unlockable.badge("❃", 6, 1),
+            Unlockable.badge("❈", 7, 1),
+            Unlockable.badge("✠", 8, 1),
+            Unlockable.badge("♆", 9, 1),
+            Unlockable.badge("֎", 10, 1),
+
+            Unlockable.badge("🟆", 10, 100),
+            Unlockable.badge("⨳", 10, 200),
+            Unlockable.badge("✺", 10, 300),
+            Unlockable.badge("⟁", 10, 400),
+            Unlockable.badge("▣", 10, 500),
+            Unlockable.badge("🞛", 10, 600),
+            Unlockable.badge("⧉", 10, 700),
+            Unlockable.badge("❀", 10, 800),
+            Unlockable.badge("✾", 10, 900),
+            Unlockable.badge("☬", 10, 1000),
+            Unlockable.badge("♙", 10, 1100),
+            Unlockable.badge("♘", 10, 1200),
+            Unlockable.badge("♔", 10, 1300),
+            Unlockable.badge("ꕥ", 10, 1400),
+            Unlockable.badge("⸎", 10, 1500)
+    };
 
     public final static int MAX_LEVEL = 80;
 
@@ -140,6 +175,22 @@ public class Progress {
     }
 
     @JsonIgnore
+    public String[] getBadges() { //TODO change
+        ArrayList<Unlockable> badges = new ArrayList<>(Arrays.asList(BADGE_UNLOCKS));
+        badges.removeIf(badge -> getTotalLevelThisLife() < badge.getTotalLevelRequired());
+        return badges.stream().map(Unlockable::toString).toArray(String[]::new);
+    }
+
+    public static int getBadgeIndex(String badge) {
+        for (int i = 0; i < BADGE_UNLOCKS.length; i++) {
+            if (badge.equals(BADGE_UNLOCKS[i].toString())) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @JsonIgnore
     public boolean isMaxLevel() {
         return (level == MAX_LEVEL && !prestige.isMax()); //Max prestige levels infinitely
     }
@@ -174,7 +225,7 @@ public class Progress {
         if (xp >= xpTotalForLevelUp || xp < 0) {
             if (xp >= xpTotalForLevelUp) {
                 levelUp(logToChannel);
-                checkUnlocks();
+                checkAllUnlocks();
             } else if (xp < 0) {
                 //TODO support prestiging down?
                 if (level > 1) { //prevent negative levels
@@ -215,12 +266,6 @@ public class Progress {
                 String.format("%s\n**%d → %d**", user.asGuildMember().getMention(), level + 1, level), user.asGuildMember().getColor().block());
     }
 
-    private void checkUnlocks() {
-        if (user.getPrefs().get(Pref.NOTIFY_UNLOCK)) {
-            notifyPossibleUnlocks();
-        }
-    }
-
     private void maxOut() {
         xp = 0;
         xpTotalForLevelUp = 0;
@@ -253,6 +298,7 @@ public class Progress {
         if (!prestige.isMax()) {
             changeRankIfNeeded();
         }
+        checkUnlocks(BADGE_UNLOCKS);
         user.getName().verifyOnGuild();
         BotUtils.getGuildTextChannel("log", user.asGuildMember().getGuild().block()).createMessage(spec -> {
             spec.setContent(user.asGuildMember().getMention());
@@ -306,7 +352,7 @@ public class Progress {
         setDefaultStats();
         verifyRankOnGuild();
         carryXPToNextLife(carryXP);
-        user.getName().verifyOnGuild();
+        user.getName().setBadge("");
 
         user.asGuildMember().edit(spec -> spec.setRoles(ColorManager.getMemberRolesNoColor(user.asGuildMember()))).block();
     }
@@ -326,6 +372,10 @@ public class Progress {
 
         prestige = new Prestige(timesToPrestige);
 
+        if (prestige.getNumber() > 0) {
+            user.getName().setBadge(BADGE_UNLOCKS[prestige.getNumber() - 1].toString());
+        }
+
         if (prestige.isMax()) { //have to set max rank back
             rank = Rank.getMaxRank();
             verifyRankOnGuild();
@@ -333,36 +383,26 @@ public class Progress {
 
         xp -= timesToPrestige * prestigeXP;
         this.xp = xp;
-        checkXP(); //check for leveling and ranking up with the remaining xp
+        checkXP(false); //check for leveling and ranking up with the remaining xp
     }
 
-    //Moved here until theres a solution/ unlock manager?
-    //All of this is hardcoded, clean it up eventually
-    private void notifyPossibleUnlocks() {
+    //A better solution, but im sure can still be made better
+    private void checkAllUnlocks() {
         int totalLevel = getTotalLevelThisLife();
-        if (totalLevel <= MAX_LEVEL && totalLevel % 10 == 0) { //unlocking perks
-            String perkDesc = "", perkCommand = "";
-            if (totalLevel == NickCommand.LEVEL_REQUIRED) {
-                perkCommand = "/name";
-                perkDesc = "change your **nickname**";
-            } else if (totalLevel == EmojiCommand.LEVEL_REQUIRED) {
-                perkCommand = "/emoji";
-                perkDesc = "set **emojis** in your name";
-            } else if (totalLevel == ColorCommand.LEVEL_REQUIRED) {
-                perkCommand = "/color";
-                perkDesc = "change your **name color**";
-            }
-            MessageUtils.sendMessage(user.asGuildMember().getPrivateChannel().block(), "Perk Unlocked!",
-                    "You have unlocked the ability to " + perkDesc + " on " + user.asGuildMember().getGuild().block().getName()
-                            + "!\n\n*You can type `" + perkCommand + "` on the server to get started.*", DiscordColor.ORANGE);
-        } else if (totalLevel % 20 == 0 && !prestige.isMax()) { //unlocking colors
-            Unlockable color = ColorManager.getUnlockedColor(totalLevel);
-            if (color != null) {
-                MessageUtils.sendMessage(user.asGuildMember().getPrivateChannel().block(), "Color Unlocked!",
-                        "You have unlocked the name color **" + color.toString() + "** on "
-                                + user.asGuildMember().getGuild().block().getName()
-                                + "!\n\n*You can type `/color list` on the server to view your unlocked colors.*",
-                        BotUtils.getGuildRole(color.toString(), user.asGuildMember().getGuild().block()).getColor());
+        if (totalLevel <= MAX_LEVEL && totalLevel % 10 == 0) { //unlocking commands, only first prestige
+            checkUnlocks(COMMAND_UNLOCKS);
+        } else if (totalLevel % 20 == 0 && !prestige.isMax()) { //unlocking colors, every 20 levels
+            checkUnlocks(ColorManager.getUnlockableColors());
+        } else if (level == 1 || level % 100 == 0) { //unlocking badges, every prestige and then every 100 levels after max prestige
+            checkUnlocks(BADGE_UNLOCKS);
+        }
+    }
+
+    private void checkUnlocks(Unlockable[] unlockables) {
+        for (Unlockable command : unlockables) {
+            if (command.getTotalLevelRequired() == getTotalLevelThisLife()) {
+                command.onUnlock(user);
+                return;
             }
         }
     }
@@ -403,9 +443,6 @@ public class Progress {
                 memberRoles.removeIf(role -> role.getName().equals(rank.getRoleName()));
             }
             memberRoles.add(rankRole);
-            for (Role r : memberRoles) {
-                System.out.print(r.getName() + ", ");
-            }
             user.asGuildMember().edit(spec -> spec.setRoles(memberRoles.stream().map(Role::getId).collect(Collectors.toSet()))).block();
             System.out.println("Updated rank role to " + rankRole.getName());
         }

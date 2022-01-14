@@ -13,7 +13,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,19 +36,19 @@ public class PollCommand extends AbstractCommand {
                         .name("allow_results")
                         .description("If true, voters can view results after they vote. If false, results are hidden until the poll ends")
                         .required(true)
-                        .type(ApplicationCommandOptionType.BOOLEAN.getValue())
+                        .type(ApplicationCommandOption.Type.BOOLEAN.getValue())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("color")
                         .description("Your poll's color (Type /color list for colors)")
                         .required(true)
-                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("title")
                         .description("Your poll's title/question to ask")
                         .required(true)
-                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
                         .build())
                 .addAllOptions(getOptions())
                 .build();
@@ -61,7 +61,7 @@ public class PollCommand extends AbstractCommand {
                 .name("option" + i)
                 .description("Poll option " + i)
                     .required(true)
-                    .type(ApplicationCommandOptionType.STRING.getValue())
+                    .type(ApplicationCommandOption.Type.STRING.getValue())
                     .build());
         }
         for (int i = 3; i <= 15; i++) {
@@ -69,7 +69,7 @@ public class PollCommand extends AbstractCommand {
                     .name("option" + i)
                     .description("Poll option " + i)
                     .required(false)
-                    .type(ApplicationCommandOptionType.STRING.getValue())
+                    .type(ApplicationCommandOption.Type.STRING.getValue())
                     .build());
         }
         return options;

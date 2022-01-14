@@ -2,6 +2,8 @@ package discord.util;
 
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.EmbedCreateFields;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Mono;
@@ -20,6 +22,22 @@ public class MessageUtils {
 
     public static Consumer<LegacyEmbedCreateSpec> getEmbed(String title, String desc) {
         return getEmbed(title, desc, Color.DISCORD_WHITE);
+    }
+
+    public static EmbedCreateSpec getNewEmbed(String title, String desc, Color color) {
+        return EmbedCreateSpec.create()
+                .withAuthor(EmbedCreateFields.Author.of(title, "", BotUtils.BOT_AVATAR_URL))
+                .withDescription(desc)
+                .withColor(color);
+    }
+
+    public static EmbedCreateSpec getNewEmbed(String title, String desc) {
+        return getNewEmbed(title, desc, Color.DISCORD_WHITE);
+    }
+
+    //temporary until we switch to new embed specs everywhere
+    public static EmbedCreateSpec getNewErrorEmbed(String message) {
+        return getNewEmbed("Error", message, DiscordColor.RED);
     }
 
     public static Consumer<LegacyEmbedCreateSpec> getErrorEmbed(String message) {

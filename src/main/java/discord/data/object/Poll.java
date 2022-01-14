@@ -8,7 +8,7 @@ import discord.util.BotUtils;
 import discord.util.MessageUtils;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.interaction.ButtonInteractEvent;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
@@ -159,6 +159,7 @@ public class Poll {
         this.pollMessageText = sb.toString();
         this.color = message.getEmbeds().get(0).getColor().get();
         this.endInstant = message.getEmbeds().get(0).getTimestamp().get();
+        message.edit(spec -> spec.addEmbed(getPollEmbed())).block();
     }
 
     public void start() {
@@ -168,7 +169,7 @@ public class Poll {
                 .filter(e -> e.getMessageId().equals(message.getId()) && UserManager.databaseContainsUser(e.getMember().get()))
                 .doOnNext(e -> e.getMessage().block().removeReaction(e.getEmoji(), e.getUserId()).block())
                 .subscribe(this::onPollReaction);
-        message.getClient().on(ButtonInteractEvent.class)
+        message.getClient().on(ButtonInteractionEvent.class)
                 .takeUntil(e -> !active)
                 .filter(e -> e.getInteraction().getMessage().map(Message::getId).map(id -> id.equals(message.getId())).orElse(false))
                 .subscribe(this::onPollButtonInteract);
@@ -180,7 +181,7 @@ public class Poll {
         }, Instant.now().until(endInstant, ChronoUnit.SECONDS), TimeUnit.SECONDS);
     }
 
-    private void sendResults(ButtonInteractEvent event) {
+    private void sendResults(ButtonInteractionEvent event) {
         event.reply(spec -> {
             spec.setEphemeral(true);
             spec.addEmbed(embed -> {
@@ -191,7 +192,7 @@ public class Poll {
         }).block();
     }
 
-    private void onPollButtonInteract(ButtonInteractEvent event) {
+    private void onPollButtonInteract(ButtonInteractionEvent event) {
         String button = event.getCustomId();
         if (button.equals("results")) {
             if (hasVoted(event.getInteraction().getUser())) {

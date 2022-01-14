@@ -4,20 +4,14 @@ import discord.command.utility.TagCommand;
 import discord.data.object.BirthdayScheduler;
 import discord.manager.PollManager;
 import discord.util.BotUtils;
-import discord.util.DiscordColor;
-import discord.util.MessageUtils;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.PresenceUpdateEvent;
-import discord.core.command.CommandManager;
 import discord.manager.UserManager;
 import discord.data.object.XPScheduler;
 
 import discord4j.core.event.domain.guild.GuildCreateEvent;
-import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.object.presence.Activity;
-import discord4j.core.object.presence.Presence;
-import discord.data.object.user.DUser;
-import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.presence.ClientActivity;
+import discord4j.core.object.presence.ClientPresence;
 
 public class EventsHandler {
 
@@ -26,7 +20,7 @@ public class EventsHandler {
     //TODO seperate into different classes?
     public static void onGuildCreateEvent(GuildCreateEvent event) {
         if (event.getGuild().getId().equals(THE_REALM_ID)) {
-            //event.getClient().updatePresence(Presence.online(Activity.listening("/help"))).block();
+            event.getClient().updatePresence(ClientPresence.online(ClientActivity.listening("/help"))).block();
             BotUtils.BOT_AVATAR_URL = event.getClient().getSelf().block().getAvatarUrl();
             UserManager.createDatabase(event.getGuild());
             PollManager.loadPolls(event.getClient());

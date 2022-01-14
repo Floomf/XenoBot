@@ -17,7 +17,8 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.guild.MemberJoinEvent;
 import discord4j.core.event.domain.guild.MemberLeaveEvent;
-import discord4j.core.event.domain.interaction.SlashCommandEvent;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.gateway.intent.Intent;
@@ -56,23 +57,19 @@ public class Main {
                 //.setStore(Store.fromLayout(LegacyStoreLayout.of(new JdkStoreService())))
                 .login().block();
 
-
-                    gateway.on(GuildCreateEvent.class).subscribe(EventsHandler::onGuildCreateEvent);
+        gateway.on(GuildCreateEvent.class).subscribe(EventsHandler::onGuildCreateEvent);
         gateway.on(MessageCreateEvent.class).subscribe(CommandHandler::onMessageEvent);
 
         gateway.on(MemberJoinEvent.class).subscribe(UserManager::onMemberJoinEvent);
         gateway.on(MemberLeaveEvent.class).subscribe(UserManager::onMemberLeaveEvent);
 
         //gateway.on(PresenceUpdateEvent.class).subscribe(EventsHandler::onPresenceUpdateEvent);
-        gateway.on(SlashCommandEvent.class).subscribe(CommandHandler::onInteractionCreate);
+        gateway.on(ChatInputInteractionEvent.class).subscribe(CommandHandler::onInteractionCreate);
 
-                    //support for focus channel feature
-        gateway.on(ReactionAddEvent.class).filter(e -> e.getMessageId().equals(FocusCommand.UNFOCUS_MESSAGE_ID)
-                            && !e.getUser().block().isBot())
-                            .subscribe(e -> {
-                                e.getMember().get().removeRole(FocusCommand.FOCUS_ROLE_ID).block();
-                                e.getMessage().block().removeReaction(e.getEmoji(), e.getUserId()).block();
-                            });
+        //support for focus channel feature
+        gateway.on(ButtonInteractionEvent.class)
+                .filter(e -> e.getMessageId().equals(FocusCommand.UNFOCUS_MESSAGE_ID))
+                .subscribe(e -> e.getInteraction().getMember().get().removeRole(FocusCommand.FOCUS_ROLE_ID).block());
 
         gateway.onDisconnect().block();
 

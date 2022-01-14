@@ -11,7 +11,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 public class SlotsCommand extends AbstractCommand {
 
@@ -27,7 +27,7 @@ public class SlotsCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("bet")
                         .description("Your bet")
-                        .type(ApplicationCommandOptionType.INTEGER.getValue())
+                        .type(ApplicationCommandOption.Type.INTEGER.getValue())
                         .required(true)
                         .build())
                 .build();

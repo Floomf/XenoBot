@@ -5,11 +5,9 @@ import discord.command.CommandCategory;
 import discord.core.command.InteractionContext;
 import discord.util.BotUtils;
 import discord.util.MessageUtils;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONObject;
 
@@ -29,17 +27,17 @@ public class TodayCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("event")
                         .description("View a random event that occurred today in history")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("birthday")
                         .description("View a random birth that occurred today in history")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("death")
                         .description("View a random death that occurred today in history")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .build();
     }

@@ -4,12 +4,15 @@ import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.core.command.InteractionContext;
 import discord.util.BotUtils;
+import discord.util.MessageUtils;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.EmbedCreateFields;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
@@ -29,7 +32,7 @@ public class WikipediaCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("query")
                         .description("What to search for")
-                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(true)
                         .build())
                 .build();
@@ -37,10 +40,11 @@ public class WikipediaCommand extends AbstractCommand {
 
     @Override
     public void execute(InteractionContext context) {
+        context.deferReply();
         JSONArray search = Unirest.get("https://en.wikipedia.org/w/api.php?action=opensearch&limit=1&search=" + context.getOptionAsString("query"))
                 .asJson().getBody().getArray();
         if (search.getJSONArray(1).isEmpty()) {
-            context.replyWithError("Couldn't find any page from that query!");
+            context.editReply(MessageUtils.getNewErrorEmbed("Couldn't find any page from that query!"));
         } else {
             String title = search.getJSONArray(1).getString(0);
             String link = search.getJSONArray(3).getString(0);
@@ -52,9 +56,7 @@ public class WikipediaCommand extends AbstractCommand {
 
             boolean isDisambPage = page.has("categories"); //we want all content from disamiguation page
             String text = page.getString("extract");
-            System.out.println(isDisambPage);
             if (isDisambPage) {
-                System.out.println(text);
                 text = text.replaceAll("\\n\\n\\n(.+)\\n\\n\\n", "\n**__$1__**\n\n\n");
                 text = text.replaceAll("\\n\\n\\n(.+)\\n", "\n**$1:**\n");
                 text = text.substring(0, Math.min(text.length(), Embed.MAX_DESCRIPTION_LENGTH));
@@ -71,18 +73,15 @@ public class WikipediaCommand extends AbstractCommand {
                 }
             } else {
                 int endIntroIndex = text.indexOf("\n\n\n");
-                text = text.substring(0, Math.min(endIntroIndex == -1 ? text.length() : endIntroIndex, 2040)).replace("\n", "\n\n");
+                text = text.substring(0, Math.min(endIntroIndex == -1 ? text.length() : endIntroIndex,
+                        Embed.MAX_DESCRIPTION_LENGTH - 10)).replace("\n", "\n\n");
                 text = text.substring(0, text.lastIndexOf('.') + 1); //TODO may somehow break
             }
 
-            String formatted = text;
-
-            context.reply(spec -> {
-                spec.setThumbnail("");
-                spec.setAuthor(title, link, BotUtils.BOT_AVATAR_URL);
-                spec.setDescription(formatted);
-                spec.setColor(BotUtils.getRandomColor());
-            });
+            context.editReply(EmbedCreateSpec.create()
+                .withAuthor(EmbedCreateFields.Author.of(title, link, BotUtils.BOT_AVATAR_URL))
+                .withDescription(text)
+                .withColor(BotUtils.getRandomColor()));
         }
 
     }

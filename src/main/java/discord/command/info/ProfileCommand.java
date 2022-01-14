@@ -22,7 +22,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.spec.legacy.LegacyEmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 public class ProfileCommand extends AbstractCommand {
 
@@ -39,7 +39,7 @@ public class ProfileCommand extends AbstractCommand {
                         .name("other_user")
                         .description("Specify another user instead")
                         .required(false)
-                        .type(ApplicationCommandOptionType.USER.getValue())
+                        .type(ApplicationCommandOption.Type.USER.getValue())
                         .build())
                 .build();
     }

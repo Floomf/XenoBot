@@ -2,6 +2,9 @@ package discord.core.game;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 
 import java.io.File;
@@ -31,10 +34,15 @@ public class Leaderboard {
         return false;
     }
 
-    @Override
-    public String toString() { //don't sort it until we actually need to display it
+    public String toString(Guild guild) { //don't sort it until we actually need to display it
+        //only display scores from the current guild (members cant click on names from people they arent in a server with)
+        List<Long> memberIds = guild.getMembers().map(User::getId).map(Snowflake::asLong)
+                .filter(id -> highScoresMap.containsKey(id)).collectList().block();
+
         StringBuilder sb = new StringBuilder();
         List<Map.Entry<Long, Integer>> sortedScores = new ArrayList<>(highScoresMap.entrySet());
+
+        sortedScores.removeIf(score -> !memberIds.contains(score.getKey()));
         sortedScores.sort((entry1, entry2) -> entry2.getValue() - entry1.getValue());
 
         int currPlace = 1;
@@ -54,7 +62,7 @@ public class Leaderboard {
             }
             lastScore = score.getValue();
         }
-        return sb.toString();
+        return sb.length() == 0 ? "No high scores have been set on this server!" : sb.toString();
     }
 
     private static String getFormattedPlace(int place) {

@@ -1,7 +1,6 @@
 package discord.util;
 
 import discord.command.utility.TagCommand;
-import discord.data.object.user.Prestige;
 import discord.data.object.user.Progress;
 import discord.data.object.user.DUser;
 
@@ -58,7 +57,6 @@ public class ProfileBuilder {
 
     public ProfileBuilder addPrestige() {
         embed = embed.andThen(embed -> embed.addField("Prestige :trophy:", "" + getOrdinal(prog.getPrestige().getNumber()) + ""
-                + " (" + prog.getPrestige().getBadge() + ")"
                 + (prog.getPrestige().isMax() ? " *(Max)*" : ""), true));
         return this;
     }
@@ -91,7 +89,7 @@ public class ProfileBuilder {
     }
 
     public ProfileBuilder addBadgeCase() {
-        embed = embed.andThen(embed -> embed.addField("Badge Case :beginner: ", getUserBadges(), true));
+        embed = embed.andThen(embed -> embed.addField("Badge Case :beginner: ", getBadgeCase(), true));
         return this;
     }
 
@@ -130,10 +128,10 @@ public class ProfileBuilder {
         return embed;
     }
 
-    private String getUserBadges() {
+    private String getBadgeCase() {
         String badges = "";
-        for (int i = 1; i <= prog.getPrestige().getNumber(); i++) {
-            badges += Prestige.BADGES[i];
+        for (String badge : prog.getBadges()) {
+            badges += badge;
         }
         return badges;
     }

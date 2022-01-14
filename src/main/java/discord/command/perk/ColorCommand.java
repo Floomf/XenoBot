@@ -29,7 +29,7 @@ import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.ApplicationCommandInteractionOptionData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.rest.util.Color;
 
 public class ColorCommand extends AbstractCommand {
@@ -48,18 +48,18 @@ public class ColorCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("set")
                         .description("Change the color of your name on this server")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .addOption(ApplicationCommandOptionData.builder()
                                 .name("new_color")
                                 .description("Color to set")
                                 .required(true)
-                                .type(ApplicationCommandOptionType.STRING.getValue())
+                                .type(ApplicationCommandOption.Type.STRING.getValue())
                                 .build())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("list")
                         .description("View your available colors")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .build();
     }

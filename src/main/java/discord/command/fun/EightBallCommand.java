@@ -6,11 +6,9 @@ import discord.core.command.InteractionContext;
 import discord.util.BotUtils;
 import discord.util.DiscordColor;
 import discord.util.MessageUtils;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 import kong.unirest.Unirest;
 import org.apache.commons.text.StringEscapeUtils;
 
@@ -28,7 +26,7 @@ public class EightBallCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("question")
                         .description("Your question")
-                        .type(ApplicationCommandOptionType.STRING.getValue())
+                        .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(true)
                         .build())
                 .build();

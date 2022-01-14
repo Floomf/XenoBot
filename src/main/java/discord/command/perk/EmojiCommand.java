@@ -15,7 +15,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandInteractionOptionData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.util.ApplicationCommandOptionType;
+import discord4j.core.object.command.ApplicationCommandOption;
 
 public class EmojiCommand extends AbstractCommand {
 
@@ -33,18 +33,18 @@ public class EmojiCommand extends AbstractCommand {
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("set")
                         .description("Set emoji(s) next to your name")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .addOption(ApplicationCommandOptionData.builder()
                                 .name("emojis")
                                 .description("Emoji(s) to set")
-                                .type(ApplicationCommandOptionType.STRING.getValue())
+                                .type(ApplicationCommandOption.Type.STRING.getValue())
                                 .required(true)
                                 .build())
                         .build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("clear")
                         .description("Clear any name emojis you currently have")
-                        .type(ApplicationCommandOptionType.SUB_COMMAND.getValue())
+                        .type(ApplicationCommandOption.Type.SUB_COMMAND.getValue())
                         .build())
                 .build();
     }
