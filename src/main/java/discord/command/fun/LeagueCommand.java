@@ -6,8 +6,11 @@ import discord.core.command.InteractionContext;
 import discord.data.object.LeagueMessage;
 import discord.util.BotUtils;
 import discord.util.MessageUtils;
+import discord4j.core.object.command.ApplicationCommandInteractionOption;
+import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.spec.InteractionReplyEditSpec;
+import discord4j.discordjson.json.ApplicationCommandInteractionOptionData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import kong.unirest.HttpResponse;
@@ -18,6 +21,8 @@ import kong.unirest.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class LeagueCommand extends AbstractCommand {
 
@@ -49,6 +54,12 @@ public class LeagueCommand extends AbstractCommand {
                         .type(ApplicationCommandOption.Type.STRING.getValue())
                         .required(true)
                         .build())
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("match_id")
+                        .description("A particular match id (instead of fetching latest match)")
+                        .type(ApplicationCommandOption.Type.INTEGER.getValue())
+                        .required(false)
+                        .build())
                 .build();
     }
 
@@ -61,8 +72,7 @@ public class LeagueCommand extends AbstractCommand {
                 .asJson();
 
         if (summonerResponse.getStatus() == 404) {
-            context.event.editReply(InteractionReplyEditSpec.create()
-                    .withEmbeds(MessageUtils.getNewErrorEmbed("Couldn't fetch a summoner by that name. Did you type it in correctly?"))).block();
+            context.editReply(MessageUtils.getNewErrorEmbed("Couldn't fetch a summoner by that name. Did you type it in correctly?"));
             return;
         }
 
@@ -74,26 +84,41 @@ public class LeagueCommand extends AbstractCommand {
 
         String puuid = summonerResponse.getBody().getObject().getString("puuid");
 
-        JSONArray latestMatches = Unirest.get("https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids?count=1")
-                .header("X-Riot-Token", "RGAPI-164fc3ab-4c82-4a2b-8a10-a78367e14b8e")
-                .asJson().getBody().getArray();
+        String matchId = context.getOptionAsLong("match_id").map(id -> "NA1_" + id).orElse("");
+        if (matchId.isEmpty()) {
+            JSONArray latestMatches = Unirest.get("https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids?count=1")
+                    .header("X-Riot-Token", "RGAPI-164fc3ab-4c82-4a2b-8a10-a78367e14b8e")
+                    .asJson().getBody().getArray();
 
-        if (latestMatches.isEmpty()) {
-            context.event.editReply(InteractionReplyEditSpec.create()
-                    .withEmbeds(MessageUtils.getNewErrorEmbed("Couldn't find the latest match played by "
-                            + context.getOptionAsString("summoner") + ".\n\nHave they played the game recently?"))).block();
+            if (latestMatches.isEmpty()) {
+                context.editReply(MessageUtils.getNewErrorEmbed("Couldn't find the latest match played by "
+                        + context.getOptionAsString("summoner") + ".\n\nHave they played the game recently?"));
+                return;
+            }
+            matchId = latestMatches.getString(0);
+        }
+
+        HttpResponse<JsonNode> matchResponse = Unirest.get("https://americas.api.riotgames.com/lol/match/v5/matches/" + matchId)
+            .header("X-Riot-Token", "RGAPI-164fc3ab-4c82-4a2b-8a10-a78367e14b8e")
+            .asJson();
+
+        if (matchResponse.getStatus() == 404) {
+            context.editReply(MessageUtils.getNewErrorEmbed("Couldn't fetch a match by that ID. Did you type it in correctly?"));
             return;
         }
 
-        JSONObject matchData = Unirest.get("https://americas.api.riotgames.com/lol/match/v5/matches/" + latestMatches.getString(0))
-                .header("X-Riot-Token", "RGAPI-164fc3ab-4c82-4a2b-8a10-a78367e14b8e")
-                .asJson().getBody().getObject().getJSONObject("info");
+        JSONObject matchData = matchResponse.getBody().getObject().getJSONObject("info");
 
         ArrayList<JSONObject> participants = (ArrayList<JSONObject>) matchData.getJSONArray("participants").toList();
-        JSONObject pData = participants.stream().filter(o -> o.getString("puuid").equals(puuid)).findFirst().get();
+        //if they enter in a random player but a valid match id, we just ignore the player
+        JSONObject pData = participants.stream().filter(o -> o.getString("puuid").equals(puuid)).findFirst().orElse(participants.get(0));
+
+        ArrayList<JSONObject> enemyData = participants.stream().filter(json -> json.getInt("teamId") != pData.getInt("teamId"))
+                .collect(Collectors.toCollection(ArrayList::new));
+
         participants.removeIf(json -> json.getInt("teamId") != pData.getInt("teamId")); //only teammates
 
-        new LeagueMessage(context, matchData, pData, participants);
+        new LeagueMessage(context, matchId, matchData, pData, participants, enemyData);
     }
 
     @Override

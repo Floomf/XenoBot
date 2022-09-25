@@ -3,9 +3,7 @@ package discord.data.object;
 import discord.command.fun.LeagueCommand;
 import discord.core.command.InteractionContext;
 import discord.data.object.user.DUser;
-import discord.data.object.user.Progress;
 import discord.util.DiscordColor;
-import discord.util.MessageUtils;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
@@ -20,18 +18,24 @@ import java.util.concurrent.TimeUnit;
 
 public class LeagueMessage {
 
+    private static final String TEAM_BEST_SYMBOL = "⭐";
+    private static final String GAME_BEST_SYMBOL = "👑";
+
     protected final Message message;
     protected final Thread idleTimerThread;
 
+    protected final String matchId;
     protected final JSONObject matchData;
-    protected final ArrayList<JSONObject> teamData;
+    protected ArrayList<JSONObject> teamData;
+    protected ArrayList<JSONObject> enemyData;
 
     protected boolean active;
 
     private final DUser dUser;
     private int playerIndex;
 
-    public LeagueMessage(InteractionContext context, JSONObject matchData, JSONObject pData, ArrayList<JSONObject> teamData) {
+    public LeagueMessage(InteractionContext context, String matchId, JSONObject matchData, JSONObject pData,
+                         ArrayList<JSONObject> teamData, ArrayList<JSONObject> enemyData) {
         dUser = context.getDUser();
 
         for (int i = 0; i < teamData.size(); i++) {
@@ -41,13 +45,15 @@ public class LeagueMessage {
             }
         }
 
+        this.matchId = matchId.substring(4);
         this.matchData = matchData;
         this.teamData = teamData;
+        this.enemyData = enemyData;
 
         context.event.editReply(InteractionReplyEditSpec.create()
                 .withEmbeds(getPlayerEmbed(matchData, pData))
                 .withComponents(ActionRow.of(Button.secondary("previous", "Previous Teammate"),
-                        Button.secondary("next", "Next Teammate")))).block();
+                        Button.secondary("next", "Next Teammate"), Button.primary("switch", "Switch Teams")))).block();
 
         this.message = context.getChannel().getMessageById(
                 Snowflake.of(context.event.getInteractionResponse().getInitialResponse().block().id())).block();
@@ -59,13 +65,7 @@ public class LeagueMessage {
                 .takeUntil(p -> !active)
                 .filter(event -> event.getMessageId().equals(message.getId()))
                 .filter(event -> event.getInteraction().getUser().getId().asLong() == dUser.getDiscordID())
-                .subscribe(this::onButton)
-        ;
-    }
-
-    protected void end() {
-        active = false;
-        idleTimerThread.interrupt();
+                .subscribe(this::onButton);
     }
 
     private void onButton(ButtonInteractionEvent event) {
@@ -74,14 +74,17 @@ public class LeagueMessage {
             if (playerIndex == teamData.size()) {
                 playerIndex = 0;
             }
-            update(event);
         } else if (event.getCustomId().equals("previous")) {
             playerIndex--;
             if (playerIndex < 0) {
                 playerIndex = teamData.size() - 1;
             }
-            update(event);
+        } else if (event.getCustomId().equals("switch")) {
+            ArrayList<JSONObject> temp = teamData;
+            teamData = enemyData;
+            enemyData = temp;
         }
+        update(event);
         idleTimerThread.interrupt();
     }
 
@@ -92,7 +95,7 @@ public class LeagueMessage {
 
     protected void startIdleTimer() {
         try {
-            Thread.sleep(TimeUnit.MINUTES.toMillis(3));
+            Thread.sleep(TimeUnit.MINUTES.toMillis(5));
             message.edit(MessageEditSpec.create()
                     .withComponents()).block();
         } catch (InterruptedException e) {
@@ -113,7 +116,8 @@ public class LeagueMessage {
                                 + pData.getInt("profileIcon") + ".jpg"))
                 .withColor(pData.getBoolean("win") ? DiscordColor.GREEN : DiscordColor.RED)
                 .withTimestamp(Instant.ofEpochMilli(matchData.getLong("gameStartTimestamp")))
-                .withFooter(EmbedCreateFields.Footer.of(getDurationString(matchData.has("gameEndTimestamp")
+                .withFooter(EmbedCreateFields.Footer.of("(" + TEAM_BEST_SYMBOL + " = Team Best, " + GAME_BEST_SYMBOL + " = Game Best)\n"
+                        + "(ID: " + matchId + ")  •  " + getDurationString(matchData.has("gameEndTimestamp")
                         ? matchData.getLong("gameDuration") : matchData.getLong("gameDuration") / 1000), ""));
 
         ArrayList<EmbedCreateFields.Field> fields = new ArrayList<>();
@@ -130,36 +134,63 @@ public class LeagueMessage {
                     teamPosition.equals("UTILITY") ? "Support" : capitalize(teamPosition), true)); //little hacky
         }
 
-        fields.add(EmbedCreateFields.Field.of("K / D / A ⚔️", pData.getInt("kills")
-                + " / " + pData.getInt("deaths") + " / " + pData.getInt("assists"), true));
-        fields.add(EmbedCreateFields.Field.of("Kill Particip. 🗡️", getKillParticipation(pData, teamData), true));
-        fields.add(EmbedCreateFields.Field.of("Damage Dealt 🩸",
-                String.valueOf(pData.getInt("totalDamageDealtToChampions")), true));
+        fields.add(EmbedCreateFields.Field.of("K / D / A ⚔️", getKDA(pData), true));
+        fields.add(EmbedCreateFields.Field.of("Kill Particip. 🗡️", getKillParticipation(pData), true));
+        fields.add(EmbedCreateFields.Field.of("Damage Dealt 🩸", getStat(pData,"totalDamageDealtToChampions"), true));
 
         if (pData.getInt("doubleKills") > 0) {
-            fields.add(EmbedCreateFields.Field.of("Double Kills 👨‍👦", String.valueOf(pData.getInt("doubleKills")), true));
+            fields.add(EmbedCreateFields.Field.of("Double Kills 👨‍👦", getStat(pData,"doubleKills"), true));
         }
         if (pData.getInt("tripleKills") > 0) {
-            fields.add(EmbedCreateFields.Field.of("Triple Kills 👨‍👨‍👦", String.valueOf(pData.getInt("doubleKills")), true));
+            fields.add(EmbedCreateFields.Field.of("Triple Kills 👨‍👨‍👦", getStat(pData,"tripleKills"), true));
         }
         if (pData.getInt("quadraKills") > 0) {
-            fields.add(EmbedCreateFields.Field.of("Quadra Kills 👨‍👨‍👦‍👦", String.valueOf(pData.getInt("quadraKills")), true));
+            fields.add(EmbedCreateFields.Field.of("Quadra Kills 👨‍👨‍👦‍👦", getStat(pData,"quadraKills"), true));
         }
         if (pData.getInt("pentaKills") > 0) {
-            fields.add(EmbedCreateFields.Field.of("Penta Kills 👨‍👨‍👦 👨‍👦", String.valueOf(pData.getInt("pentaKills")), true));
+            fields.add(EmbedCreateFields.Field.of("Penta Kills 👨‍👨‍👦 👨‍👦", getStat(pData,"pentaKills"), true));
         }
         if (pData.getInt("largestKillingSpree") > 0) {
-            fields.add(EmbedCreateFields.Field.of("Largest Spree 🔥", pData.getInt("largestKillingSpree") + " Kills", true));
+            fields.add(EmbedCreateFields.Field.of("Largest Spree 🔥", pData.getInt("largestKillingSpree") + " Kills"
+                    + getPossibleStar(pData, "largestKillingSpree"), true));
         }
 
         fields.add(EmbedCreateFields.Field.of("CS 🎯", getCsString(matchData, pData), true));
-        fields.add(EmbedCreateFields.Field.of("Gold Earned 🪙", String.valueOf(pData.getInt("goldEarned")), true));
+        fields.add(EmbedCreateFields.Field.of("Gold Earned 🪙", getStat(pData,"goldEarned"), true));
 
         if (pData.getInt("visionScore") > 0) {
-            fields.add(EmbedCreateFields.Field.of("Vision Score 👁️", String.valueOf(pData.getInt("visionScore")), true));
+            fields.add(EmbedCreateFields.Field.of("Vision Score 👁️", getStat(pData,"visionScore"), true));
         }
 
         return embed.withFields(fields);
+    }
+
+    private String getStat(JSONObject pData, String property) {
+        return pData.getInt(property) + getPossibleStar(pData, property);
+    }
+
+    public String getPossibleStar(JSONObject pData, String property) {
+        if (getMaxPropertyForTeam(teamData, property) == pData.getInt(property)) {
+            if (getMaxPropertyForTeam(enemyData, property) <= pData.getInt(property)) {
+                return " " + GAME_BEST_SYMBOL;
+            } else {
+                return " " + TEAM_BEST_SYMBOL;
+            }
+        }
+        return "";
+    }
+
+    private int getMaxPropertyForTeam(ArrayList<JSONObject> teamData, String property) {
+        return max(teamData.get(0).getInt(property), teamData.get(1).getInt(property), teamData.get(2).getInt(property),
+                teamData.get(3).getInt(property), teamData.get(4).getInt(property));
+    }
+
+    private static int max(int num1, int num2, int num3, int num4, int num5) {
+        return Math.max(num1, Math.max(num2, Math.max(num3, Math.max(num4, num5))));
+    }
+
+    private static double max(double num1, double num2, double num3, double num4, double num5) {
+        return Math.max(num1, Math.max(num2, Math.max(num3, Math.max(num4, num5))));
     }
 
     private static String capitalize(String string) {
@@ -181,19 +212,80 @@ public class LeagueMessage {
         return duration;
     }
 
-    private static String getCsString(JSONObject matchData, JSONObject pData) {
-        int cs = pData.getInt("totalMinionsKilled") + pData.getInt("neutralMinionsKilled");
-        long length = matchData.has("gameEndTimestamp")
-                ? matchData.getLong("gameDuration") : matchData.getLong("gameDuration") / 1000;
-        return cs + String.format(" (%.1f/min)", 60.0 / length * cs);
+    private int getCs(JSONObject pData) {
+        return pData.getInt("totalMinionsKilled") + pData.getInt("neutralMinionsKilled");
     }
 
-    private static String getKillParticipation(JSONObject pData, ArrayList<JSONObject> teamData) {
+    private String getCsString(JSONObject matchData, JSONObject pData) {
+        String csString = "";
+        int cs = getCs(pData);
+        csString += cs;
+        long length = matchData.has("gameEndTimestamp")
+                ? matchData.getLong("gameDuration") : matchData.getLong("gameDuration") / 1000;
+        csString += String.format(" (%.1f/min)", 60.0 / length * cs);
+
+        if (max(getCs(teamData.get(0)), getCs(teamData.get(1)), getCs(teamData.get(2)),
+                getCs(teamData.get(3)), getCs(teamData.get(4))) == cs) {
+            csString += " ";
+            if (max(getCs(enemyData.get(0)), getCs(enemyData.get(1)), getCs(enemyData.get(2)),
+                    getCs(enemyData.get(3)), getCs(enemyData.get(4))) <= cs) {
+                csString += GAME_BEST_SYMBOL;
+            } else {
+                csString += TEAM_BEST_SYMBOL;
+            }
+        }
+        return csString;
+    }
+
+    private int getKillsAndAssists(JSONObject pData) {
+        return pData.getInt("kills") + pData.getInt("assists");
+    }
+
+    private double getKDARatio(JSONObject pData) {
+        return getKillsAndAssists(pData) / ((double) pData.getInt("deaths"));
+    }
+
+    private String getKDA(JSONObject pData) {
+        String kdaString = pData.getInt("kills") + "/" + pData.getInt("deaths")
+                + "/" + pData.getInt("assists") + String.format(" (%.1f)", getKDARatio(pData));
+        if (max(getKDARatio(teamData.get(0)), getKDARatio(teamData.get(1)), getKDARatio(teamData.get(2)),
+                getKDARatio(teamData.get(3)), getKDARatio(teamData.get(4))) == getKDARatio(pData)) {
+            kdaString += " ";
+            if (max(getKDARatio(enemyData.get(0)), getKDARatio(enemyData.get(1)), getKDARatio(enemyData.get(2)),
+                    getKDARatio(enemyData.get(3)), getKDARatio(enemyData.get(4))) <= getKDARatio(pData)) {
+                kdaString += GAME_BEST_SYMBOL;
+            } else {
+                kdaString += TEAM_BEST_SYMBOL;
+            }
+        }
+        return kdaString;
+    }
+
+    private int getKillParticipation(JSONObject pData, ArrayList<JSONObject> teamData) {
         int teamKills = 0;
         for (JSONObject player : teamData) {
             teamKills += player.getInt("kills");
         }
-        return Math.round((pData.getInt("kills") + pData.getInt("assists")) / (double) teamKills * 100) + "%";
+
+        return (int) Math.round(getKillsAndAssists(pData) / (double) teamKills * 100);
+    }
+
+    private String getKillParticipation(JSONObject pData) {
+        String kpString = getKillParticipation(pData, teamData) + "%";
+
+        if (max(getKillsAndAssists(teamData.get(0)), getKillsAndAssists(teamData.get(1)), getKillsAndAssists(teamData.get(2)),
+                getKillsAndAssists(teamData.get(3)), getKillsAndAssists(teamData.get(4))) == getKillsAndAssists(pData)) {
+            kpString += " ";
+            //we have to use kill participation method instead here because percentage is based on total team kills
+            if (max(getKillParticipation(enemyData.get(0), enemyData), getKillParticipation(enemyData.get(1), enemyData),
+                    getKillParticipation(enemyData.get(2), enemyData), getKillParticipation(enemyData.get(4), enemyData),
+                    getKillParticipation(enemyData.get(0), enemyData)) <= getKillParticipation(pData, teamData)) {
+                kpString += GAME_BEST_SYMBOL;
+            } else {
+                kpString += TEAM_BEST_SYMBOL;
+            }
+        }
+        return kpString;
     }
 
 }
