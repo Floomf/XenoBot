@@ -15,6 +15,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.spec.MessageEditSpec;
 import discord4j.rest.util.Color;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,7 +38,6 @@ public abstract class BaseGame {
     private List<Snowflake> playerMessages;
     private int msgDeleteInterval;
     private boolean typingGame;
-
     //TODO BETTER SOLUTION
     protected ComponentInteractionEvent componentEvent = null;
 
@@ -107,10 +107,10 @@ public abstract class BaseGame {
         turn = 1;
         setup();
         if (!useEmbed()) {
-            gameMessage.edit(spec -> {
-                spec.setContent(getFirstDisplay());
-                spec.setComponents(getComponents());
-            }).block();
+            gameMessage.edit(MessageEditSpec.create()
+                    .withContentOrNull(getFirstDisplay())
+                    .withEmbeds()
+                    .withComponents(getComponents())).block();
         } else {
             gameMessage.edit(spec -> {
                 spec.addEmbed(MessageUtils.getEmbed(gameTitle, getFirstDisplay(), Color.DISCORD_WHITE));
@@ -126,7 +126,7 @@ public abstract class BaseGame {
         active = true;
         turn = 1;
         setup();
-        //Only way I know how to store the message from an interaction
+        /*//Only way I know how to store the message from an interaction
         context.getChannel().getClient().on(MessageCreateEvent.class)
                 .map(MessageCreateEvent::getMessage)
                 .filter(message -> message.getInteraction().map(interaction -> interaction.getId().equals(context.event.getInteraction().getId())).orElse(false))
@@ -135,7 +135,7 @@ public abstract class BaseGame {
                     gameMessage = message;
                     idleTimerThread.start();
                     onStart();
-                });
+                });*/
         context.event.reply(spec -> {
             if (!useEmbed()) {
                 spec.setContent(getFirstDisplay());
@@ -144,6 +144,11 @@ public abstract class BaseGame {
             }
             spec.setComponents(getComponents());
         }).block();
+
+        gameMessage = context.getChannel().getMessageById(Snowflake.of(
+                context.event.getInteractionResponse().getInitialResponse().block().id())).block();
+        idleTimerThread.start();
+        onStart();
     }
 
     protected final void tie(String tieMessage) {
@@ -318,7 +323,7 @@ public abstract class BaseGame {
     //Now we are no longer destroying a thread and creating one over and over
     private void startIdleTimerThread() {
         try {
-            Thread.sleep(TimeUnit.MINUTES.toMillis(5));
+            Thread.sleep(TimeUnit.MINUTES.toMillis(10));
             onTimeout();
         } catch (InterruptedException e) {
             if (!active) {

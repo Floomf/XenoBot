@@ -20,9 +20,10 @@ public class GameEmoji {
     public static final String U = "\uD83C\uDDFA";
     public static final String Y = "\uD83C\uDDFE";
 
-    public static final String LEFT_ARROW = "⬅️";
+    public static final String DOUBLE_ARROW = "↔️";
 
     public static final String CHECKMARK = "\u2705";
+    public static final String X = "❌";
     public static final String EXIT = "\uD83D\uDEAB";
 
     public static int numberEmojiToInt(String emoji) {
@@ -32,6 +33,19 @@ public class GameEmoji {
 
     public static String intToNumberEmoji(int number) {
         return new String(new char[]{(char) (number + '\u0030'), '\u20E3'});
+    }
+
+    public static String wordToLetterEmojis(String word) {
+        String emojis = "";
+        for (char letter : word.toLowerCase().toCharArray()) {
+            emojis += letterToLetterEmoji(letter) + " ";
+        }
+        return emojis;
+    }
+
+    private static String letterToLetterEmoji(char letter) {
+        char second = (char) (0xDD85 + letter);
+        return "\uD83C" + second;
     }
 
 

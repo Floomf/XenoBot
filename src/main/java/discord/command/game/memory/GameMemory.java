@@ -10,6 +10,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.spec.MessageEditSpec;
 
 import java.util.*;
 
@@ -18,7 +19,7 @@ import java.util.*;
 public class GameMemory extends MultiplayerGame {
 
     private final static String[] ANIMAL_EMOJIS = {"🐶", "🐱", "🐷", "🐮", "🦊", "🐸", "🐼",
-            "🐻", "🐰", "🐵", "🐭", "🐨", "🐹", "🦝"};
+            "🐻", "🐰", "🐵", "🐭", "🐨", "🐹", "🦝", "🦍", };
 
     class Square {
 
@@ -48,14 +49,6 @@ public class GameMemory extends MultiplayerGame {
             currentEmoji = CLEARED_EMOJI;
         }
 
-        boolean isHidden() {
-            return currentEmoji.equals(HIDDEN_EMOJI);
-        }
-
-        boolean isCleared() {
-            return currentEmoji.equals(CLEARED_EMOJI);
-        }
-
         public boolean matches(Square other) {
             return value.equals(other.value);
         }
@@ -72,12 +65,8 @@ public class GameMemory extends MultiplayerGame {
 
     }
 
-    //private final HashMap<String, Square> buttonMap = new HashMap<>();
     private final Square[] squares = new Square[16];
 
-    private final Square[][] board = new Square[4][4];
-
-    //private Message boardMessage;
     private Square previousSquareSelected;
 
     private final HashMap<Member, Integer> scoresMap = new HashMap<>();
@@ -119,13 +108,11 @@ public class GameMemory extends MultiplayerGame {
         scoresMap.put(super.getPNextTurn(), 0);
 
         Random rand = new Random();
-        /*List<ReactionEmoji> emojis = getChannel().getClient().getGuildById(EventsHandler.THE_REALM_ID)
-                .flatMapMany(Guild::getEmojis).map(emoji -> ReactionEmoji.of(emoji.getData())).collectList().block();*/
 
         ArrayList<String> emojis = new ArrayList<>(Arrays.asList(ANIMAL_EMOJIS));
 
         //fill in with 4 pairs of emojis
-        for (int i = 0; i < squares.length; i+=2) {
+        for (int i = 0; i < squares.length; i += 2) {
             String emoji = emojis.get(rand.nextInt(emojis.size()));
             emojis.remove(emoji);
 
@@ -135,7 +122,7 @@ public class GameMemory extends MultiplayerGame {
 
         //shuffle them
         for (int i = 0; i < squares.length; i++) {
-            int index = rand.nextInt(board.length);
+            int index = rand.nextInt(squares.length);
             Square temp = squares[index];
             squares[index] = squares[i];
             squares[i] = temp;
@@ -165,7 +152,6 @@ public class GameMemory extends MultiplayerGame {
     @Override
     protected void onTurn(String input) {
         Square pick = getSquareFromInput(input);
-        //Square pick = getSquareFromCoords(input);
         String emoji = pick.value;
 
         pick.reveal();
@@ -179,11 +165,11 @@ public class GameMemory extends MultiplayerGame {
                 previousSquareSelected.clear();
                 previousSquareSelected = null;
 
-                if (scoresMap.values().stream().anyMatch(score -> score == (board.length + board[0].length) / 2 + 1)) {
+                if (scoresMap.values().stream().anyMatch(score -> score == squares.length / 4 + 1)) {
                     revealAllSquares();
-                    Member winner = scoresMap.keySet().stream().filter(m -> scoresMap.get(m) == 5).findFirst().get();
+                    Member winner = scoresMap.keySet().stream().filter(m -> scoresMap.get(m) == squares.length / 4 + 1).findFirst().get();
                     win(winner.getMention() + " found five matches! **Winner!**", winner);
-                } else if (scoresMap.get(getPThisTurn()) == 4 && scoresMap.get(getPNextTurn()) == 4) {
+                } else if (scoresMap.get(getPThisTurn()) == squares.length / 4 && scoresMap.get(getPNextTurn()) == squares.length / 4) {
                     revealAllSquares();
                     tie("Even matches! Tie!");
                 } else {
@@ -213,12 +199,13 @@ public class GameMemory extends MultiplayerGame {
         for (Square square : squares) {
             square.reveal();
         }
+        //bad design since to edit the message again here
+        getGameMessage().edit(MessageEditSpec.create().withComponents(getComponents())).block();
     }
 
     @Override
     protected boolean isValidInput(String input) {
         return true;
-        //return input.matches("[a-d][1-4]") && getSquareFromCoords(input).isHidden();
     }
 
     @Override

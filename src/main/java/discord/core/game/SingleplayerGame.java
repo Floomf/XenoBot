@@ -22,6 +22,10 @@ public abstract class SingleplayerGame extends BaseGame {
 
     abstract protected String getIdleMessage();
 
+    protected String getInvalidInputMessage(String input) {
+        return "Invalid input.";
+    }
+
     @Override
     protected void onEnd() {};
 
@@ -33,7 +37,6 @@ public abstract class SingleplayerGame extends BaseGame {
         if (!super.isActive()) return; //this is the way i thought of
 
         if (input.equalsIgnoreCase("forfeit") || input.equalsIgnoreCase("ff")) {
-            //message.delete().doOnError(e -> super.setGameDisplay("I don't have permission to delete messages! Ended game.")).onErrorStop().block();
             lose(getForfeitMessage());
             return;
         }
@@ -44,9 +47,10 @@ public abstract class SingleplayerGame extends BaseGame {
                 setupNextTurn();
             }
         } else {
-            Message invalidMessage = getChannel().createMessage("**Invalid input.**\n(You can type **ff** to forfeit)").block();
+            Message invalidMessage = getChannel().createMessage("**" + getInvalidInputMessage(input)
+                    + "**\n(You can type **ff** to forfeit)").block();
             try {
-                Thread.sleep(1250);
+                Thread.sleep(1500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

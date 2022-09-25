@@ -202,6 +202,15 @@ public class GameHangman extends SingleplayerGame {
     }
 
     @Override
+    protected String getInvalidInputMessage(String input) {
+        if (!input.matches("[a-z]")) {
+            return "Please enter a single letter.";
+        } else {
+            return "You've already guessed that letter!";
+        }
+    }
+
+    @Override
     protected boolean isValidInput(String input) {
         return input.matches("[a-z]") && !new String(guesses).contains(input);
     }

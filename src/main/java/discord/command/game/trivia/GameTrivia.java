@@ -109,7 +109,7 @@ public class GameTrivia extends MultiplayerGame {
     @Override
     protected String getFirstDisplay() {
         return "First, agree on a **category**!\nSelect your choice below." +
-                "\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B";
+                "\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B\n\u200B";
     }
 
     @Override
