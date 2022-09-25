@@ -3,6 +3,8 @@ package discord;
 import discord.command.admin.ThemeCommand;
 import discord.command.utility.FocusCommand;
 import discord.core.command.CommandManager;
+import discord.data.credential.Credential;
+import discord.data.credential.CredentialManager;
 import discord4j.common.store.Store;
 import discord4j.common.store.legacy.LegacyStoreLayout;
 import discord4j.core.DiscordClient;
@@ -34,14 +36,9 @@ import kong.unirest.Unirest;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        if (args.length == 0) {
-            System.out.println("Please run the jar with your bot token as the first argument.");
-            System.in.read();
-            System.exit(0);
-        }
         Unirest.config().enableCookieManagement(false);
 
-        DiscordClient client = DiscordClientBuilder.create(args[0])
+        DiscordClient client = DiscordClientBuilder.create(CredentialManager.getCredential(Credential.DISCORD_TOKEN))
                 .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 403))
                 .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_DELETE), 403))
                 .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.MESSAGE_CREATE), 403))

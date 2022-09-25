@@ -3,6 +3,8 @@ package discord.command.fun;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.core.command.InteractionContext;
+import discord.data.credential.Credential;
+import discord.data.credential.CredentialManager;
 import discord.util.BotUtils;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Message;
@@ -60,7 +62,7 @@ public class AnimalCommand extends AbstractCommand {
                         .asJson().getBody().getObject().getJSONObject("media").getString("gif");
             case "cat":
                 return Unirest.get("https://api.thecatapi.com/v1/images/search")
-                        .header("x-api-key", "82ac98b9-6bc2-4e04-9401-9949905f1f92") //shhh
+                        .header("x-api-key", CredentialManager.getCredential(Credential.CAT_API_KEY))
                         .asJson().getBody().getArray().getJSONObject(0).getString("url");
             case "dog":
                 return Unirest.get("https://dog.ceo/api/breeds/image/random")

@@ -3,6 +3,8 @@ package discord.command.fun;
 import discord.command.AbstractCommand;
 import discord.command.CommandCategory;
 import discord.core.command.InteractionContext;
+import discord.data.credential.Credential;
+import discord.data.credential.CredentialManager;
 import discord.data.object.LeagueMessage;
 import discord.util.BotUtils;
 import discord.util.MessageUtils;
@@ -68,7 +70,7 @@ public class LeagueCommand extends AbstractCommand {
         context.acknowledge();
         HttpResponse<JsonNode> summonerResponse =
                 Unirest.get("https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + context.getOptionAsString("summoner"))
-                .header("X-Riot-Token", "RGAPI-164fc3ab-4c82-4a2b-8a10-a78367e14b8e")
+                .header("X-Riot-Token", CredentialManager.getCredential(Credential.RIOT_TOKEN))
                 .asJson();
 
         if (summonerResponse.getStatus() == 404) {
@@ -78,7 +80,7 @@ public class LeagueCommand extends AbstractCommand {
 
         if (!summonerResponse.getBody().getObject().has("puuid")) {
             context.event.editReply(InteractionReplyEditSpec.create()
-                    .withEmbeds(MessageUtils.getNewErrorEmbed("API key expired. Tell the admin to fix it."))).block();
+                    .withEmbeds(MessageUtils.getNewErrorEmbed("API key invalid. Tell the admin to fix it."))).block();
             return;
         }
 
@@ -87,7 +89,7 @@ public class LeagueCommand extends AbstractCommand {
         String matchId = context.getOptionAsLong("match_id").map(id -> "NA1_" + id).orElse("");
         if (matchId.isEmpty()) {
             JSONArray latestMatches = Unirest.get("https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids?count=1")
-                    .header("X-Riot-Token", "RGAPI-164fc3ab-4c82-4a2b-8a10-a78367e14b8e")
+                    .header("X-Riot-Token", CredentialManager.getCredential(Credential.RIOT_TOKEN))
                     .asJson().getBody().getArray();
 
             if (latestMatches.isEmpty()) {
@@ -99,7 +101,7 @@ public class LeagueCommand extends AbstractCommand {
         }
 
         HttpResponse<JsonNode> matchResponse = Unirest.get("https://americas.api.riotgames.com/lol/match/v5/matches/" + matchId)
-            .header("X-Riot-Token", "RGAPI-164fc3ab-4c82-4a2b-8a10-a78367e14b8e")
+            .header("X-Riot-Token", CredentialManager.getCredential(Credential.RIOT_TOKEN))
             .asJson();
 
         if (matchResponse.getStatus() == 404) {
