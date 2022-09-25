@@ -1,5 +1,6 @@
 package discord;
 
+import discord.command.admin.ThemeCommand;
 import discord.command.utility.FocusCommand;
 import discord.core.command.CommandManager;
 import discord4j.common.store.Store;
@@ -19,6 +20,7 @@ import discord4j.core.event.domain.guild.MemberJoinEvent;
 import discord4j.core.event.domain.guild.MemberLeaveEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.ModalSubmitInteractionEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.gateway.intent.Intent;
@@ -70,6 +72,10 @@ public class Main {
         gateway.on(ButtonInteractionEvent.class)
                 .filter(e -> e.getMessageId().equals(FocusCommand.UNFOCUS_MESSAGE_ID))
                 .subscribe(e -> e.getInteraction().getMember().get().removeRole(FocusCommand.FOCUS_ROLE_ID).block());
+
+        gateway.on(ModalSubmitInteractionEvent.class)
+                .filter(e -> e.getCustomId().matches("theme_submit"))
+                .subscribe(ThemeCommand::onSubmitTheme);
 
         gateway.onDisconnect().block();
 

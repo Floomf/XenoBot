@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-
 public class InteractionContext {
 
     public ChatInputInteractionEvent event;
@@ -35,6 +34,10 @@ public class InteractionContext {
 
     public Member getMember() {
         return event.getInteraction().getMember().get();
+    }
+
+    public User getUser() {
+        return event.getInteraction().getUser();
     }
 
     public DUser getDUser() {

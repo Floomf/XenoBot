@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.core.object.entity.Role;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.io.IOException;
 //Immutable
 public class Rank {
 
-    protected static Rank[] RANKS;
+    public static Rank[] RANKS;
 
     static {
         ObjectMapper mapper = new ObjectMapper();
@@ -23,17 +24,27 @@ public class Rank {
         }
     }
 
-    private final String name;
-    private final String roleName;
+    private String name;
     private final int levelRequired;
 
     @JsonCreator
     public Rank(@JsonProperty("name") String name,
-                @JsonProperty("roleName") String roleName,
                 @JsonProperty("levelRequired") int levelRequired) {
         this.name = name;
-        this.roleName = roleName;
         this.levelRequired = levelRequired;
+    }
+
+    public static void saveRanks() {
+        try {
+            System.out.println("Saving ranks...");
+            new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(new File("ranks.json"), RANKS);
+        } catch (IOException e) {
+            System.out.print("Could not save ranks with error: " + e);
+        }
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public static Rank getRankForLevel(int level) {
@@ -54,12 +65,18 @@ public class Rank {
         return name;
     }
 
-    public String getRoleName() {
-        return roleName;
-    }
-
     public int getLevelRequired() {
         return levelRequired;
+    }
+
+    @JsonIgnore
+    public static boolean isRankRole(Role role) {
+        for (Rank rank : RANKS) {
+            if (role.getName().equals(rank.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @JsonIgnore

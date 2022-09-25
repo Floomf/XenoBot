@@ -433,14 +433,14 @@ public class Progress {
     public void verifyRankOnGuild() {
         System.out.println("Verifying rank (" + rank.getName() + ") for " + user.getName());
         Role rankRole = user.asGuildMember().getGuild().block().getRoles()
-                .filter(role -> role.getName().equals(rank.getRoleName()))
+                .filter(role -> role.getName().equals(rank.getName()))
                 .blockFirst();
 
         List<Role> memberRoles = user.asGuildMember().getRoles(EntityRetrievalStrategy.REST).collectList().block();
 
         if (!memberRoles.contains(rankRole)) {
             for (Rank rank : Rank.RANKS) { //remove all existing rank roles
-                memberRoles.removeIf(role -> role.getName().equals(rank.getRoleName()));
+                memberRoles.removeIf(role -> role.getName().equals(rank.getName()));
             }
             memberRoles.add(rankRole);
             user.asGuildMember().edit(spec -> spec.setRoles(memberRoles.stream().map(Role::getId).collect(Collectors.toSet()))).block();
