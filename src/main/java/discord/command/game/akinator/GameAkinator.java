@@ -1,10 +1,10 @@
 package discord.command.game.akinator;
 
-import com.markozajc.akiwrapper.Akiwrapper;
-import com.markozajc.akiwrapper.AkiwrapperBuilder;
-import com.markozajc.akiwrapper.core.entities.Guess;
-import com.markozajc.akiwrapper.core.entities.Server;
-import com.markozajc.akiwrapper.core.exceptions.ServerNotFoundException;
+import com.github.markozajc.akiwrapper.Akiwrapper;
+import com.github.markozajc.akiwrapper.AkiwrapperBuilder;
+import com.github.markozajc.akiwrapper.core.entities.Guess;
+import com.github.markozajc.akiwrapper.core.entities.Server;
+import com.github.markozajc.akiwrapper.core.exceptions.ServerNotFoundException;
 import discord.core.game.SingleplayerGame;
 import discord.util.BotUtils;
 import discord.util.DiscordColor;
@@ -112,13 +112,13 @@ public class GameAkinator extends SingleplayerGame {
                 onlyYesNoButtons = false;
             }
         } else {
-            aw.answerCurrentQuestion(Akiwrapper.Answer.valueOf(input));
+            aw.answer(Akiwrapper.Answer.valueOf(input));
         }
 
-        if (aw.getCurrentQuestion() == null || aw.getCurrentQuestion().getProgression() > 85) {
+        if (aw.getQuestion() == null || aw.getQuestion().getProgression() > 85) {
             List<Guess> currentGuesses = aw.getGuesses();
             for (Guess guess : currentGuesses) {
-                if (!declinedGuesses.contains(guess.getIdLong()) && (aw.getCurrentQuestion() == null || guess.getProbability() > 0.80)) {
+                if (!declinedGuesses.contains(guess.getIdLong()) && (aw.getQuestion() == null || guess.getProbability() > 0.80)) {
                     onlyYesNoButtons = true;
                     currentGuess = guess;
                     editMessageToGuess(guess);
@@ -127,7 +127,7 @@ public class GameAkinator extends SingleplayerGame {
             }
         }
 
-        if (aw.getCurrentQuestion() != null) {
+        if (aw.getQuestion() != null) {
             super.setInfoDisplay("");
         } else {
             super.lose(":relieved: Bravo. I have been defeated.");
@@ -164,13 +164,13 @@ public class GameAkinator extends SingleplayerGame {
     }
 
     private String getEmojiForProgression() {
-        if (aw.getCurrentQuestion().getProgression() < 20) {
+        if (aw.getQuestion().getProgression() < 20) {
             return ":neutral_face:";
-        } else if (aw.getCurrentQuestion().getProgression() < 35) {
+        } else if (aw.getQuestion().getProgression() < 35) {
             return ":face_with_raised_eyebrow:";
-        } else if (aw.getCurrentQuestion().getProgression() < 55) {
+        } else if (aw.getQuestion().getProgression() < 55) {
             return ":thinking:";
-        } else if (aw.getCurrentQuestion().getProgression() < 70) {
+        } else if (aw.getQuestion().getProgression() < 70) {
             return ":open_mouth:";
         } else {
             return ":smirk:";
@@ -184,10 +184,6 @@ public class GameAkinator extends SingleplayerGame {
 
     @Override
     protected String getBoard() {
-        return getEmojiForProgression() + " **__Question " + (aw.getCurrentQuestion().getStep() + 1) + "__**\n" + aw.getCurrentQuestion().getQuestion();
-
-                /*+ "**\n\n"
-                + ":regional_indicator_y: Yes\n:regional_indicator_n: No\n:regional_indicator_d: Don't know\n"
-                + ":regional_indicator_p: Probably\n:regional_indicator_u: Unlikely\n\n:arrow_left: (Undo last answer)";*/
+        return getEmojiForProgression() + " **__Question " + (aw.getQuestion().getStep() + 1) + "__**\n" + aw.getQuestion().getQuestion();
     }
 }
