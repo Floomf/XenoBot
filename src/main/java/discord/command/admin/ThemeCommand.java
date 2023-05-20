@@ -49,7 +49,8 @@ public class ThemeCommand extends AbstractCommand {
     @Override
     public void execute(InteractionContext context) {
         if (!(context.getUser().getId().equals(Snowflake.of(194934170005274624L))
-                || context.getUser().getId().equals(Snowflake.of(98235887866908672L)))) {
+                || context.getUser().getId().equals(Snowflake.of(98235887866908672L))
+                || context.getUser().getId().equals(Snowflake.of(363601835245699074L)))) {
             context.replyWithError("You don't have permission to use this command.");
             return;
         }

@@ -162,6 +162,8 @@ public class LeagueMessage {
             fields.add(EmbedCreateFields.Field.of("Vision Score 👁️", getStat(pData,"visionScore"), true));
         }
 
+        fields.add(EmbedCreateFields.Field.of("Item Build ⚒️", getItemBuild(pData), false));
+
         return embed.withFields(fields);
     }
 
@@ -286,6 +288,14 @@ public class LeagueMessage {
             }
         }
         return kpString;
+    }
+
+    private String getItemBuild(JSONObject pData) {
+        String build = "";
+        for (int i = 0; i < 6; i++) {
+            build += LeagueCommand.ITEM_MAP.get(pData.getInt("item" + i)) + "\n";
+        }
+        return build;
     }
 
 }

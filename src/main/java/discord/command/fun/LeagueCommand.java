@@ -29,10 +29,12 @@ import java.util.stream.Collectors;
 public class LeagueCommand extends AbstractCommand {
 
     public static final HashMap<Integer, String> queueMap = new HashMap<>();
+    public static final HashMap<Integer, String> ITEM_MAP = new HashMap<>();
 
     public LeagueCommand() {
         super("lol", 0, CommandCategory.FUN);
         setupQueueMap();
+        setupItemMap();
     }
 
     private void setupQueueMap() {
@@ -43,6 +45,17 @@ public class LeagueCommand extends AbstractCommand {
             queueMap.put(queue.getInt("queueId"), queue.getString("description")
                     .replace("5v5", "").replace("games", "").trim());
         }
+    }
+
+    private void setupItemMap() {
+        String latestPatch = Unirest.get("https://ddragon.leagueoflegends.com/realms/na.json")
+                .asJson().getBody().getObject().getJSONObject("n").getString("item");
+        JSONObject items = Unirest.get("https://ddragon.leagueoflegends.com/cdn/" + latestPatch + "/data/en_US/item.json")
+                .asJson().getBody().getObject().getJSONObject("data");
+        items.names().forEach(id -> {
+            ITEM_MAP.put(Integer.parseInt(id.toString()), items.getJSONObject(id.toString()).getString("name"));
+        });
+        ITEM_MAP.put(0, "");
     }
 
     @Override
